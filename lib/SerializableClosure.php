@@ -21,7 +21,7 @@ class SerializableClosure implements \Serializable
     
     protected $code;
      
-    public function __construct(Closure $func)
+    public function __construct(\Closure $func)
     {
         $this->closure = $func;
     }
