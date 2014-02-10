@@ -10,6 +10,8 @@
 
 namespace Opis\Closure;
 
+use ReflectionFunction;
+
 class ReflectionClosure extends ReflectionFunction
 {
     protected $code;
