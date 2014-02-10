@@ -37,7 +37,6 @@ class ReflectionClosure extends ReflectionFunction
             $state = 'start';
             $open = 0;
             $code = '';
-            $break = false;
             
             foreach($tokens as &$token)
             {
@@ -102,7 +101,7 @@ class ReflectionClosure extends ReflectionFunction
                                 $open--;
                                 if($open === 0)
                                 {
-                                    $break = true;
+                                    break 2;
                                 }
                             }
                         }
@@ -111,11 +110,6 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $token[1];
                         }
                         break;
-                }
-                
-                if($break === true)
-                {
-                    break;
                 }
                 
             }
