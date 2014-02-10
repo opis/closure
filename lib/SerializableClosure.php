@@ -21,6 +21,8 @@ class SerializableClosure implements Serializable
     protected $reflector;
     
     protected $code;
+    
+    protected $self = array();
      
     public function __construct(Closure $func)
     {
@@ -97,6 +99,15 @@ class SerializableClosure implements Serializable
         extract($this->code['use']);
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
+        
+        foreach($this->code['use'] as $key => &$value)
+        {
+            if($value === $this)
+            {
+                ${$key} = $this->closure;
+            }
+        }
+        
     }
  
 }
