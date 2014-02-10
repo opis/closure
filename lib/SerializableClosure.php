@@ -92,7 +92,7 @@ class SerializableClosure implements Serializable
         $use = unserialize($this->code['use']);
         $map = function(&$value)
         {
-            if($value === self::SELF_GUID)
+            if($value === static::GUID)
             {
                 return $this;
             }
