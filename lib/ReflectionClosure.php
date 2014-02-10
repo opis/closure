@@ -10,6 +10,7 @@
 
 namespace Opis\Closure;
 
+use Closure;
 use ReflectionFunction;
 
 class ReflectionClosure extends ReflectionFunction

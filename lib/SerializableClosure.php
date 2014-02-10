@@ -10,7 +10,10 @@
 
 namespace Opis\Closure;
 
-class SerializableClosure implements \Serializable
+use Closure;
+use Serializable;
+
+class SerializableClosure implements Serializable
 {
     
     const GUID = '576a930a-fbbb-46b5-a3d0-63aa24ed9ef1';
@@ -21,7 +24,7 @@ class SerializableClosure implements \Serializable
     
     protected $code;
      
-    public function __construct(\Closure $func)
+    public function __construct(Closure $func)
     {
         $this->closure = $func;
     }
@@ -49,7 +52,7 @@ class SerializableClosure implements \Serializable
             
             $map = function(&$value)
             {
-                if($value instanceof \Closure)
+                if($value instanceof Closure)
                 {
                     if($value === $this->closure)
                     {
