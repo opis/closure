@@ -1,0 +1,28 @@
+{
+    "name": "opis/closure",
+    "description": "Serializable closures",
+    "keywords": ["opis", "closure", "serialization"],
+    "homepage": "http://opis.io",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marius Sarca",
+            "email": "marius.sarca@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-4": {"Opis\\Closure\\": "lib/"}
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
