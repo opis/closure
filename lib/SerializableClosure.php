@@ -10,9 +10,7 @@
 
 namespace Opis\Closure;
 
-use Closure;
-
-class SerializableClosure implements Serializable
+class SerializableClosure implements \Serializable
 {
     
     const GUID = '576a930a-fbbb-46b5-a3d0-63aa24ed9ef1';
@@ -51,7 +49,7 @@ class SerializableClosure implements Serializable
             
             $map = function(&$value)
             {
-                if($value instanceof Closure)
+                if($value instanceof \Closure)
                 {
                     if($value === $this->closure)
                     {
