@@ -16,8 +16,6 @@ use Serializable;
 class SerializableClosure implements Serializable
 {
     
-    const GUID = '576a930a-fbbb-46b5-a3d0-63aa24ed9ef1';
-    
     protected $closure;
     
     protected $reflector;
@@ -54,19 +52,13 @@ class SerializableClosure implements Serializable
             {
                 if($value instanceof Closure)
                 {
-                    if($value === $this->closure)
-                    {
-                        return static::GUID;
-                    }
-                    
-                    return new static($value);
+                    return $value === $this->closure ? $this : new static($value);
                 }
-                
                 return $value;
             };
             
             $this->code = array(
-                'use' => serialize(array_map($map, $reflector->getStaticVariables())),
+                'use' => array_map($map, $reflector->getStaticVariables()),
                 'function' => $reflector->getCode(),
             );
             
@@ -89,23 +81,20 @@ class SerializableClosure implements Serializable
     {
         ClosureStream::register();
         $this->code = unserialize($data);
-        $use = unserialize($this->code['use']);
-        $map = function(&$value)
-        {
-            if($value === static::GUID)
+        $this->code['use'] = array_map(function(&$value){
+            if($value instanceof SerializableClosure)
             {
-                return $this;
-            }
-            elseif($value instanceof SerializableClosure)
-            {
+                if($value === $this)
+                {
+                    return $this;
+                }
+                
                 return $value->getClosure();
             }
             return $value;
-        };
+        }, $this->code['use']);
         
-        $use = array_map($map, $use);
-        
-        extract($use);
+        extract($this->code['use']);
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
     }

@@ -17,24 +17,28 @@ class ClosureStream
     protected static $isRegistred = false;
     
     protected $content;
-     
+    
+    protected $length;
+    
+    protected $pointer = 0;
+    
     function stream_open($path, $mode, $options, &$opened_path)
     {
-        $this->content = "<?php \nreturn ". substr($path, strlen(static::STREAM_PROTO . '://')) . ";";
+        $this->content = "<?php\nreturn ". substr($path, strlen(static::STREAM_PROTO . '://')) . ";";
+        $this->length = strlen($this->content);
         return true;
     }
      
     public function stream_read($count)
     {
-        $ret = substr($this->content, 0, $count) ;
-        $count = strlen($ret);
-        $this->content = substr($this->content, $count);
-        return $ret;
+        $value = substr($this->content, $this->pointer, $count);
+        $this->pointer += $count;
+        return $value;
     }
  
     public function stream_eof()
     {
-        return !isset($this->content[0]);
+        return $this->pointer >= $this->length;
     }
      
     public function stream_stat()
