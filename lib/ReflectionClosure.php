@@ -12,6 +12,7 @@ namespace Opis\Closure;
 
 use Closure;
 use ReflectionFunction;
+use SplFileObject;
 
 class ReflectionClosure extends ReflectionFunction
 {
