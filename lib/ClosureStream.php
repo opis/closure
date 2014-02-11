@@ -72,7 +72,7 @@ class ClosureStream
                 break;
         }
         
-        if($this->pointer < 0 || $this->pointer > $this->length)
+        if($this->pointer < 0 || $this->pointer >= $this->length)
         {
             $this->pointer = $crt;
             return false;

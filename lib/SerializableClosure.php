@@ -27,9 +27,14 @@ class SerializableClosure implements Serializable
     
     protected static $storage;
     
+    protected $isBinded = false;
+    
+    protected $serializeBind = false;
+    
      
-    public function __construct(Closure $closure)
+    public function __construct(Closure $closure, $serializeBind = false)
     {
+        $this->serializeBind = (bool) $serializeBind;
         $this->closure = $closure;
     }
     
@@ -109,7 +114,11 @@ class SerializableClosure implements Serializable
     
     public function __invoke()
     {
-        return $this->getReflector()->invokeArgs(func_get_args());
+        //return $this->getReflector()->invokeArgs(func_get_args());
+        return $this->isBinded
+                    ? call_user_func_array($this->closure, func_get_args())
+                    : $this->getReflector()->invokeArgs(func_get_args());
+                    
     }
     
     public function serialize()
@@ -125,9 +134,23 @@ class SerializableClosure implements Serializable
         $variables = $reflector->getStaticVariables();
         $use = &$this->mapByReference($variables);
         
+        $scope = null;
+        $that = null;
+        
+        if($this->serializeBind && method_exists($reflector, 'getClosureScopeClass'))
+        {
+            if($scope = $reflector->getClosureScopeClass())
+            {
+                $scope = $scope->name;
+                $that = $reflector->getClosureThis();
+            }
+        }
+        
         $ret = serialize(array(
             'use' => $use,
             'function' => $reflector->getCode(),
+            'scope' => $scope,
+            'this' => $that,
         ));
         
         if (!--static::$serializations)
@@ -149,6 +172,12 @@ class SerializableClosure implements Serializable
         extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
+        
+        if($this !== $this->code['this'] && ($this->code['scope'] !== null || $this->code['this'] !== null))
+        {
+            $this->isBinded = $this->serializeBind = true;
+            $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
+        }
         
         $this->code = $this->code['function'];
         
