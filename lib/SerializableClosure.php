@@ -23,122 +23,119 @@ class SerializableClosure implements Serializable
     
     protected $code;
     
-    protected $self = array();
+    protected static $serializations = 0;
+    
+    protected static $storage;
+    
      
-    public function __construct(Closure $func)
+    public function __construct(Closure $closure)
     {
-        $this->closure = $func;
+        $this->closure = $closure;
     }
-     
+    
+    protected function &getClosurePointer()
+    {
+        return $this->closure;
+    }
+    
     public function getClosure()
     {
         return $this->closure;
     }
     
-    protected function getReflector()
+    public function getReflector()
     {
         if($this->reflector === null)
         {
-            $this->reflector = new ReflectionClosure($this->closure);
+            $this->reflector = new ReflectionClosure($this->closure, $this->code);
+            $this->code = null;
         }
         
         return $this->reflector;
     }
     
-    protected function mapThat(&$value)
+    
+    protected function &mapPointers(&$value)
     {
         if($value instanceof static)
         {
-            if($value !== $this)
-            {
-                $value = $value->getClosure();
-            }
-            elseif(is_array($value) || is_object($value))
-            {
-                array_walk($value, array($this, 'mapThat'));
-            }
+            $pointer = &$value->getClosurePointer();
+            return $pointer;
         }
+        elseif(is_array($value))
+        {
+            $pointer = array_map(array($this, __FUNCTION__), $value);
+            return $pointer;
+        }
+        elseif($value instanceof \stdClass)
+        {
+            $pointer = (array) $value;
+            $pointer = array_map(array($this, __FUNCTION__), $pointer);
+            $pointer = (object) $pointer;
+            return $pointer;
+        }
+        return $value;
     }
     
-    protected function mapThis(&$value)
+    protected function &mapByReference(&$value)
     {
-        if($value instanceof static)
+        if($value instanceof Closure)
         {
-            if($value === $this)
+            if(isset(static::$storage[$value]))
             {
-                $value = $this->closure;
+                $ret = static::$storage[$value];
+                return $ret;
             }
-            else
-            {
-                $value = $value->getClosure();
-            }
+            
+            $instance = new static($value);
+            static::$storage[$value] = $instance;
+            return $instance;
         }
-        elseif(is_array($value) || is_object($value))
+        elseif(is_array($value))
         {
-            array_walk($value, array($this, 'mapThis'));
+            $ret = array_map(array($this, __FUNCTION__), $value);
+            return $ret;
         }
+        elseif($value instanceof \stdClass)
+        {
+            $ret = (array) $value;
+            $ret = array_map(array($this, __FUNCTION__), $ret);
+            $ret = (object) $ret;
+            return $ret;
+        }
+        return $value;
     }
     
-    protected function getCode()
-    {
-        if($this->code === null)
-        {
-            $reflector = $this->getReflector();
-            
-            $storage = new SplObjectStorage();
-            
-            $variables = $reflector->getStaticVariables();
-            
-            $map = function(&$value) use(&$storage, &$map){
-                
-                if($value instanceof Closure)
-                {
-                    if($value === $this->closure)
-                    {
-                        $value = $this;
-                    }
-                    elseif(isset($storage[$value]))
-                    {
-                        $value = $storage[$value];
-                    }
-                    else
-                    {
-                        $instance = new static($value);
-                        $storage[$value] = $instance;
-                        $value = $instance;
-                    }
-                }
-                elseif(is_array($value) || (is_object($value) && !($value instanceof static)))
-                {
-                    array_walk($value, $map);
-                }
-                
-            };
-            
-            array_walk($variables, $map);
-            
-            unset($storage);
-            
-            $this->code = array(
-                'use' => $variables,
-                'references' => $reflector->getUseReferences(),
-                'function' => $reflector->getCode(),
-            );
-            
-            
-        }
-        
-        return $this->code;
-    }
-     
+    
     public function __invoke()
     {
         return $this->getReflector()->invokeArgs(func_get_args());
     }
-     
+    
     public function serialize()
     {
-        return serialize($this->getCode());
+        
+        if (!static::$serializations++)
+        {
+            static::$storage = new SplObjectStorage();
+        }
+        
+        $reflector = $this->getReflector();
+        static::$storage[$this->closure] = $this;
+        $variables = $reflector->getStaticVariables();
+        $use = &$this->mapByReference($variables);
+        
+        $ret = serialize(array(
+            'use' => $use,
+            'function' => $reflector->getCode(),
+        ));
+        
+        if (!--static::$serializations)
+        {
+            static::$storage = null;
+        }
+        
+        return $ret;
     }
      
     public function unserialize($data)
@@ -147,16 +144,13 @@ class SerializableClosure implements Serializable
         
         $this->code = unserialize($data);
         
-        array_walk($this->code['use'], array($this, 'mapThat'));
+        $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
         
-        extract($this->code['use']);
+        extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
         
-        foreach($this->code['references'] as $name)
-        {
-            array_walk(${$name}, array($this, 'mapThis'));
-        }
+        $this->code = $this->code['function'];
         
     }
  

@@ -17,11 +17,11 @@ use SplFileObject;
 class ReflectionClosure extends ReflectionFunction
 {
     protected $code;
+
     
-    protected $useRefs;
-    
-    public function __construct(Closure $closure)
+    public function __construct(Closure $closure, $code = null)
     {
+        $this->code = $code;
         parent::__construct($closure);
     }
     
@@ -124,70 +124,6 @@ class ReflectionClosure extends ReflectionFunction
         }
         
         return $this->code;
-    }
-    
-    public function getUseReferences()
-    {
-        if($this->useRefs === null)
-        {
-            $statics = $this->getStaticVariables();
-            $this->useRefs = array();
-            if(!empty($statics))
-            {
-                $this->useRefs = array();
-                
-                $tokens = token_get_all('<?php ' . $this->getCode());
-                
-                $state = 'start';
-                $open = 0;
-                
-                foreach($tokens as &$token)
-                {
-                    switch($state)
-                    {
-                        case 'start':
-                            if(is_array($token))
-                            {
-                                if($token[0] === T_USE)
-                                {
-                                    $state = 'use';
-                                }
-                            }
-                            break;
-                        case 'use':
-                            if(!is_array($token))
-                            {
-                                switch($token)
-                                {
-                                    case '(':
-                                        $open++;
-                                        break;
-                                    case ')':
-                                        $open--;
-                                        if($open === 0)
-                                        {
-                                            break 3;
-                                        }
-                                        break;
-                                    case '&':
-                                        $state = 'var';
-                                        break 2;
-                                }
-                            }
-                            break;
-                        case 'var':
-                            if(is_array($token) && $token[0] === T_VARIABLE)
-                            {
-                                $this->useRefs[] = substr($token[1], 1);
-                                $state = 'use';
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-        
-        return $this->useRefs;
     }
     
 }
