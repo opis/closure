@@ -22,8 +22,9 @@ class ClosureStream
     
     protected $pointer = 0;
     
+    
     function stream_open($path, $mode, $options, &$opened_path)
-    {
+    {   
         $this->content = "<?php\nreturn ". substr($path, strlen(static::STREAM_PROTO . '://')) . ";";
         $this->length = strlen($this->content);
         return true;
@@ -43,9 +44,18 @@ class ClosureStream
      
     public function stream_stat()
     {
-        return array();
+        $stat = stat(__FILE__);
+        $stat[7] = $stat['size'] = $this->length;
+        return $stat;
     }
-     
+    
+    public function url_stat($path, $flags)
+    {
+        $stat = stat(__FILE__);
+        $stat[7] = $stat['size'] = $this->length;
+        return $stat;
+    }
+    
     public static function register()
     {
         if(!static::$isRegistred)

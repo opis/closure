@@ -12,6 +12,7 @@ namespace Opis\Closure;
 
 use Closure;
 use Serializable;
+use SplObjectStorage;
 
 class SerializableClosure implements Serializable
 {
@@ -44,25 +45,86 @@ class SerializableClosure implements Serializable
         return $this->reflector;
     }
     
+    protected function mapThat(&$value)
+    {
+        if($value instanceof static)
+        {
+            if($value !== $this)
+            {
+                $value = $value->getClosure();
+            }
+            elseif(is_array($value) || is_object($value))
+            {
+                array_walk($value, array($this, 'mapThat'));
+            }
+        }
+    }
+    
+    protected function mapThis(&$value)
+    {
+        if($value instanceof static)
+        {
+            if($value === $this)
+            {
+                $value = $this->closure;
+            }
+            else
+            {
+                $value = $value->getClosure();
+            }
+        }
+        elseif(is_array($value) || is_object($value))
+        {
+            array_walk($value, array($this, 'mapThis'));
+        }
+    }
+    
     protected function getCode()
     {
         if($this->code === null)
         {
             $reflector = $this->getReflector();
             
-            $map = function(&$value)
-            {
+            $storage = new SplObjectStorage();
+            
+            $variables = $reflector->getStaticVariables();
+            
+            $map = function(&$value) use(&$storage, &$map){
+                
                 if($value instanceof Closure)
                 {
-                    return $value === $this->closure ? $this : new static($value);
+                    if($value === $this->closure)
+                    {
+                        $value = $this;
+                    }
+                    elseif(isset($storage[$value]))
+                    {
+                        $value = $storage[$value];
+                    }
+                    else
+                    {
+                        $instance = new static($value);
+                        $storage[$value] = $instance;
+                        $value = $instance;
+                    }
                 }
-                return $value;
+                elseif(is_array($value) || (is_object($value) && !($value instanceof static)))
+                {
+                    array_walk($value, $map);
+                }
+                
             };
             
+            array_walk($variables, $map);
+            
+            unset($storage);
+            
             $this->code = array(
-                'use' => array_map($map, $reflector->getStaticVariables()),
+                'use' => $variables,
+                'references' => $reflector->getUseReferences(),
                 'function' => $reflector->getCode(),
             );
+            
             
         }
         
@@ -82,30 +144,18 @@ class SerializableClosure implements Serializable
     public function unserialize($data)
     {
         ClosureStream::register();
+        
         $this->code = unserialize($data);
-        $this->code['use'] = array_map(function(&$value){
-            if($value instanceof SerializableClosure)
-            {
-                if($value === $this)
-                {
-                    return $this;
-                }
-                
-                return $value->getClosure();
-            }
-            return $value;
-        }, $this->code['use']);
+        
+        array_walk($this->code['use'], array($this, 'mapThat'));
         
         extract($this->code['use']);
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
         
-        foreach($this->code['use'] as $key => &$value)
+        foreach($this->code['references'] as $name)
         {
-            if($value === $this)
-            {
-                ${$key} = $this->closure;
-            }
+            array_walk(${$name}, array($this, 'mapThis'));
         }
         
     }
