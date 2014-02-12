@@ -122,7 +122,14 @@ class SerializableClosure implements Serializable
         {
             if(isset(static::$storage[$value]))
             {
-                $ret = static::$storage[$value]->reference;
+                if(static::supportBinding())
+                {
+                    $ret = static::$storage[$value];
+                }
+                else
+                {
+                    $ret = static::$storage[$value]->reference;
+                }
                 return $ret;
             }
             
@@ -162,7 +169,10 @@ class SerializableClosure implements Serializable
             static::$storage = new SplObjectStorage();
         }
         
-        $this->reference = new SelfReference($this);
+        if(!static::supportBinding())
+        {
+            $this->reference = new SelfReference($this);
+        }
         
         $reflector = $this->getReflector();
         static::$storage[$this->closure] = $this;
@@ -199,16 +209,43 @@ class SerializableClosure implements Serializable
      
     public function unserialize($data)
     {
+        ClosureStream::register();
+        
+        if(!static::supportBinding())
+        {
+            $this->unserializePHP53($data);
+            return;
+        }
+        
+        $this->code = unserialize($data);
+        
+        $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
+        
+        extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
+        
+        $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
+       
+        if($this !== $this->code['this'] && ($this->code['scope'] !== null || $this->code['this'] !== null))
+        {
+            $this->isBinded = $this->serializeBind = true;
+            $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
+        }
+        
+        $this->code = $this->code['function'];
+        
+    }
+    
+    protected function unserializePHP53(&$data)
+    {
         if(!static::$unserializations++)
         {
             static::$deserialized = array();
         }
         
-        ClosureStream::register();
-        
         $this->code = unserialize($data);
         
         static::$deserialized[$this->code['self']->hash] = null;
+        
         
         $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
         
@@ -216,15 +253,6 @@ class SerializableClosure implements Serializable
         extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
-       
-        if(static::supportBinding())
-        {
-            if($this !== $this->code['this'] && ($this->code['scope'] !== null || $this->code['this'] !== null))
-            {
-                $this->isBinded = $this->serializeBind = true;
-                $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
-            }
-        }
         
         static::$deserialized[$this->code['self']->hash] = $this->closure;
         
