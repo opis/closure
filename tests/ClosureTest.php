@@ -60,6 +60,12 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelf()
     {
+        if(!method_exists('Closure', 'bindTo'))
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+        
         $a = function() use (&$a){
             return $a;
         };
