@@ -1,7 +1,7 @@
 {
     "name": "opis/closure",
-    "description": "Serializable closures",
-    "keywords": ["opis", "closure", "serialization"],
+    "description": "Real serialization of closures is now possible. Serialize any closure in a safe and fast way.",
+    "keywords": ["opis", "closure", "serialization", "function"],
     "homepage": "http://opis.io",
     "license": "MIT",
     "authors": [
