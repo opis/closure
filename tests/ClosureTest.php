@@ -14,6 +14,10 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         }
         return unserialize(serialize($closure));
     }
+    
+    protected function r() {
+        return version_compare(PHP_VERSION, '5.4', '<');
+    }
 
     public function testClosureUseReturnValue()
     {
@@ -60,7 +64,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelf()
     {
-        if(!method_exists('Closure', 'bindTo'))
+        if($this->r())
         {
             $this->markTestSkipped('This test requires PHP >=5.4');
             return;
@@ -76,6 +80,12 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelfInArray()
     {
+        if($this->r())
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+        
         $a = array();
         
         $b = function() use(&$a){
@@ -91,6 +101,12 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelfInObject()
     {
+        if($this->r())
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+        
         $a = new stdClass();
         
         $b = function() use(&$a){
@@ -106,6 +122,12 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelfInMultiArray()
     {
+        if($this->r())
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+        
         $a = array();
         $x = null;
         
@@ -129,7 +151,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureBindToObject()
     {
-        if(!method_exists('Closure', 'bindTo'))
+        if($this->r())
         {
             $this->markTestSkipped('This test requires PHP >=5.4');
             return;
@@ -150,7 +172,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureBindToObjectScope()
     {
-        if(!method_exists('Closure', 'bindTo'))
+        if($this->r())
         {
             $this->markTestSkipped('This test requires PHP >=5.4');
             return;
@@ -171,7 +193,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureBindToObjectStaticScope()
     {
-        if(!method_exists('Closure', 'bindTo'))
+        if($this->r())
         {
             $this->markTestSkipped('This test requires PHP >=5.4');
             return;
