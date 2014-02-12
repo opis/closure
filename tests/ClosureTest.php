@@ -44,7 +44,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         $v = 1;
         $u = $this->s($b);
         
-        $this->assertEquals($u(1), $v + 1);
+        $this->assertEquals($v + 1, $u(1));
     }
     
     public function testClosureUseReturnClosureByRef()
@@ -59,7 +59,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         $v = 1;
         $u = $this->s($b);
         
-        $this->assertEquals($u(1), $v + 1);
+        $this->assertEquals($v + 1, $u(1));
     }
     
     public function testClosureUseSelf()
@@ -147,7 +147,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($b, true);
         
-        $this->assertEquals($u(), 'public called');
+        $this->assertEquals('public called', $u());
     }
     
     public function testClosureBindToObjectScope()
@@ -168,7 +168,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($b, true);
         
-        $this->assertEquals($u(), 'protected called');
+        $this->assertEquals('protected called', $u());
     }
     
     public function testClosureBindToObjectStaticScope()
@@ -189,7 +189,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($b, true);
         
-        $this->assertEquals($u(), 'static protected called');
+        $this->assertEquals('static protected called', $u());
     }
     
     public function testClosureSerializationTwice()
@@ -204,7 +204,17 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($this->s($b));
         
-        $this->assertEquals($u('ok'), 'ok');
+        $this->assertEquals('ok', $u('ok'));
+    }
+    
+    public function testClosureRealSerialization()
+    {
+        $f = function($a, $b){
+            return $a + $b;
+        };
+        
+        $u = $this->s($this->s($f)->getClosure());
+        $this->assertEquals(5, $u(2, 3));
     }
     
 }
