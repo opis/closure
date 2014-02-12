@@ -64,11 +64,6 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelf()
     {
-        if($this->r())
-        {
-            $this->markTestSkipped('This test requires PHP >=5.4');
-            return;
-        }
         
         $a = function() use (&$a){
             return $a;
@@ -80,11 +75,6 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelfInArray()
     {
-        if($this->r())
-        {
-            $this->markTestSkipped('This test requires PHP >=5.4');
-            return;
-        }
         
         $a = array();
         
@@ -101,11 +91,6 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelfInObject()
     {
-        if($this->r())
-        {
-            $this->markTestSkipped('This test requires PHP >=5.4');
-            return;
-        }
         
         $a = new stdClass();
         
@@ -122,11 +107,6 @@ class ClosureTest extends PHPUnit_Framework_TestCase
     
     public function testClosureUseSelfInMultiArray()
     {
-        if($this->r())
-        {
-            $this->markTestSkipped('This test requires PHP >=5.4');
-            return;
-        }
         
         $a = array();
         $x = null;
