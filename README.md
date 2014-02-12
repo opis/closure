@@ -1,5 +1,9 @@
 Serializable Closure
 ====================
+[![Build Status](https://travis-ci.org/opis/closure.png?branch=master)](https://travis-ci.org/opis/closure)
+[![Latest Stable Version](https://poser.pugx.org/opis/closure/v/stable.png)](https://packagist.org/packages/opis/closure)
+[![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
+[![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
 
 The real serialization of PHP closures
 --------------------
@@ -17,7 +21,7 @@ Serializations of closures in the real way (like any other serializable object) 
 
 ###Installation
 
-SerializableClosure is available on packagist and can be installed via composer, just add in `composer.json` the following:
+This library is available on [Packagist](https://packagist.org/packages/opis/closure) and can be installed using [Composer](http://getcomposer.org)
 
 ```json
 {
@@ -71,7 +75,7 @@ echo $closure(5); //> 120
 ```
 
 ####Note
-Because of PHP limitations, this library cannot detect the correct closure code if there is more then one closure on a single line.
+Due to PHP limitations, this library cannot detect the correct closure code if there is more then one closure on a single line.
 
 ```php
 
