@@ -14,32 +14,91 @@ use Closure;
 use Serializable;
 use SplObjectStorage;
 
+
+/**
+ * Provides a wrapper for serialization of closures
+ */
 class SerializableClosure implements Serializable
 {
     
+    /**
+     * @var Closure Wrapped closure
+     * @see Opis\Closure\SerializableClosure::getClosure()
+     */
     protected $closure;
     
+    /**
+     * @var Opis\Closure\ReflectionClosure A reflection instance for closure
+     * @see Opis\Closure\SerializableClosure::getReflector()
+     */
     protected $reflector;
     
+    /**
+     * @var mixed Used on unserializations to hold variables
+     * @see Opis\Closure\SerializableClosure::unserialize()
+     * @see Opis\Closure\SerializableClosure::getReflector()
+     */
     protected $code;
     
+    /**
+     * @var Opis\Closure\SelfReference Used to fix serialization in PHP 5.3
+     */
     protected $reference;
     
+    /**
+     * @var boolean Indicates if closure is bound to an object
+     */
     protected $isBinded = false;
     
+    /**
+     * @var boolean Indicates if closure must be serialized with bounded object
+     */
     protected $serializeBind = false;
     
+    /**
+     * @var string Closure scope
+     */
     protected $scope;
     
+    /**
+     * @var Opis\Closure\ClosureContext Context of closure, used in serialization
+     */
     protected static $context;
     
-    protected static $unserializations = 0;
-    
-    protected static $deserialized;
-    
+    /**
+     * @var boolean Indicates is closures can be bound to objects
+     * @see Opis\Closure\SerializableClosure::supportBinding()
+     */
     protected static $bindingSupported;
     
+    /**
+     * @var integer Number of unserializations in progress
+     * @see Opis\Closure\SerializableClosure::unserializePHP53()
+     */
+    protected static $unserializations = 0;
     
+    /**
+     * @var array Deserialized closures
+     * @see Opis\Closure\SerializableClosure::unserializePHP53()
+     */
+    protected static $deserialized;
+    
+    /**
+     * @var boolean Indicates if deserialized closures should be kept for references
+     * @see Opis\Closure\SerializableClosure::unserializeData()
+     * @see Opis\Closure\SerializableClosure::unserializePHP53()
+     */
+    protected static $persist = false;
+    
+    /**
+     * Constructor
+     *
+     * @param Closure $closure
+     *   Closure you want to serialize
+     * @param boolean $serializeBind
+     *   If true, the bounded object will be serialized
+     *   Available only for PHP 5.4+
+     */
     public function __construct(Closure $closure, $serializeBind = false)
     {
         $this->closure = $closure;
@@ -52,16 +111,33 @@ class SerializableClosure implements Serializable
         }
     }
     
+    /**
+     * Internal method used to get a reference from closure
+     * 
+     * @return Closure
+     *   A pointer to closure
+     */
     protected function &getClosurePointer()
     {
         return $this->closure;
     }
     
+    /**
+     * Get the Closure object
+     *
+     * @return Closure
+     *   The wrapped closure
+     */
     public function getClosure()
     {
         return $this->closure;
     }
     
+    /**
+     * Get the reflector for closure
+     *
+     * @return Opis\Closure\ReflectionClosure
+     */
     public function getReflector()
     {
         if($this->reflector === null)
@@ -73,6 +149,11 @@ class SerializableClosure implements Serializable
         return $this->reflector;
     }
     
+    /**
+     * Indicates is closures can be bound to objects
+     *
+     * @return boolean
+     */
     public static function supportBinding()
     {
         if(static::$bindingSupported === null)
@@ -83,6 +164,14 @@ class SerializableClosure implements Serializable
         return static::$bindingSupported;
     }
     
+    /**
+     * Internal method used to map the pointers on unserialization
+     *
+     * @param mixed &$value
+     *   The value to map
+     * @return mixed
+     *   Mapped pointers
+     */
     protected function &mapPointers(&$value)
     {
         if($value instanceof static)
@@ -110,9 +199,15 @@ class SerializableClosure implements Serializable
         return $value;
     }
     
+    /**
+     * Internal method used to map closures by reference
+     *
+     * @param mixed &$value
+     * @return mixed
+     *   The mapped values
+     */
     protected function &mapByReference(&$value)
     {
-        
         if($value instanceof Closure)
         {
             if(isset($this->scope->storage[$value]))
@@ -157,7 +252,9 @@ class SerializableClosure implements Serializable
         return $value;
     }
     
-    
+    /**
+     * Implementation of magic method __invoke()
+     */
     public function __invoke()
     {
         return $this->isBinded
@@ -166,6 +263,11 @@ class SerializableClosure implements Serializable
                     
     }
     
+    /**
+     * Implementation of Serializable::serialize()
+     * @return string
+     *   The serialized closure
+     */
     public function serialize()
     {
         if($this->scope === null)
@@ -179,25 +281,27 @@ class SerializableClosure implements Serializable
             $this->scope->storage = new SplObjectStorage();
         }
         
-        if(!static::supportBinding())
-        {
-            $this->reference = new SelfReference($this);
-        }
+        $this->scope->storage[$this->closure] = $this;
+        $scope = $object = null;
+
         
         $reflector = $this->getReflector();
-        $this->scope->storage[$this->closure] = $this;
-        $variables = $reflector->getStaticVariables();
-        $use = &$this->mapByReference($variables);
+        $use = null;
+        if ($variables = $reflector->getStaticVariables())
+        {
+            $use = &$this->mapByReference($variables);
+        }
         
-        $scope = null;
-        $that = null;
-        
-        if($this->serializeBind && static::supportBinding())
+        if(!static::supportBinding())
+        {
+            $this->reference = new SelfReference($this->closure);
+        }
+        elseif($this->serializeBind)
         {
             if($scope = $reflector->getClosureScopeClass())
             {
                 $scope = $scope->name;
-                $that = $reflector->getClosureThis();
+                $object = $reflector->getClosureThis();
             }
         }
         
@@ -205,7 +309,7 @@ class SerializableClosure implements Serializable
             'use' => $use,
             'function' => $reflector->getCode(),
             'scope' => $scope,
-            'this' => $that,
+            'this' => $object,
             'self' => $this->reference,
         ));
         
@@ -217,7 +321,13 @@ class SerializableClosure implements Serializable
         
         return $ret;
     }
-     
+    
+    /**
+     * Implementation of Serializable::unserialize()
+     *
+     * @param string $data
+     *   Serialized data
+     */
     public function unserialize($data)
     {
         ClosureStream::register();
@@ -230,9 +340,11 @@ class SerializableClosure implements Serializable
         
         $this->code = unserialize($data);
         
-        $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
-        
-        extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
+        if ($this->code['use'])
+        {
+            $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
+            extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
+        }
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
        
@@ -243,38 +355,80 @@ class SerializableClosure implements Serializable
         }
         
         $this->code = $this->code['function'];
-        
     }
     
+    /**
+     * Helper method used to unserialize data for PHP 5.3
+     * This method fixes closures references
+     *
+     * @param string $data
+     *   Serialized data
+     * @return mixed
+     *   Unserialized data
+     */
+    public static function unserializeData($data)
+    {
+        static::$persist = true;
+        $data = unserialize($data);
+        if (!static::$unserializations) {
+            static::$persist = false;
+            static::$deserialized = null;
+        }
+        return $data;
+    }
+    
+    /**
+     * Internal method used to unserialize closures in PHP 5.3
+     *
+     * @param string &$data
+     *   Serialized closure
+     */
     protected function unserializePHP53(&$data)
     {
-        if(!static::$unserializations++)
+        if(!static::$unserializations++ && !static::$persist && !static::$deserialized)
         {
             static::$deserialized = array();
         }
         
         $this->code = unserialize($data);
         
+        if (isset(static::$deserialized[$this->code['self']->hash]))
+        {
+            $this->closure = static::$deserialized[$this->code['self']->hash];
+            goto setcode;
+        }
+        
         static::$deserialized[$this->code['self']->hash] = null;
         
-        
-        $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
-        
-        
-        extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
+        if ($this->code['use'])
+        {
+            $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
+            extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
+        }
         
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
         
         static::$deserialized[$this->code['self']->hash] = $this->closure;
         
+        setcode:
         $this->code = $this->code['function'];
         
-        if(!--static::$unserializations)
+        if(!--static::$unserializations && !static::$persist)
         {
             static::$deserialized = null;
         }
     }
     
+    /**
+     * Wraps a closure and sets the context (if any)
+     * 
+     * @param Closure $closure
+     *   Closure to be wrapped
+     * @param boolean $serializeThis
+     *   Indicates if the scope of closure should be serialized
+     * @return Opis\Closure\SerializableClosure
+     *   The wrapped closure
+     */
     public static function from(Closure $closure, $serializeThis = false)
     {
         if(static::$context === null)
@@ -295,6 +449,11 @@ class SerializableClosure implements Serializable
         return $instance;
     }
     
+    /**
+     * Creates a context for serializing duplicate closures
+     * with the same reference.
+     * Applies only on closures wrapped with from()
+     */
     public static function enterContext()
     {
         if(static::$context === null)
@@ -305,6 +464,9 @@ class SerializableClosure implements Serializable
         static::$context->locks++;
     }
     
+    /**
+     * Destroys the context created with enterContext()
+     */
     public static function exitContext()
     {
         if(static::$context !== null && !--static::$context->locks)
@@ -315,31 +477,70 @@ class SerializableClosure implements Serializable
  
 }
 
+/**
+ * Helper class used to indicate a reference to an object
+ */
 class SelfReference
 {
+    /**
+     * @var string An unique hash representing the object
+     */
     public $hash;
     
+    /**
+     * Constructor
+     * @param object $object
+     */
     public function __construct($object)
     {
         $this->hash = spl_object_hash($object);
     }
 }
 
+/**
+ * Closure scope class
+ */
 class ClosureScope
 {
+    /**
+     * @var integer Number of serializations in current scope
+     */
     public $serializations = 0;
+    
+    /**
+     * @var integer Number of closures that have to be serialized
+     */
     public $toserialize = 0;
+    
+    /**
+     * @var SplObjectStorage Wrapped closures in current scope
+     */
     public $storage;
 }
 
+/**
+ * Closure context class
+ */
 class ClosureContext
 {
+    /**
+     * @var Opis\Closure\ClosureScope Closures scope
+     */
     public $scope;
     
+    /**
+     * @var SplObjectStorage Wrapped closures in this context
+     */
     public $instances;
     
+    /**
+     * @var integer
+     */
     public $locks;
     
+    /**
+     * Constructor
+     */
     public function __construct()
     {
         $this->scope = new ClosureScope();
