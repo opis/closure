@@ -14,16 +14,6 @@ use Closure;
 use Serializable;
 use SplObjectStorage;
 
-class SelfReference
-{
-    public $hash;
-    
-    public function __construct($object)
-    {
-        $this->hash = spl_object_hash($object);
-    }
-}
-
 class SerializableClosure implements Serializable
 {
     
@@ -39,22 +29,27 @@ class SerializableClosure implements Serializable
     
     protected $serializeBind = false;
     
-    protected static $serializations = 0;
+    protected $scope;
+    
+    protected static $context;
     
     protected static $unserializations = 0;
-    
-    protected static $storage;
     
     protected static $deserialized;
     
     protected static $bindingSupported;
     
     
-     
     public function __construct(Closure $closure, $serializeBind = false)
     {
-        $this->serializeBind = (bool) $serializeBind;
         $this->closure = $closure;
+        $this->serializeBind = (bool) $serializeBind;
+        
+        if(static::$context !== null)
+        {
+            $this->scope = static::$context->scope;
+            $this->scope->toserialize++;
+        }
     }
     
     protected function &getClosurePointer()
@@ -120,21 +115,31 @@ class SerializableClosure implements Serializable
         
         if($value instanceof Closure)
         {
-            if(isset(static::$storage[$value]))
+            if(isset($this->scope->storage[$value]))
             {
                 if(static::supportBinding())
                 {
-                    $ret = static::$storage[$value];
+                    $ret = $this->scope->storage[$value];
                 }
                 else
                 {
-                    $ret = static::$storage[$value]->reference;
+                    $ret = $this->scope->storage[$value]->reference;
                 }
                 return $ret;
             }
             
-            $instance = new static($value);
-            static::$storage[$value] = $instance;
+            $instance = new static($value, false);
+            
+            if(static::$context !== null)
+            {
+                static::$context->scope->toserialize--;
+            }
+            else
+            {
+                $instance->scope = $this->scope;
+            }
+            
+            $this->scope->storage[$value] = $instance;
             return $instance;
         }
         elseif(is_array($value))
@@ -163,10 +168,15 @@ class SerializableClosure implements Serializable
     
     public function serialize()
     {
-        
-        if (!static::$serializations++)
+        if($this->scope === null)
         {
-            static::$storage = new SplObjectStorage();
+            $this->scope = new ClosureScope();
+            $this->scope->toserialize++;
+        }
+        
+        if(!$this->scope->serializations++)
+        {
+            $this->scope->storage = new SplObjectStorage();
         }
         
         if(!static::supportBinding())
@@ -175,7 +185,7 @@ class SerializableClosure implements Serializable
         }
         
         $reflector = $this->getReflector();
-        static::$storage[$this->closure] = $this;
+        $this->scope->storage[$this->closure] = $this;
         $variables = $reflector->getStaticVariables();
         $use = &$this->mapByReference($variables);
         
@@ -199,9 +209,10 @@ class SerializableClosure implements Serializable
             'self' => $this->reference,
         ));
         
-        if (!--static::$serializations)
+        
+        if(!--$this->scope->serializations && !--$this->scope->toserialize)
         {
-            static::$storage = null;
+            $this->scope->storage = null;
         }
         
         return $ret;
@@ -263,5 +274,76 @@ class SerializableClosure implements Serializable
             static::$deserialized = null;
         }
     }
+    
+    public static function from(Closure $closure, $serializeThis = false)
+    {
+        if(static::$context === null)
+        {
+            $instance = new SerializableClosure($closure, $serializeThis);
+        }
+        elseif(isset(static::$context->instances[$closure]))
+        {
+            $instance = static::$context->instances[$closure];
+            $instance->serializeBind = $serializeThis;
+        }
+        else
+        {
+            $instance = new SerializableClosure($closure, $serializeThis);
+            static::$context->instances[$closure] = $instance;
+        }
+        
+        return $instance;
+    }
+    
+    public static function enterContext()
+    {
+        if(static::$context === null)
+        {
+            static::$context = new ClosureContext();
+        }
+        
+        static::$context->locks++;
+    }
+    
+    public static function exitContext()
+    {
+        if(static::$context !== null && !--static::$context->locks)
+        {
+            static::$context = null;
+        }
+    }
  
+}
+
+class SelfReference
+{
+    public $hash;
+    
+    public function __construct($object)
+    {
+        $this->hash = spl_object_hash($object);
+    }
+}
+
+class ClosureScope
+{
+    public $serializations = 0;
+    public $toserialize = 0;
+    public $storage;
+}
+
+class ClosureContext
+{
+    public $scope;
+    
+    public $instances;
+    
+    public $locks;
+    
+    public function __construct()
+    {
+        $this->scope = new ClosureScope();
+        $this->instances = new SplObjectStorage();
+        $this->locks = 0;
+    }
 }
