@@ -231,7 +231,9 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $t->subtest = $t2;
         
+        SerializableClosure::enterContext();
         $x = serialize($t);
+        SerializableClosure::exitContext();
         
         if ($this->r())
         {
