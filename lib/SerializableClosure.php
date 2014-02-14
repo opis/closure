@@ -281,7 +281,6 @@ class SerializableClosure implements Serializable
             $this->scope->storage = new SplObjectStorage();
         }
         
-        
         $scope = $object = null;
         $reflector = $this->getReflector();
         
@@ -305,8 +304,6 @@ class SerializableClosure implements Serializable
         {
             $use = &$this->mapByReference($variables);
         }
-
-
         
         $ret = serialize(array(
             'use' => $use,
@@ -315,7 +312,6 @@ class SerializableClosure implements Serializable
             'this' => $object,
             'self' => $this->reference,
         ));
-        
         
         if(!--$this->scope->serializations && !--$this->scope->toserialize)
         {
@@ -373,7 +369,8 @@ class SerializableClosure implements Serializable
     {
         static::$persist = true;
         $data = unserialize($data);
-        if (!static::$unserializations) {
+        if (!static::$unserializations)
+        {
             static::$persist = false;
             static::$deserialized = null;
         }
