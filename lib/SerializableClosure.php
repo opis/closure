@@ -283,7 +283,8 @@ class SerializableClosure implements Serializable
         
         
         $scope = $object = null;
-
+        $reflector = $this->getReflector();
+        
         if(!static::supportBinding())
         {
             $this->reference = new SelfReference($this->closure);
@@ -299,7 +300,6 @@ class SerializableClosure implements Serializable
         
         $this->scope->storage[$this->closure] = $this;
         
-        $reflector = $this->getReflector();
         $use = null;
         if ($variables = $reflector->getStaticVariables())
         {
