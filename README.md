@@ -15,7 +15,7 @@ Real serialization of closures is now possible. Serialize any closure in a safe 
  * Handles recursive closures
  * Unserialization doesn't need `eval()`, so that any error in a closure can be caught
  * Simple and very fast parser
- * Handles magic constants like __FILE__, __DIR__, __LINE__, __NAMESPACE__
+ * Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__`
  * You can serialize/unserialize any closure unlimited times, even those previously unserialized (this is possible because `eval()` is not used for unserialization)
  * Provides a reflector, which can give you informations about closure code, parameters, ...
  * Supports serialization of bounded objects and scopes (available only from PHP >= 5.4)
