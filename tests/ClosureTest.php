@@ -217,6 +217,43 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(5, $u(2, 3));
     }
     
+    public function testClosureObjectinObject()
+    {
+        $f = function() use (&$f) {
+          return $f;
+        };
+        
+        $t = new ObjnObj();
+        $t->func = $f;
+        
+        $t2 = new ObjnObj();
+        $t2->func = $f;
+        
+        $t->subtest = $t2;
+        
+        SerializableClosure::enterContext();
+        $x = serialize($t);
+        SerializableClosure::exitContext();
+        
+        if ($this->r())
+        {
+            // php 5.3 compatible
+            $x = SerializableClosure::unserializeData($x);
+        }
+        else
+        {
+            $x = unserialize($x);
+        }
+        
+        $g = $x->func;
+        $g = $g();
+        
+        $ok = $x->func == $x->subtest->func;
+        $ok = $ok && ($x->subtest->func == $g);
+        
+        $this->assertEquals(true, $ok);
+    }
+    
 }
 
 class A
@@ -234,4 +271,23 @@ class A
     {
         return 'public called';
     }
+}
+
+class ObjnObj implements \Serializable {
+  public $subtest;
+  public $func;
+  
+  public function serialize() {
+    return serialize(array(
+      'subtest' => $this->subtest,
+      'func' => SerializableClosure::from($this->func),
+    ));
+  }
+  
+  public function unserialize($data) {
+    $data = unserialize($data);
+    $this->subtest = $data['subtest'];
+    $this->func = $data['func']->getClosure();
+  }
+  
 }
