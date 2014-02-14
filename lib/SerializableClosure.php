@@ -281,17 +281,9 @@ class SerializableClosure implements Serializable
             $this->scope->storage = new SplObjectStorage();
         }
         
-        $this->scope->storage[$this->closure] = $this;
+        
         $scope = $object = null;
 
-        
-        $reflector = $this->getReflector();
-        $use = null;
-        if ($variables = $reflector->getStaticVariables())
-        {
-            $use = &$this->mapByReference($variables);
-        }
-        
         if(!static::supportBinding())
         {
             $this->reference = new SelfReference($this->closure);
@@ -304,6 +296,17 @@ class SerializableClosure implements Serializable
                 $object = $reflector->getClosureThis();
             }
         }
+        
+        $this->scope->storage[$this->closure] = $this;
+        
+        $reflector = $this->getReflector();
+        $use = null;
+        if ($variables = $reflector->getStaticVariables())
+        {
+            $use = &$this->mapByReference($variables);
+        }
+
+
         
         $ret = serialize(array(
             'use' => $use,
@@ -385,11 +388,12 @@ class SerializableClosure implements Serializable
      */
     protected function unserializePHP53(&$data)
     {
-        if(!static::$unserializations++ && !static::$persist && !static::$deserialized)
+
+        if(!static::$unserializations++ && !static::$persist && static::$deserialized === null)
         {
             static::$deserialized = array();
         }
-        
+
         $this->code = unserialize($data);
         
         if (isset(static::$deserialized[$this->code['self']->hash]))
