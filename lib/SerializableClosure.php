@@ -315,7 +315,8 @@ class SerializableClosure implements Serializable
         $this->scope->storage[$this->closure] = $this;
         
         $use = null;
-        if ($variables = $reflector->getStaticVariables())
+        
+        if ($variables = $reflector->getUseVariables())
         {
             $use = &$this->mapByReference($variables);
         }
