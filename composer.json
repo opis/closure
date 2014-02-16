@@ -1,7 +1,7 @@
 {
     "name": "opis/closure",
-    "description": "Real serialization of closures is now possible. Serialize any closure in a safe and fast way.",
-    "keywords": ["opis", "closure", "serialization", "function"],
+    "description": "A PHP 5.3+ library for closure serialization. Serialize any closure in a safe and fast way.",
+    "keywords": ["closure", "serialization", "function", "serializable", "serialize"],
     "homepage": "http://opis.io",
     "license": "MIT",
     "authors": [
