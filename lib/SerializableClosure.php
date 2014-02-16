@@ -388,6 +388,12 @@ class SerializableClosure implements Serializable
         
         $this->code = unserialize($data);
         
+        if (isset(static::$deserialized[$this->code['self']->hash]))
+        {
+            $this->closure = static::$deserialized[$this->code['self']->hash];
+            goto setcode;
+        }
+        
         static::$deserialized[$this->code['self']->hash] = null;
         
         if ($this->code['use'])
@@ -400,6 +406,8 @@ class SerializableClosure implements Serializable
         
         static::$deserialized[$this->code['self']->hash] = $this->closure;
         
+        setcode:
+        
         $this->code = $this->code['function'];
         
         if(!--static::$unserializations)
@@ -409,7 +417,7 @@ class SerializableClosure implements Serializable
     }
     
     /**
-     * Wraps a closure and sets the context (if any)
+     * Wraps a closure and sets the serialization context (if any)
      * 
      * @param   Closure $closure        Closure to be wrapped
      * @param   boolean $serializeThis  Indicates if the scope of closure should be serialized
@@ -461,6 +469,27 @@ class SerializableClosure implements Serializable
         {
             static::$context = null;
         }
+    }
+    
+    /**
+     * Helper method for unserialization
+     */
+    
+    public static function unserializeData($data)
+    {
+        if(!static::$unserializations++)
+        {
+            static::$deserialized = array();
+        }
+        
+        $value = unserialize($data);
+        
+        if(!--static::$unserializations)
+        {
+            static::$deserialized =  null;
+        }
+        
+        return $value;
     }
  
 }
