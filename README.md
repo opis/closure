@@ -28,7 +28,7 @@ This library is available on [Packagist](https://packagist.org/packages/opis/clo
 ```json
 {
     "require": {
-        "opis/closure": "1.1.*"
+        "opis/closure": "1.2.*"
     }
 }
 ```
