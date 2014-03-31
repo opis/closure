@@ -19,7 +19,6 @@ class ReflectionClosure extends ReflectionFunction
 {
     protected $code;
 
-    protected $useVariables;
     
     public function __construct(Closure $closure, $code = null)
     {
@@ -59,7 +58,25 @@ class ReflectionClosure extends ReflectionFunction
             $code = '';
             foreach($tokens as &$token)
             {
-                $is_array = is_array($token);
+                // Replace magic constants
+                if ($is_array = is_array($token))
+                {
+                    switch ($token[0])
+                    {
+                        case T_LINE:
+                            $token[1] = $_line_ + $token[2];
+                            break;
+                        case T_DIR:
+                            $token[1] = $_dir_;
+                            break;
+                        case T_FILE:
+                            $token[1] = $_file_;
+                            break;
+                        case T_NS_C:
+                            $token[1] = $_namespace_;
+                            break;
+                    }
+                }
                 
                 switch($state)
                 {
@@ -101,7 +118,8 @@ class ReflectionClosure extends ReflectionFunction
                             }
                             elseif($token === '}')
                             {
-                                if(--$open === 0)
+                                $open--;
+                                if($open === 0)
                                 {
                                     $state = 'start';
                                 }
@@ -109,41 +127,25 @@ class ReflectionClosure extends ReflectionFunction
                         }
                         break;
                     case 'closure':
-                        if($is_array)
+                        if(!$is_array)
                         {
-                            switch ($token[0])
-                            {
-                                case T_LINE:
-                                    $token[1] = $_line_ + $token[2];
-                                    break;
-                                case T_DIR:
-                                    $token[1] = $_dir_;
-                                    break;
-                                case T_FILE:
-                                    $token[1] = $_file_;
-                                    break;
-                                case T_NS_C:
-                                    $token[1] = $_namespace_;
-                                    break;
-                            }
-                            
-                            $code .= $token[1];
-                        }
-                        else
-                        {   
                             $code .= $token;
-                            
                             if($token === '{')
                             {
                                 $open++;
                             }
                             elseif($token === '}')
                             {
-                                if(--$open === 0)
+                                $open--;
+                                if($open === 0)
                                 {
                                     break 2;
                                 }
                             }
+                        }
+                        else
+                        {
+                            $code .= $token[1];
                         }
                         break;
                 }
@@ -154,46 +156,6 @@ class ReflectionClosure extends ReflectionFunction
         }
         
         return $this->code;
-    }
-    
-    public function getUseVariables()
-    {
-        if($this->useVariables === null)
-        {
-            $code = $this->getCode();
-            
-            $tokens = token_get_all('<?php ' . substr($code, 0, strpos($code, '{')));
-            
-            $state = 'start';
-            
-            $use = array();
-            
-            foreach($tokens as &$token)
-            {
-                if(is_array($token))
-                {
-                    switch($state)
-                    {
-                        case 'start':
-                            if($token[0] === T_USE)
-                            {
-                                $state = 'use';
-                            }
-                            break;
-                    case 'use':
-                            if($token[0] === T_VARIABLE)
-                            {
-                                $use[] = substr($token[1], 1);
-                            }
-                            break;
-                    }
-                }
-            }
-            
-            $this->useVariables = empty($use) ? $use : array_intersect_key($this->getStaticVariables(), array_flip($use));
-        }
-        
-        return $this->useVariables;
     }
     
 }
