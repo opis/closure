@@ -10,8 +10,9 @@ Serialization of PHP closures
 
 If you ever used closures then you probably know that trying to serialize a closure will result in an exception.
 
-```php
-Fatal error: Uncaught exception 'Exception' with message 'Serialization of 'Closure' is not allowed'
+```
+Fatal error: Uncaught exception 'Exception' with message 'Serialization of 'Closure'
+is not allowed'
 ```
 This library aims to overcome PHP's limitations regarding closure serialization by providing a wrapper that will make the closure serializable.
 
@@ -109,8 +110,11 @@ $collection = serialize($collection);
 //Unserialize
 $collection = unserialize($collection);
 
-//Outputs FALSE
-print $collection['a']->getClosure() === $colection['b']->getClosure() ? 'TRUE' : 'FALSE';
+$a = $collection['a']->getClosure();
+$b = $collection['b']->getClosure();
+
+//Prints FALSE
+print $a === $b ? 'TRUE' : 'FALSE';
 
 ```
 In the above example, even though the same closure instance was serialized, after the deserialization, two different instances of the same closure were created.
@@ -141,8 +145,11 @@ $collection = serialize($collection);
 //Unserialize
 $collection = SerializableClosure::unserializeData($collection);
 
-//Outputs TRUE
-print $collection['a']->getClosure() === $colection['b']->getClosure() ? 'TRUE' : 'FALSE';
+$a = $collection['a']->getClosure();
+$b = $collection['b']->getClosure();
+
+//Prints TRUE
+print $a === $b ? 'TRUE' : 'FALSE';
 ```
 Now let's analyze the above code:
 
@@ -155,17 +162,17 @@ Each call to `SerializableClosure::enterContext` must have a matching call to `S
  * **`SerializableClosure::from`**
  
     Wraps a given closure inside a `SerializableClosure` object, keeping a record of all closures that
-    were wrapped in the current context. If a closure was already wrapped, it returns the coresponding `SerializableClosure` object.
+    were wrapped in the current context. If a closure was already wrapped, the coresponding `SerializableClosure` object will be returned.
     This method is an equivalent of `new SerializableClosure`
     and it can be used even if a serialization context wasn't created.
  * **`SerializableClosure::exitContext`**
  
-    Exit from a serialization context by decrementing its internal counter.
+    Exits from a serialization context by decrementing its internal counter.
     When the context's counter reaches to zero, the context is destroyed.
  * **`SerializableClosure::unserializeData`**
     
-    This method is an equivalent of PHP's `unserialize()` function and its sole purpose is to overcome some of the bugs found PHP 5.3.
-    The usage of this method is not mandatory if you are planning to use this library with PHP 5.4 or latest
+    This method is an equivalent of PHP's `unserialize()` function and its sole purpose is to overcome some of the bugs found in PHP 5.3.
+    If you are planning to use this library with PHP 5.4 or latest, the usage of this method is not mandatory.
 
 ### Bounded objects
 
