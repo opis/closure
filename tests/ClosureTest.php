@@ -242,6 +242,28 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, $ok);
     }
     
+    public function testClosureNested()
+    {
+        $o = function($a) {
+            
+            // this should never happen
+            if ($a === false) {
+                return false;
+            }
+            
+            $n = function ($b) {
+                return !$b;
+            };
+            $ns = unserialize(serialize(new Opis\Closure\SerializableClosure($n)));
+            
+            return $ns(false);
+        };
+        
+        $os = $this->s($o);
+
+        $this->assertEquals(true, $os(true));
+    }
+    
 }
 
 class A

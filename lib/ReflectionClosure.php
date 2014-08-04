@@ -33,7 +33,7 @@ class ReflectionClosure extends ReflectionFunction
         {
             
             $_file_ = $this->getFileName();
-            if (strpos($_file_, ClosureStream::STREAM_PROTO . '://') === 0)
+            if (strpos($_file_, ClosureStream::STREAM_PROTO . '://') === 0 && ($this->getStartLine() === 2))
             {
                 return $this->code = substr($_file_, strlen(ClosureStream::STREAM_PROTO) + 3);
             }
