@@ -155,6 +155,7 @@ class SerializableClosure implements Serializable
         {
             $this->reflector = new ReflectionClosure($this->closure, $this->code);
             $this->code = null;
+            $this->useVars = null;
         }
         
         return $this->reflector;
@@ -316,6 +317,8 @@ class SerializableClosure implements Serializable
         
         $use = null;
         
+        $code = $reflector->getCode();
+
         if ($variables = $reflector->getUseVariables())
         {
             $use = &$this->mapByReference($variables);
@@ -323,7 +326,7 @@ class SerializableClosure implements Serializable
         
         $ret = serialize(array(
             'use' => $use,
-            'function' => $reflector->getCode(),
+            'function' => $code,
             'scope' => $scope,
             'this' => $object,
             'self' => $this->reference,

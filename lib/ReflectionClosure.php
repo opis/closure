@@ -18,8 +18,11 @@ use SplFileObject;
 class ReflectionClosure extends ReflectionFunction
 {
     protected $code;
-
+    protected $tokens;
+    protected $classes;
     protected $useVariables;
+    
+    protected static $files = array();
     
     public function __construct(Closure $closure, $code = null)
     {
@@ -27,36 +30,208 @@ class ReflectionClosure extends ReflectionFunction
         parent::__construct($closure);
     }
     
+    protected function &getFileTokens()
+    {
+        $file = $this->getFileName();
+        $key = md5($file);
+        
+        if(!isset(static::$files[$key]))
+        {
+            static::$files[$key] = token_get_all(file_get_contents($file));
+        }
+        
+        return static::$files[$key];
+    }
+    
+    protected function &getTokens()
+    {
+        if($this->tokens === null)
+        {
+            $tokens = &$this->getFileTokens();
+            $startLine = $this->getStartLine();
+            $endLine = $this->getEndLine();
+            $results = array();
+            $start = false;
+            
+            foreach($tokens as &$token)
+            {
+                if(!is_array($token))
+                {
+                    if($start)
+                    {
+                        $results[] = $token;
+                    }
+                    
+                    continue;
+                }
+                
+                $line = $token[2];
+                
+                if($line <= $endLine)
+                {
+                    if($line >= $startLine)
+                    {
+                        $start = true;
+                        $results[] = $token;
+                    }
+                    
+                    continue;
+                }
+                
+                break;
+            }
+            
+            $this->tokens = $results;
+        }
+        
+        return $this->tokens;
+    }
+    
+    protected function &getClasses()
+    {
+        if($this->classes === null)
+        {
+            $classes = array();
+            $tokens = &$this->getFileTokens();
+            
+            $open = 0;
+            $state = 'start';
+            $class = '';
+            $alias = '';
+            
+            foreach($tokens as &$token)
+            {
+                $is_array = is_array($token);
+                
+                switch($state)
+                {
+                    case 'start':
+                        if($is_array)
+                        {
+                            switch($token[0])
+                            {
+                                case T_CLASS:
+                                case T_INTERFACE:
+                                case T_TRAIT:
+                                    $state = 'structure';
+                                    break;
+                                case T_USE:
+                                    $state = 'use';
+                                    $class = $alias = '';
+                                    break;
+                            }
+                        }
+                        break;
+                    case 'use':
+                        if($is_array)
+                        {
+                            switch($token[0])
+                            {
+                                case T_NS_SEPARATOR:
+                                    $class .= $token[1];
+                                    break;
+                                case T_STRING:
+                                    $class .= $token[1];
+                                    $alias = $token[1];
+                                    break;
+                                case T_AS:
+                                    $state = 'alias';
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            if($class[0] !== '\\')
+                            {
+                                $class = '\\' . $class;
+                            }
+                            
+                            $classes[$alias] = $class;
+                            
+                            $state = $token == ',' ? 'use' : 'start';
+                        }
+                        break;
+                    case 'alias':
+                        if($is_array)
+                        {
+                            switch($token[0])
+                            {
+                                case T_STRING:
+                                    $alias = $token[1];
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            if($class[0] !== '\\')
+                            {
+                                $class = '\\' . $class;
+                            }
+                            
+                            $classes[$alias] = $class;
+                            
+                            $state = $token == ',' ? 'use' : 'start';
+                        }
+                        break;
+                    case 'structure':
+                        if(!$is_array)
+                        {
+                            if($token === '{')
+                            {
+                                $open++;
+                            }
+                            elseif($token === '{')
+                            {
+                                if(--$open == 0)
+                                {
+                                    $state = 'start';
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+            
+            $this->classes = $classes;
+
+        }
+        
+        return $this->classes;
+    }
+    
     public function getCode()
     {
         if($this->code === null)
         {
+            $fileName = $this->getFileName();
+            $line = $this->getStartLine() - 1;
             
-            $_file_ = $this->getFileName();
-            if (strpos($_file_, ClosureStream::STREAM_PROTO . '://') === 0 && ($this->getStartLine() === 2))
+            if($line === 1 && strpos($fileName, ClosureStream::STREAM_PROTO . '://') === 0)
             {
-                return $this->code = substr($_file_, strlen(ClosureStream::STREAM_PROTO) + 3);
+                return $this->code = substr($fileName, strlen(ClosureStream::STREAM_PROTO) + 3);
             }
-            $_dir_ = dirname($_file_);
-            $_line_ = $this->getStartLine() - 1;
             
-            $file = new SplFileObject($_file_);
-            $file->seek($_line_);
-            $code = '<?php ';
-            $end_line = $this->getEndLine();
-            while ($file->key() < $end_line)
+            if(null !== $className = $this->getClosureScopeClass())
             {
-                $code .= $file->current();
-                $file->next();
+                $className = '\\' . trim($className->getName(), '\\');
             }
-            $file = null;
-            $_file_ = var_export($_file_, true);
-            $_dir_ = var_export($_dir_, true);
-            $_namespace_ = var_export($this->getNamespaceName(), true);
-            $tokens = token_get_all($code);
+            
+            $ns = $this->getNamespaceName();
+            
+            $_file = var_export($fileName, true);
+            $_dir = var_export(dirname($fileName), true);
+            $_namespace = var_export($ns, true);
+            $_class = var_export($className, true);
+            
+            $tokens = &$this->getTokens();
             $state = 'start';
             $open = 0;
             $code = '';
+            $buffer = $cls = '';
+            $new_key_word = false;
+            $classes = null;
+            $use = array();
+            
             foreach($tokens as &$token)
             {
                 $is_array = is_array($token);
@@ -114,17 +289,34 @@ class ReflectionClosure extends ReflectionFunction
                             switch ($token[0])
                             {
                                 case T_LINE:
-                                    $token[1] = $_line_ + $token[2];
-                                    break;
-                                case T_DIR:
-                                    $token[1] = $_dir_;
+                                    $token[1] = $token[2] - $line;
                                     break;
                                 case T_FILE:
-                                    $token[1] = $_file_;
+                                    $token[1] = $_file;
+                                    break;
+                                case T_DIR:
+                                    $token[1] = $_dir;
                                     break;
                                 case T_NS_C:
-                                    $token[1] = $_namespace_;
+                                    $token[1] = $_namespace;
                                     break;
+                                case T_CLASS_C:
+                                    $token[1] = $_class;
+                                    break;
+                                case T_USE:
+                                    $state = 'use';
+                                    break;
+                                case T_NS_SEPARATOR:
+                                case T_STRING:
+                                    $buffer = $cls = $token[1];
+                                    $new_key_word = false;
+                                    $state = 'class_name';
+                                    break 2;
+                                case T_NEW:
+                                    $buffer = $token[1];
+                                    $new_key_word = true;
+                                    $state = 'new';
+                                    break 2;
                             }
                             
                             $code .= $token[1];
@@ -146,47 +338,190 @@ class ReflectionClosure extends ReflectionFunction
                             }
                         }
                         break;
-                }
-                
-            }
-            
-            $this->code = $code;
-        }
-        
-        return $this->code;
-    }
-    
-    public function getUseVariables()
-    {
-        if($this->useVariables === null)
-        {
-            $code = $this->getCode();
-            
-            $tokens = token_get_all('<?php ' . substr($code, 0, strpos($code, '{')));
-            
-            $state = 'start';
-            
-            $use = array();
-            
-            foreach($tokens as &$token)
-            {
-                if(is_array($token))
-                {
-                    switch($state)
-                    {
-                        case 'start':
-                            if($token[0] === T_USE)
-                            {
-                                $state = 'use';
-                            }
-                            break;
                     case 'use':
+                        if($is_array)
+                        {
                             if($token[0] === T_VARIABLE)
                             {
                                 $use[] = substr($token[1], 1);
                             }
-                            break;
-                    }
+                            
+                            $code .= $token[1];
+                        }
+                        else
+                        {
+                            if($token == ')')
+                            {
+                                $state = 'closure';
+                            }
+                            
+                            $code .= $token;
+                        }
+                        break;
+                    case 'class_name':
+                        if($is_array)
+                        {
+                            switch($token[0])
+                            {
+                                case T_NS_SEPARATOR:
+                                case T_STRING:
+                                    $cls .= $token[1];
+                                    $buffer .= $token[1];
+                                    break;
+                                case T_WHITESPACE:
+                                    $buffer .= $token[1];
+                                    break;
+                                case T_VARIABLE:
+                                case T_DOUBLE_COLON:
+                                    
+                                    if($cls[0] == '\\')
+                                    {
+                                        $code .= $buffer . $token[1];
+                                    }
+                                    else
+                                    {
+                                        $suffix = '';
+                                        
+                                        if($token[0] == T_VARIABLE)
+                                        {
+                                            $suffix = substr($buffer, strlen(rtrim($buffer)));
+                                        }
+                                        
+                                        if($classes === null)
+                                        {
+                                            $classes = &$this->getClasses();
+                                        }
+                                        
+                                        if(isset($classes[$cls]))
+                                        {
+                                            $cls = $classes[$cls];
+                                        }
+                                        else
+                                        {
+                                            $cls = '\\' . $ns . '\\' . $cls; 
+                                        }
+                                        
+                                        $code .= $cls . $suffix . $token[1];
+                                    }
+                                    $state = 'closure';
+                                    break;
+                                default:
+                                    $code .= $buffer . $token[1];
+                                    $state = 'closure';
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            if($new_key_word)
+                            {
+                                if($cls[0] == '\\')
+                                {
+                                    $code .= $buffer . $token;
+                                }
+                                else
+                                {
+                                    $suffix = '';
+                                    
+                                    if($token[0] == T_VARIABLE)
+                                    {
+                                        $suffix = substr($buffer, strlen(rtrim($buffer)));
+                                    }
+                                    
+                                    if($classes === null)
+                                    {
+                                        $classes = &$this->getClasses();
+                                    }
+                                    
+                                    if(isset($classes[$cls]))
+                                    {
+                                        $cls = $classes[$cls];
+                                    }
+                                    else
+                                    {
+                                        $cls = '\\' . $ns . '\\' . $cls; 
+                                    }
+                                    
+                                    $code .= $cls . $suffix . $token;
+                                }
+                            }
+                            else
+                            {
+                                $code .= $buffer . $token;
+                            }
+                            
+                            $state = 'closure';
+                        }
+                        break;
+                    case 'new':
+                        if($is_array)
+                        {
+                            switch($token[0])
+                            {
+                                case T_WHITESPACE:
+                                    $buffer .= $token[1];
+                                    break;
+                                case T_NS_SEPARATOR:
+                                case T_STRING:
+                                    $code .= $buffer;
+                                    $buffer = $cls = $token[1];
+                                    $state = 'class_name';
+                                    break 2;
+                                default:
+                                    $code .= $buffer . $token[1];
+                                    $state = 'closure';
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            $code .= $buffer . $token;
+                            $state = 'closure';
+                        }
+                        break;
+                }
+            }
+            
+            $this->code = $code;
+            $this->useVariables = empty($use) ? $use : array_intersect_key($this->getStaticVariables(), array_flip($use));
+        }
+        
+        return $this->code;
+    }
+
+    public function getUseVariables()
+    {
+        if($this->useVariables === null)
+        {
+            $tokens = &$this->getTokens();
+            $use = array();
+            $state = 'start';
+            
+            foreach($tokens as &$token)
+            {
+                $is_array = is_array($token);
+                
+                switch($state)
+                {
+                    case 'start':
+                        if($is_array && $token[0] === T_USE)
+                        {
+                            $state = 'use';
+                        }
+                        break;
+                    case 'use':
+                        if($is_array)
+                        {
+                            if($token[0] === T_VARIABLE)
+                            {
+                                $use[] = substr($token[1], 1);
+                            }
+                        }
+                        elseif($token == ')')
+                        {
+                            break 2;
+                        }
+                        break;
                 }
             }
             
