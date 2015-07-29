@@ -19,13 +19,9 @@
     "autoload": {
         "psr-4": {"Opis\\Closure\\": "lib/"}
     },
-    "config": {
-        "preferred-install": "dist"
-    },
-    "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "dev-master": "1.4-dev"
+            "dev-master": "2.0-dev"
         }
     }
 }
