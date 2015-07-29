@@ -217,11 +217,13 @@ class ReflectionClosure extends ReflectionFunction
             }
             
             $ns = $this->getNamespaceName();
+            $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
             
             $_file = var_export($fileName, true);
             $_dir = var_export(dirname($fileName), true);
             $_namespace = var_export($ns, true);
             $_class = var_export($className, true);
+            
             
             $tokens = &$this->getTokens();
             $state = 'start';
@@ -398,7 +400,7 @@ class ReflectionClosure extends ReflectionFunction
                                         }
                                         else
                                         {
-                                            $cls = '\\' . $ns . '\\' . $cls; 
+                                            $cls = $nsf . '\\' . $cls; 
                                         }
                                         
                                         $code .= $cls . $suffix . $token[1];
@@ -439,7 +441,7 @@ class ReflectionClosure extends ReflectionFunction
                                     }
                                     else
                                     {
-                                        $cls = '\\' . $ns . '\\' . $cls; 
+                                        $cls = $nsf . '\\' . $cls; 
                                     }
                                     
                                     $code .= $cls . $suffix . $token;
