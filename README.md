@@ -18,12 +18,13 @@ serialization by providing a wrapper that will make the closure serializable.
 * Handles all variables referenced/imported in `use()` and automatically wraps all referenced/imported closures for
 proper serialization
 * Handles recursive closures
-* Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__` and `__CLASS__`
+* Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__`, `__CLASS__`
+* Automatically resolves all class names used inside the closure
 * Simple and very fast parser
 * Any error or exception, that might occur when executing an unserialized closure, can be caught and treated properly
 * You can serialize/unserialize any closure unlimited times, even those previously unserialized
 (this is possible because `eval()` is not used for unserialization)
-* Provides a reflector that can give you informations about closure code's, parameters, ...
+* Provides a reflector that can give you informations about the serialized closure
 * Supports serialization of bounded objects and scopes (available only from PHP >= 5.4)
 
 
@@ -42,18 +43,18 @@ This library is available on [Packagist](https://packagist.org/packages/opis/clo
 ```json
 {
     "require": {
-        "opis/closure": "1.3.*"
+        "opis/closure": "~2.0"
     }
 }
 ```
 
 If you are unable to use [Composer](http://getcomposer.org) you can download the
-[tar.gz](https://github.com/opis/closure/archive/1.3.0.tar.gz) or the [zip](https://github.com/opis/closure/archive/1.3.0.zip)
+[tar.gz](https://github.com/opis/closure/archive/2.0.0.tar.gz) or the [zip](https://github.com/opis/closure/archive/2.0.0.zip)
 archive file, extract the content of the archive and include de `autoload.php` file into your project. 
 
 ```php
 
-require_once 'path/to/closure-1.3.0/autoload.php';
+require_once 'path/to/closure-2.0.0/autoload.php';
 
 ```
 
