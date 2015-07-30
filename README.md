@@ -6,7 +6,7 @@ Opis Closure
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
 
 Serializable closures
---------------------
+---------------------
 **Opis Closure** is a library that aims to overcome PHP's limitations regarding closure
 serialization by providing a wrapper that will make the closure serializable. 
 
