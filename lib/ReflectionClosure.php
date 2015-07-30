@@ -112,12 +112,17 @@ class ReflectionClosure extends ReflectionFunction
                             {
                                 case T_CLASS:
                                 case T_INTERFACE:
-                                case T_TRAIT:
                                     $state = 'structure';
                                     break;
                                 case T_USE:
                                     $state = 'use';
                                     $class = $alias = '';
+                                    break;
+                                default:
+                                    if(defined('T_TRAIT') && $token[0] == T_TRAIT)
+                                    {
+                                        $state = 'structure';
+                                    }
                                     break;
                             }
                         }
