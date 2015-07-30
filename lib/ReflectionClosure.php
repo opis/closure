@@ -305,6 +305,17 @@ class ReflectionClosure extends ReflectionFunction
                                 case T_CLASS_C:
                                     $token[1] = $_class;
                                     break;
+                                case T_COMMENT:
+                                    if(substr($token[1], 0, 8) === '#trackme')
+                                    {
+                                        $timestamp = time();
+                                        $token[1]  = '/**' . PHP_EOL;
+                                        $token[1] .= '* Date      : ' . date(DATE_W3C, $timestamp) . PHP_EOL;
+                                        $token[1] .= '* Timestamp : ' . $timestamp . PHP_EOL;
+                                        $token[1] .= '* Line      : ' . ($line + 1) . PHP_EOL;
+                                        $token[1] .= '* File      : ' . $_file . PHP_EOL . '*/';     
+                                    }
+                                    break;
                                 case T_USE:
                                     $state = 'use';
                                     break;
@@ -361,6 +372,7 @@ class ReflectionClosure extends ReflectionFunction
                         }
                         break;
                     case 'class_name':
+                        
                         if($is_array)
                         {
                             switch($token[0])
@@ -369,91 +381,48 @@ class ReflectionClosure extends ReflectionFunction
                                 case T_STRING:
                                     $cls .= $token[1];
                                     $buffer .= $token[1];
-                                    break;
+                                    break 2;
                                 case T_WHITESPACE:
                                     $buffer .= $token[1];
-                                    break;
-                                case T_VARIABLE:
-                                case T_DOUBLE_COLON:
-                                    
-                                    if($cls[0] == '\\')
-                                    {
-                                        $code .= $buffer . $token[1];
-                                    }
-                                    else
-                                    {
-                                        $suffix = '';
-                                        
-                                        if($token[0] == T_VARIABLE)
-                                        {
-                                            $suffix = substr($buffer, strlen(rtrim($buffer)));
-                                        }
-                                        
-                                        if($classes === null)
-                                        {
-                                            $classes = &$this->getClasses();
-                                        }
-                                        
-                                        if(isset($classes[$cls]))
-                                        {
-                                            $cls = $classes[$cls];
-                                        }
-                                        else
-                                        {
-                                            $cls = $nsf . '\\' . $cls; 
-                                        }
-                                        
-                                        $code .= $cls . $suffix . $token[1];
-                                    }
-                                    $state = 'closure';
-                                    break;
-                                default:
-                                    $code .= $buffer . $token[1];
-                                    $state = 'closure';
-                                    break;
+                                    break 2;
                             }
+                        }
+                        
+                        if($cls[0] == '\\')
+                        {
+                            $code .= $buffer . ($is_array ? $token[1] : $token);
                         }
                         else
                         {
-                            if($new_key_word)
+                            
+                            if($new_key_word || ($is_array && ($token[0] == T_VARIABLE || $token[0] == T_DOUBLE_COLON)))
                             {
-                                if($cls[0] == '\\')
+                                $suffix = substr($buffer, strlen(rtrim($buffer)));
+                                
+                                if($classes === null)
                                 {
-                                    $code .= $buffer . $token;
+                                    $classes = &$this->getClasses();
+                                }
+                                
+                                if(isset($classes[$cls]))
+                                {
+                                    $cls = $classes[$cls];
                                 }
                                 else
                                 {
-                                    $suffix = '';
-                                    
-                                    if($token[0] == T_VARIABLE)
-                                    {
-                                        $suffix = substr($buffer, strlen(rtrim($buffer)));
-                                    }
-                                    
-                                    if($classes === null)
-                                    {
-                                        $classes = &$this->getClasses();
-                                    }
-                                    
-                                    if(isset($classes[$cls]))
-                                    {
-                                        $cls = $classes[$cls];
-                                    }
-                                    else
-                                    {
-                                        $cls = $nsf . '\\' . $cls; 
-                                    }
-                                    
-                                    $code .= $cls . $suffix . $token;
+                                    $cls = $nsf . '\\' . $cls; 
                                 }
+                                
+                                $code .= $cls . $suffix . ($is_array ? $token[1] : $token);   
                             }
                             else
                             {
-                                $code .= $buffer . $token;
+                                $code .= $buffer . ($is_array ? $token[1] : $token);
                             }
                             
-                            $state = 'closure';
                         }
+                        
+                        $state = 'closure';
                         break;
                     case 'new':
                         if($is_array)
