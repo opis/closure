@@ -6,7 +6,7 @@ Opis Closure
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
 
 Serializable closures
---------------------
+---------------------
 **Opis Closure** is a library that aims to overcome PHP's limitations regarding closure
 serialization by providing a wrapper that will make the closure serializable. 
 
@@ -18,7 +18,7 @@ serialization by providing a wrapper that will make the closure serializable.
 * Handles all variables referenced/imported in `use()` and automatically wraps all referenced/imported closures for
 proper serialization
 * Handles recursive closures
-* Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__`
+* Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__` and `__CLASS__`
 * Simple and very fast parser
 * Any error or exception, that might occur when executing an unserialized closure, can be caught and treated properly
 * You can serialize/unserialize any closure unlimited times, even those previously unserialized
