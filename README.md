@@ -1,6 +1,6 @@
 Opis Closure
 ====================
-[![Build Status](https://travis-ci.org/opis/closure.png?branch=master)](https://travis-ci.org/opis/closure)
+[![Build Status](https://travis-ci.org/opis/closure.png?branch=1.3)](https://travis-ci.org/opis/closure)
 [![Latest Stable Version](https://poser.pugx.org/opis/closure/v/stable.png)](https://packagist.org/packages/opis/closure)
 [![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
