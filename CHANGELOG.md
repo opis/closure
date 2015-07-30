@@ -1,6 +1,6 @@
 CHANGELOG
 -----------
-### Opis Closure 2.0.0
+### Opis Closure 2.0.0, 2015.07.31
 
 * The closure parser was improved
 * Class names are now automatically resolved
