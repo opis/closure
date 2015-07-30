@@ -233,6 +233,7 @@ class ReflectionClosure extends ReflectionFunction
             $new_key_word = false;
             $classes = null;
             $use = array();
+            $lineAdd = 0;
             
             foreach($tokens as &$token)
             {
@@ -291,7 +292,7 @@ class ReflectionClosure extends ReflectionFunction
                             switch ($token[0])
                             {
                                 case T_LINE:
-                                    $token[1] = $token[2] - $line;
+                                    $token[1] = $token[2] - $line + $lineAdd;
                                     break;
                                 case T_FILE:
                                     $token[1] = $_file;
@@ -313,7 +314,8 @@ class ReflectionClosure extends ReflectionFunction
                                         $token[1] .= '* Date      : ' . date(DATE_W3C, $timestamp) . PHP_EOL;
                                         $token[1] .= '* Timestamp : ' . $timestamp . PHP_EOL;
                                         $token[1] .= '* Line      : ' . ($line + 1) . PHP_EOL;
-                                        $token[1] .= '* File      : ' . $_file . PHP_EOL . '*/';     
+                                        $token[1] .= '* File      : ' . $_file . PHP_EOL . '*/' . PHP_EOL;
+                                        $lineAdd += 5;
                                     }
                                     break;
                                 case T_USE:
