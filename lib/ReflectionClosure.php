@@ -211,9 +211,11 @@ class ReflectionClosure extends ReflectionFunction
             $fileName = $this->getFileName();
             $line = $this->getStartLine() - 1;
             
-            if($line === 1 && strpos($fileName, ClosureStream::STREAM_PROTO . '://') === 0)
+            $match = ClosureStream::STREAM_PROTO . '://';
+            
+            if($line === 1 && substr($fileName, 0, strlen($match)) === $match)
             {
-                return $this->code = substr($fileName, strlen(ClosureStream::STREAM_PROTO) + 3);
+                return $this->code = substr($fileName, strlen($match));
             }
             
             $className = null;
@@ -224,8 +226,6 @@ class ReflectionClosure extends ReflectionFunction
                 {
                     $className = '\\' . trim($className->getName(), '\\');
                 }
-                
-                
             }
             
             
