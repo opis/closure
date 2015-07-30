@@ -20,6 +20,7 @@ proper serialization
 * Handles recursive closures
 * Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__`, `__CLASS__`
 * Automatically resolves all class names used inside the closure
+* Track closure's residing source by using the `#trackme` directive
 * Simple and very fast parser
 * Any error or exception, that might occur when executing an unserialized closure, can be caught and treated properly
 * You can serialize/unserialize any closure unlimited times, even those previously unserialized
