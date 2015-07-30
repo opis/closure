@@ -38,6 +38,13 @@ class ReflectionClosure extends ReflectionFunction
         if(!isset(static::$files[$key]))
         {
             static::$files[$key] = token_get_all(file_get_contents($file));
+            
+            $match = ClosureStream::STREAM_PROTO . '://';
+            
+            if(substr($file, 0, strlen($match)) === $match)
+            {
+                return $this->tokens = static::$files[$key];
+            }
         }
         
         return static::$files[$key];
