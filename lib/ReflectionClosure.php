@@ -19,10 +19,11 @@ class ReflectionClosure extends ReflectionFunction
 {
     protected $code;
     protected $tokens;
-    protected $classes;
+    protected $hashedName;
     protected $useVariables;
     
     protected static $files = array();
+    protected static $classes = array();
     
     public function __construct(Closure $closure, $code = null)
     {
@@ -30,14 +31,23 @@ class ReflectionClosure extends ReflectionFunction
         parent::__construct($closure);
     }
     
+    protected function getHashedFileName()
+    {
+        if($this->hashedName === null)
+        {
+            $this->hashedName = md5($this->getFileName());
+        }
+        
+        return $this->hashedName;
+    }
+    
     protected function &getFileTokens()
     {
-        $file = $this->getFileName();
-        $key = md5($file);
+        $key = $this->getHashedFileName();
         
         if(!isset(static::$files[$key]))
         {
-            static::$files[$key] = token_get_all(file_get_contents($file));
+            static::$files[$key] = token_get_all(file_get_contents($this->getFileName()));
         }
         
         return static::$files[$key];
@@ -89,7 +99,9 @@ class ReflectionClosure extends ReflectionFunction
     
     protected function &getClasses()
     {
-        if($this->classes === null)
+        $key = $this->getHashedFileName();
+        
+        if(!isset(static::$classes[$key]))
         {
             $classes = array();
             $tokens = &$this->getFileTokens();
@@ -197,11 +209,10 @@ class ReflectionClosure extends ReflectionFunction
                 }
             }
             
-            $this->classes = $classes;
-
+            static::$classes[$key] = $classes;
         }
         
-        return $this->classes;
+        return static::$classes[$key];
     }
     
     public function getCode()
