@@ -211,10 +211,18 @@ class ReflectionClosure extends ReflectionFunction
                 return $this->code = substr($fileName, strlen(ClosureStream::STREAM_PROTO) + 3);
             }
             
-            if(null !== $className = $this->getClosureScopeClass())
+            $className = null;
+            
+            if(SerializableClosure::supportBinding())
             {
-                $className = '\\' . trim($className->getName(), '\\');
+                if(null !== $className = $this->getClosureScopeClass())
+                {
+                    $className = '\\' . trim($className->getName(), '\\');
+                }
+                
+                
             }
+            
             
             $ns = $this->getNamespaceName();
             $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
@@ -390,7 +398,7 @@ class ReflectionClosure extends ReflectionFunction
                             }
                         }
                         
-                        if($cls[0] == '\\')
+                        if($cls[0] == '\\' || $cls == 'static' || $cls == 'self')
                         {
                             $code .= $buffer . ($is_array ? $token[1] : $token);
                         }
