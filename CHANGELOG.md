@@ -1,5 +1,9 @@
 CHANGELOG
 -----------
+### Opis Closure
+
+* Removed `branch-alias` property from `composer.json`
+
 ### Opis Closure 2.0.0, 2015.07.31
 
 * The closure parser was improved
