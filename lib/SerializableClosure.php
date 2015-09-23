@@ -237,7 +237,7 @@ class SerializableClosure implements Serializable
                 return $ret;
             }
             
-            $instance = new static($value, false);
+            $instance = new static($value, $this->serializeBind);
             
             if(static::$context !== null)
             {
