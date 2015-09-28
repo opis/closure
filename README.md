@@ -25,7 +25,7 @@ proper serialization
 * Any error or exception, that might occur when executing an unserialized closure, can be caught and treated properly
 * You can serialize/unserialize any closure unlimited times, even those previously unserialized
 (this is possible because `eval()` is not used for unserialization)
-* Provides a reflector that can give you informations about the serialized closure
+* Provides a reflector that can give you information about the serialized closure
 * Supports serialization of bounded objects and scopes (available only from PHP >= 5.4)
 
 
