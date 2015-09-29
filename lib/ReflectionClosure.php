@@ -116,7 +116,7 @@ class ReflectionClosure extends ReflectionFunction
             $startLine = $endLine = 0;
             $structType = $structName = '';
             
-            $hasTraitSuppot = defined('T_TRAIT');
+            $hasTraitSupport = defined('T_TRAIT');
             
             foreach($tokens as &$token)
             {
@@ -140,7 +140,7 @@ class ReflectionClosure extends ReflectionFunction
                                     $class = $alias = '';
                                     break;
                                 default:
-                                    if($hasTraitSuppot && $token[0] == T_TRAIT)
+                                    if($hasTraitSupport && $token[0] == T_TRAIT)
                                     {
                                         $state = 'before_structure';
                                         $startLine = $token[2];
