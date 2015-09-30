@@ -12,7 +12,17 @@ namespace Opis\Closure;
 
 class DefaultSecurityProvider implements SecurityProviderInterface
 {
+    /**
+     * @var string  Secret key
+     */
+    
     protected $key;
+    
+    /**
+     * Constructor
+     *
+     * @param   string  $key    Secret key
+     */
     
     public function __construct($key)
     {
