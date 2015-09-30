@@ -3,7 +3,7 @@ CHANGELOG
 ### v2.1.0, 2015.09.30
 
 * Added some security related classes and interfaces: `Opis\Closure\SecurityProviderInterface`,
-`Opis\Closure\DefaultSecurityProvider`, `Opis\Closure\SecureSerializableClosure`, `Opis\Closure\SecurityException`.
+`Opis\Closure\DefaultSecurityProvider`, `Opis\Closure\SecureClosure`, `Opis\Closure\SecurityException`.
 
 
 ### v2.0.1, 2015.09.23
