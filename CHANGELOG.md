@@ -6,7 +6,8 @@ CHANGELOG
 * Added some security related classes and interfaces: `Opis\Closure\SecurityProviderInterface`,
 `Opis\Closure\DefaultSecurityProvider`, `Opis\Closure\SecureClosure`, `Opis\Closure\SecurityException`.
 * Fiexed a bug in `Opis\Closure\ReflectionClosure::getClasses` method
-* Added support for static closures.
+* Other minor bugfixes
+* Added support for static closures
 * Added public `isStatic` method to `Opis\Closure\ReflectionClosure` class
 
 
