@@ -17,7 +17,7 @@ use RuntimeException;
  * Provides a wrapper for secure serialization of closures
  */
 
-class SecureSerializableClosure extends SerializableClosure
+class SecureClosure extends SerializableClosure
 {
     /**
      * @var \Opis\Closure\SecurityProviderInterface Security provider
