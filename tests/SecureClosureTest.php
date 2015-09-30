@@ -19,4 +19,27 @@ class SecureClosureTest extends ClosureTest
         return unserialize(serialize($closure));
     }
     
+    public function testSecureClosureFailWithoutProvider()
+    {
+        $this->setExpectedException('RuntimeException');
+        
+        serialize(new SecureClosure(function(){    
+        }));
+    }
+    
+    public function testSecureClosureIntegrityFail()
+    {
+        $this->setExpectedException('Opis\Closure\SecurityException');
+        
+        SecureClosure::setSecurityProvider(new DefaultSecurityProvider('secret'));
+        
+        $closure = function(){
+            /*x*/
+        };
+        $value = serialize(new SecureClosure($closure));
+        $value = str_replace('/*x*/', '/*y*/', $value);
+        $value = unserialize($value);
+        
+    }
+    
 }
