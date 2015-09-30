@@ -37,6 +37,17 @@ class SecureClosure extends SerializableClosure
     }
     
     /**
+     * Get the security provider
+     *
+     * @return   \Opis\Closure\SecuirtyProviderInterface
+     */
+        
+    public static function getSecurityProvider()
+    {
+        return static::$securityProvider;
+    }
+    
+    /**
      * Override unserialize method
      *
      * @param   string  $data   Serialized data
