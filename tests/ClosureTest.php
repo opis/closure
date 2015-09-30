@@ -1,4 +1,13 @@
 <?php
+/* ===========================================================================
+ * Opis Project
+ * http://opis.io
+ * ===========================================================================
+ * Copyright (c) 2014-2015 Opis Project
+ * 
+ * Licensed under the MIT License
+ * =========================================================================== */
+
 use Opis\Closure\SerializableClosure;
 
 class ClosureTest extends PHPUnit_Framework_TestCase
