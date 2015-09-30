@@ -2,8 +2,12 @@ CHANGELOG
 -----------
 ### v2.1.0, 2015.09.30
 
+* Added support for the missing `__METHOD__`, `__FUNCTION__` and `__TRAIT__` magic constants
 * Added some security related classes and interfaces: `Opis\Closure\SecurityProviderInterface`,
 `Opis\Closure\DefaultSecurityProvider`, `Opis\Closure\SecureClosure`, `Opis\Closure\SecurityException`.
+* Fiexed a bug in `Opis\Closure\ReflectionClosure::getClasses` method
+* Added support for static closures.
+* Added public `isStatic` method to `Opis\Closure\ReflectionClosure` class
 
 
 ### v2.0.1, 2015.09.23
