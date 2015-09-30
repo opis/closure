@@ -433,7 +433,7 @@ class SerializableClosure implements Serializable
     {
         if(static::$context === null)
         {
-            $instance = new SerializableClosure($closure, $serializeThis);
+            $instance = new static($closure, $serializeThis);
         }
         elseif(isset(static::$context->instances[$closure]))
         {
@@ -442,7 +442,7 @@ class SerializableClosure implements Serializable
         }
         else
         {
-            $instance = new SerializableClosure($closure, $serializeThis);
+            $instance = new static($closure, $serializeThis);
             static::$context->instances[$closure] = $instance;
         }
         
