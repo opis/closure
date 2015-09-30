@@ -21,6 +21,12 @@ class SecureClosureTest extends ClosureTest
     
     public function testSecureClosureFailWithoutProvider()
     {
+        if($this->r())
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+        
         $this->setExpectedException('RuntimeException');
         
         serialize(new SecureClosure(function(){    
