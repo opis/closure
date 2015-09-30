@@ -1,6 +1,4 @@
 <?php
-use Opis\Closure\ClosureStream;
-use Opis\Closure\ReflectionClosure;
 use Opis\Closure\SerializableClosure;
 
 class ClosureTest extends PHPUnit_Framework_TestCase
