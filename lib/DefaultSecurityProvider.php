@@ -3,7 +3,7 @@
  * Opis Project
  * http://opis.io
  * ===========================================================================
- * Copyright (c) 2014-2015 Opis Project
+ * Copyright (c) 2014-2016 Opis Project
  *
  * Licensed under the MIT License
  * =========================================================================== */
