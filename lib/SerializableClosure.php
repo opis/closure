@@ -56,7 +56,7 @@ class SerializableClosure implements Serializable
      * @var boolean Indicates if closure is bound to an object
      */
 
-    protected $isBinded = false;
+    protected $isBound = false;
 
     /**
      * @var boolean Indicates if closure must be serialized with bounded object
@@ -249,7 +249,7 @@ class SerializableClosure implements Serializable
 
     public function __invoke()
     {
-        return $this->isBinded
+        return $this->isBound
             ? call_user_func_array($this->closure, func_get_args())
             : $this->getReflector()->invokeArgs(func_get_args());
 
@@ -334,7 +334,7 @@ class SerializableClosure implements Serializable
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
 
         if ($this !== $this->code['this'] && ($this->code['scope'] !== null || $this->code['this'] !== null)) {
-            $this->isBinded = $this->serializeBind = true;
+            $this->isBound = $this->serializeBind = true;
             $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
         }
 
