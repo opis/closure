@@ -1,5 +1,11 @@
 CHANGELOG
------------
+---------
+### v2.2.0
+
+* Fixed CS
+* All helper classes were moved to their own file
+* Added support for PHP7 syntax
+
 ### v2.1.0, 2015.09.30
 
 * Added support for the missing `__METHOD__`, `__FUNCTION__` and `__TRAIT__` magic constants
