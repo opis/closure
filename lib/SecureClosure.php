@@ -10,7 +10,6 @@
 
 namespace Opis\Closure;
 
-use Exception;
 use RuntimeException;
 
 /**
@@ -85,12 +84,4 @@ class SecureClosure extends SerializableClosure
         $data = &static::$securityProvider->sign($data);
         return serialize($data);
     }
-}
-
-/**
- * Security exception class
- */
-class SecurityException extends Exception
-{
-
 }
