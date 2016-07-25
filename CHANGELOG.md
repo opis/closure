@@ -5,6 +5,7 @@ CHANGELOG
 * Fixed CS
 * All helper classes were moved to their own file
 * Added support for PHP7 syntax
+* Fixed a bug in `Opis\Closure\ReflectionClosure` class
 
 ### v2.1.0, 2015.09.30
 
