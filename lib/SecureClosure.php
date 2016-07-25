@@ -26,7 +26,7 @@ class SecureClosure extends SerializableClosure
     /**
      * Set the security provider
      *
-     * @param   \Opis\Closure\SecuirtyProviderInterface $provider Security provider
+     * @param  SecurityProviderInterface $provider Security provider
      */
 
     public static function setSecurityProvider(SecurityProviderInterface $provider)
@@ -37,7 +37,7 @@ class SecureClosure extends SerializableClosure
     /**
      * Get the security provider
      *
-     * @return   \Opis\Closure\SecuirtyProviderInterface
+     * @return   SecurityProviderInterface
      */
 
     public static function getSecurityProvider()

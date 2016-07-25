@@ -18,7 +18,7 @@ use SplObjectStorage;
 class ClosureContext
 {
     /**
-     * @var Opis\Closure\ClosureScope Closures scope
+     * @var ClosureScope Closures scope
      */
 
     public $scope;

@@ -30,7 +30,7 @@ class SerializableClosure implements Serializable
     protected $closure;
 
     /**
-     * @var Opis\Closure\ReflectionClosure A reflection instance for closure
+     * @var ReflectionClosure A reflection instance for closure
      *
      * @see Opis\Closure\SerializableClosure::getReflector()
      */
@@ -47,7 +47,7 @@ class SerializableClosure implements Serializable
     protected $code;
 
     /**
-     * @var Opis\Closure\SelfReference Used to fix serialization in PHP 5.3
+     * @var SelfReference Used to fix serialization in PHP 5.3
      */
 
     protected $reference;
@@ -71,7 +71,7 @@ class SerializableClosure implements Serializable
     protected $scope;
 
     /**
-     * @var Opis\Closure\ClosureContext Context of closure, used in serialization
+     * @var ClosureContext Context of closure, used in serialization
      */
 
     protected static $context;
@@ -93,7 +93,7 @@ class SerializableClosure implements Serializable
     protected static $unserializations = 0;
 
     /**
-     * @var array Deserialized closures
+     * @var array Unserialized closures
      *
      * @see Opis\Closure\SerializableClosure::unserializePHP53()
      */
@@ -144,7 +144,7 @@ class SerializableClosure implements Serializable
     /**
      * Get the reflector for closure
      *
-     * @return  Opis\Closure\ReflectionClosure
+     * @return  ReflectionClosure
      */
 
     public function getReflector()
@@ -388,7 +388,7 @@ class SerializableClosure implements Serializable
      * @param   Closure $closure Closure to be wrapped
      * @param   boolean $serializeThis Indicates if the scope of closure should be serialized
      *
-     * @return  Opis\Closure\SerializableClosure    The wrapped closure
+     * @return  self    The wrapped closure
      */
 
     public static function from(Closure $closure, $serializeThis = false)
