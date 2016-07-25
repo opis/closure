@@ -17,7 +17,7 @@ interface SecurityProviderInterface
      *
      * @param   string &$data Serialized closure
      *
-     * @return  any
+     * @return  mixed
      */
 
     public function &sign(&$data);
