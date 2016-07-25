@@ -189,6 +189,10 @@ class ReflectionClosure extends ReflectionFunction
                             case T_USE:
                                 $state = 'use';
                                 break;
+                            case T_CURLY_OPEN:
+                            case T_DOLLAR_OPEN_CURLY_BRACES:
+                                $open++;
+                                break;
                             case T_NS_SEPARATOR:
                             case T_STRING:
                                 $buffer = $name = $token[1];
@@ -632,6 +636,9 @@ class ReflectionClosure extends ReflectionFunction
                             }
                         }
                     } else {
+                        if($token[0] === T_CURLY_OPEN || $token[0] === T_DOLLAR_OPEN_CURLY_BRACES){
+                            $open++;
+                        }
                         $endLine = $token[2];
                     }
                     break;
