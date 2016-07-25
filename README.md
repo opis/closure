@@ -15,12 +15,13 @@ serialization by providing a wrapper that will make all closures serializable.
 * Serialize any closure
 * Doesn't use `eval` for closure serialization or unserialization
 * Works with any PHP version that has support for closures (Yes, even with PHP 5.3)
+* Supports PHP 7.0 syntax
 * Handles all variables referenced/imported in `use()` and automatically wraps all referenced/imported closures for
 proper serialization
 * Handles recursive closures
 * Handles magic constants like `__FILE__`, `__DIR__`, `__LINE__`, `__NAMESPACE__`, `__CLASS__`,
 `__TRAIT__`, `__METHOD__` and `__FUNCTION__`.
-* Automatically resolves all class names used inside the closure
+* Automatically resolves all class names, function names and constant names used inside the closure
 * Track closure's residing source by using the `#trackme` directive
 * Simple and very fast parser
 * Any error or exception, that might occur when executing an unserialized closure, can be caught and treated properly
@@ -47,7 +48,7 @@ This library is available on [Packagist](https://packagist.org/packages/opis/clo
 ```json
 {
     "require": {
-        "opis/closure": "^2.1.0"
+        "opis/closure": "^2.2.0"
     }
 }
 ```
@@ -58,10 +59,10 @@ archive file, extract the content of the archive and include de `autoload.php` f
 
 ```php
 
-require_once 'path/to/closure-2.1.0/autoload.php';
+require_once 'path/to/closure-2.2.0/autoload.php';
 
 ```
 
 ### Documentation
 
-Examples and documentation can be found at http://opis.io/closure .
+Examples and documentation can be found [here](http://opis.io/closure).
