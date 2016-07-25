@@ -3,7 +3,7 @@
  * Opis Project
  * http://opis.io
  * ===========================================================================
- * Copyright (c) 2014-2015 Opis Project
+ * Copyright (c) 2014-2016 Opis Project
  *
  * Licensed under the MIT License
  * =========================================================================== */
@@ -449,83 +449,4 @@ class SerializableClosure implements Serializable
         return $value;
     }
 
-}
-
-/**
- * Helper class used to indicate a reference to an object
- */
-class SelfReference
-{
-    /**
-     * @var string An unique hash representing the object
-     */
-
-    public $hash;
-
-    /**
-     * Constructor
-     *
-     * @param object $object
-     */
-
-    public function __construct($object)
-    {
-        $this->hash = spl_object_hash($object);
-    }
-}
-
-/**
- * Closure scope class
- */
-class ClosureScope
-{
-    /**
-     * @var integer Number of serializations in current scope
-     */
-    public $serializations = 0;
-
-    /**
-     * @var integer Number of closures that have to be serialized
-     */
-    public $toserialize = 0;
-
-    /**
-     * @var SplObjectStorage Wrapped closures in current scope
-     */
-    public $storage;
-}
-
-/**
- * Closure context class
- */
-class ClosureContext
-{
-    /**
-     * @var Opis\Closure\ClosureScope Closures scope
-     */
-
-    public $scope;
-
-    /**
-     * @var SplObjectStorage Wrapped closures in this context
-     */
-
-    public $instances;
-
-    /**
-     * @var integer
-     */
-
-    public $locks;
-
-    /**
-     * Constructor
-     */
-
-    public function __construct()
-    {
-        $this->scope = new ClosureScope();
-        $this->instances = new SplObjectStorage();
-        $this->locks = 0;
-    }
 }
