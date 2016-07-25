@@ -15,20 +15,20 @@ interface SecurityProviderInterface
     /**
      * Sign the serialized closure
      *
-     * @param   string  &$data  Serialized closure
+     * @param   string &$data Serialized closure
      *
      * @return  any
      */
-    
+
     public function &sign(&$data);
-    
+
     /**
      * Check data integrity
      *
-     * @param   string  &$data  Signed data
+     * @param   string &$data Signed data
      *
-     * @return  string|bool 
+     * @return  string|bool
      */
-    
+
     public function &verify(&$data);
 }
