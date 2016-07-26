@@ -522,6 +522,7 @@ class ReflectionClosure extends ReflectionFunction
 
         $startLine = $endLine = 0;
         $structType = $structName = '';
+        $structIgnore = false;
 
         $hasTraitSupport = defined('T_TRAIT');
 
@@ -542,6 +543,10 @@ class ReflectionClosure extends ReflectionFunction
                                 $state = 'use';
                                 $prefix = $name = $alias = '';
                                 $isFunc = $isConst = false;
+                                break;
+                            case T_FUNCTION:
+                                $state = 'structure';
+                                $structIgnore = true;
                                 break;
                             default:
                                 if ($hasTraitSupport && $token[0] == T_TRAIT) {
@@ -625,13 +630,15 @@ class ReflectionClosure extends ReflectionFunction
                             $open++;
                         } elseif ($token === '}') {
                             if (--$open == 0) {
-                                $structures[] = array(
-                                    'type' => $structType,
-                                    'name' => $structName,
-                                    'start' => $startLine,
-                                    'end' => $endLine,
-                                );
-
+                                if(!$structIgnore){
+                                    $structures[] = array(
+                                        'type' => $structType,
+                                        'name' => $structName,
+                                        'start' => $startLine,
+                                        'end' => $endLine,
+                                    );
+                                }
+                                $structIgnore = false;
                                 $state = 'start';
                             }
                         }
