@@ -30,7 +30,7 @@ proper serialization
 * Handles static closures
 * Supports cryptographically signed closures
 * Provides a reflector that can give you information about the serialized closure
-* Provides an analyzer for *Super Closure* library
+* Provides an analyzer for *SuperClosure* library
 * Supports serialization of bounded objects and scopes (available only from PHP >= 5.4)
 
 
@@ -64,12 +64,12 @@ require_once 'path/to/closure-2.2.0/autoload.php';
 
 ```
 
-### Super Closure support
+### SuperClosure support
 
-[Super Closure](https://github.com/jeremeamia/super_closure) is the most 
+[SuperClosure](https://github.com/jeremeamia/super_closure) is the most 
 popular an widely used closure serialization library. 
 Starting with version `2.2.0`, *Opis Closure* is shipped with an analyzer(`Opis\Closure\Analyzer`)
-which aims to provide *Opis Closure*'s parsing precision and speed to *Super Closure*.
+which aims to provide *Opis Closure*'s parsing precision and speed to *SuperClosure*.
 
 ### Documentation
 
