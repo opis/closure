@@ -1,12 +1,14 @@
 CHANGELOG
 ---------
-### v2.2.0
+### v2.2.0, 2016.07.26
 
 * Fixed CS
-* All helper classes were moved to their own file
+* `Opis\Closure\ClosureContext`, `Opis\Closure\ClosureScope`, `Opis\Closure\SelfReference`
+ and `Opis\Closure\SecurityException` classes were moved into separate files
 * Added support for PHP7 syntax
 * Fixed some bugs in `Opis\Closure\ReflectionClosure` class
 * Improved closure parser
+* Added an analyzer for SuperClosure library
 
 ### v2.1.0, 2015.09.30
 

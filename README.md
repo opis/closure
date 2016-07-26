@@ -66,3 +66,10 @@ require_once 'path/to/closure-2.2.0/autoload.php';
 ### Documentation
 
 Examples and documentation can be found [here](http://opis.io/closure).
+
+### Super Closure support
+
+[Super Closure](https://github.com/jeremeamia/super_closure) is the most 
+popular an widely used closure serialization library. 
+Starting with version `2.2.0`, *Opis Closure* is shipped with an analyzer(`Opis\Closure\Analyzer`)
+for *Super Closure*.
