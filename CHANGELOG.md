@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v2.2.1, 2016.08.20
+
+* Fixed a bug in `Opis\Closure\ReflectionClosure::fetchItems`
+
 ### v2.2.0, 2016.07.26
 
 * Fixed CS
