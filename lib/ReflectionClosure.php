@@ -597,6 +597,7 @@ class ReflectionClosure extends ReflectionFunction
                             } else {
                                 $classes[$alias] = $prefix . $name;
                             }
+                            $name = '';
                             $state = $token == ',' ? 'use' : 'start';
                         }
                     }
@@ -614,7 +615,7 @@ class ReflectionClosure extends ReflectionFunction
                         } else {
                             $classes[$alias] = $prefix . $name;
                         }
-
+                        $name = '';
                         $state = $token == ',' ? 'use' : 'start';
                     }
                     break;
