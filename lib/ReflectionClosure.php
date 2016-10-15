@@ -20,6 +20,8 @@ class ReflectionClosure extends ReflectionFunction
     protected $hashedName;
     protected $useVariables;
     protected $isStaticClosure;
+    protected $isScopeRequired;
+    protected $isBindingRequired;
 
     protected static $files = array();
     protected static $classes = array();
@@ -100,6 +102,9 @@ class ReflectionClosure extends ReflectionFunction
         $classes = $functions = $constants = null;
         $use = array();
         $lineAdd = 0;
+        $isUsingScope = false;
+        $isUsingThisObject = false;
+
 
         foreach ($tokens as $token) {
             $is_array = is_array($token);
@@ -184,6 +189,11 @@ class ReflectionClosure extends ReflectionFunction
                                     $token[1] .= '* Line      : ' . ($line + 1) . PHP_EOL;
                                     $token[1] .= '* File      : ' . $_file . PHP_EOL . '*/' . PHP_EOL;
                                     $lineAdd += 5;
+                                }
+                                break;
+                            case T_VARIABLE:
+                                if($token[1] == '$this'){
+                                    $isUsingThisObject = true;
                                 }
                                 break;
                             case T_USE:
@@ -272,8 +282,11 @@ class ReflectionClosure extends ReflectionFunction
                         }
                     }
 
-                    if ($name[0] == '\\' || $name == 'static' || $name == 'self') {
+                    if ($name[0] == '\\' || ($selfOrStatic = ($name == 'static' || $name == 'self'))) {
                         $code .= $buffer . ($is_array ? $token[1] : $token);
+                        if($selfOrStatic){
+                            $isUsingScope = true;
+                        }
                     } elseif ($new_key_word || ($is_array && ($token[0] == T_VARIABLE || $token[0] == T_DOUBLE_COLON))) {
                         $suffix = substr($buffer, strlen(rtrim($buffer)));
 
@@ -335,6 +348,8 @@ class ReflectionClosure extends ReflectionFunction
             }
         }
 
+        $this->isBindingRequired = $isUsingThisObject;
+        $this->isScopeRequired = $isUsingScope;
         $this->code = $code;
         $this->useVariables = empty($use) ? $use : array_intersect_key($this->getStaticVariables(), array_flip($use));
 
@@ -378,6 +393,30 @@ class ReflectionClosure extends ReflectionFunction
         $this->useVariables = empty($use) ? $use : array_intersect_key($this->getStaticVariables(), array_flip($use));
 
         return $this->useVariables;
+    }
+
+    /**
+     * return bool
+     */
+    public function isBindingRequired()
+    {
+        if($this->isBindingRequired === null){
+            $this->getCode();
+        }
+
+        return $this->isBindingRequired;
+    }
+
+    /**
+     * return bool
+     */
+    public function isScopeRequired()
+    {
+        if($this->isScopeRequired === null){
+            $this->getCode();
+        }
+
+        return $this->isScopeRequired;
     }
 
     /**
