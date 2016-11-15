@@ -62,7 +62,7 @@ class SerializableClosure implements Serializable
      * @var boolean Indicates if closure must be serialized with bounded object
      */
 
-    protected $serializeBind = false;
+    protected $serializeThis = false;
 
     /**
      * @var string Closure scope
@@ -105,14 +105,13 @@ class SerializableClosure implements Serializable
      * Constructor
      *
      * @param   Closure $closure Closure you want to serialize
-     * @param   boolean $serializeBind If true, the bounded object will be serialized (PHP 5.4+ only)
+     * @param   boolean $serializeThis - Obsolete
      */
 
-    public function __construct(Closure $closure, $serializeBind = false)
+    public function __construct(Closure $closure, $serializeThis = false)
     {
         $this->closure = $closure;
-        $this->serializeBind = (bool)$serializeBind;
-
+        $this->serializeThis = $serializeThis;
         if (static::$context !== null) {
             $this->scope = static::$context->scope;
             $this->scope->toserialize++;
@@ -221,7 +220,7 @@ class SerializableClosure implements Serializable
                 return $ret;
             }
 
-            $instance = new static($value, $this->serializeBind);
+            $instance = new static($value, $this->serializeThis);
 
             if (static::$context !== null) {
                 static::$context->scope->toserialize--;
@@ -277,9 +276,16 @@ class SerializableClosure implements Serializable
 
         if (!static::supportBinding()) {
             $this->reference = new SelfReference($this->closure);
-        } elseif ($this->serializeBind) {
+        } elseif ($this->serializeThis) {
             if ($scope = $reflector->getClosureScopeClass()) {
                 $scope = $scope->name;
+                $object = $reflector->getClosureThis();
+            }
+        } else {
+            if($reflector->isScopeRequired() && $scope = $reflector->getClosureScopeClass()){
+                $scope = $scope->name;
+            }
+            if($reflector->isBindingRequired()){
                 $object = $reflector->getClosureThis();
             }
         }
@@ -334,7 +340,9 @@ class SerializableClosure implements Serializable
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
 
         if ($this !== $this->code['this'] && ($this->code['scope'] !== null || $this->code['this'] !== null)) {
-            $this->isBound = $this->serializeBind = true;
+            if($this->code['this'] !== null){
+                $this->isBound = $this->serializeThis = true;
+            }
             $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
         }
 
@@ -386,7 +394,7 @@ class SerializableClosure implements Serializable
      * Wraps a closure and sets the serialization context (if any)
      *
      * @param   Closure $closure Closure to be wrapped
-     * @param   boolean $serializeThis Indicates if the scope of closure should be serialized
+     * @param   boolean $serializeThis - Obsolete
      *
      * @return  self    The wrapped closure
      */
@@ -397,7 +405,7 @@ class SerializableClosure implements Serializable
             $instance = new static($closure, $serializeThis);
         } elseif (isset(static::$context->instances[$closure])) {
             $instance = static::$context->instances[$closure];
-            $instance->serializeBind = $serializeThis;
+            $instance->serializeThis = $serializeThis;
         } else {
             $instance = new static($closure, $serializeThis);
             static::$context->instances[$closure] = $instance;
