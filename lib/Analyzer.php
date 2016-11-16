@@ -30,7 +30,7 @@ class Analyzer extends ClosureAnalyzer
         $data = [
             'reflection' => $reflection,
             'code'       => $reflection->getCode(),
-            'hasThis'    => strpos($reflection->getCode(), '$this') !== false,
+            'hasThis'    => $reflection->isBindingRequired(),
             'context'    => $reflection->getUseVariables(),
             'hasRefs'    => false,
             'binding'    => $reflection->getClosureThis(),
