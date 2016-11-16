@@ -19,7 +19,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         {
             $closure = new SerializableClosure($closure, $binded);
         }
-        return unserialize(serialize($closure));
+        return unserialize(serialize($closure))->getClosure();
     }
     
     protected function r() {
@@ -77,7 +77,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         };
         $u = $this->s($a);
         
-        $this->assertEquals($u->getClosure(), $u());
+        $this->assertEquals($u, $u());
     }
     
     public function testClosureUseSelfInArray()
@@ -93,7 +93,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($b);
         
-        $this->assertEquals($u->getClosure(), $u());
+        $this->assertEquals($u, $u());
     }
     
     public function testClosureUseSelfInObject()
@@ -109,7 +109,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($b);
         
-        $this->assertEquals($u->getClosure(), $u());
+        $this->assertEquals($u, $u());
     }
     
     public function testClosureUseSelfInMultiArray()
@@ -133,7 +133,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $u = $this->s($c);
         
-        $this->assertEquals($u->getClosure(), $u(0));
+        $this->assertEquals($u, $u(0));
     }
     
     public function testClosureBindToObject()
@@ -150,9 +150,9 @@ class ClosureTest extends PHPUnit_Framework_TestCase
           return $this->aPublic();
         };
         
-        $b = $b->bindTo($a);
+        $b = $b->bindTo($a, 'A');
         
-        $u = $this->s($b, true);
+        $u = $this->s($b);
         
         $this->assertEquals('public called', $u());
     }
@@ -173,7 +173,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $b = $b->bindTo($a, 'A');
         
-        $u = $this->s($b, true);
+        $u = $this->s($b);
         
         $this->assertEquals('protected called', $u());
     }
@@ -194,7 +194,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
         
         $b = $b->bindTo(null, 'A');
         
-        $u = $this->s($b, true);
+        $u = $this->s($b);
         
         $this->assertEquals('static protected called', $u());
     }
@@ -220,7 +220,7 @@ class ClosureTest extends PHPUnit_Framework_TestCase
             return $a + $b;
         };
         
-        $u = $this->s($this->s($f)->getClosure());
+        $u = $this->s($this->s($f));
         $this->assertEquals(5, $u(2, 3));
     }
     
