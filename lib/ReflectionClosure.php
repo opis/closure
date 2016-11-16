@@ -209,6 +209,9 @@ class ReflectionClosure extends ReflectionFunction
                                 $new_key_word = false;
                                 $state = 'name';
                                 break 2;
+                            case T_STATIC:
+                                $isUsingScope = true;
+                                break;
                             case T_NEW:
                                 $buffer = $token[1];
                                 $new_key_word = true;
