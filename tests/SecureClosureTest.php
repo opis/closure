@@ -25,7 +25,7 @@ class SecureClosureTest extends ClosureTest
             
             $closure = new SecureClosure($closure, $binded);
         }
-        return unserialize(serialize($closure));
+        return unserialize(serialize($closure))->getClosure();
     }
     
     public function testSecureClosureFailWithoutProvider()
