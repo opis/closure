@@ -276,17 +276,19 @@ class SerializableClosure implements Serializable
 
         if (!static::supportBinding()) {
             $this->reference = new SelfReference($this->closure);
-        } elseif ($this->serializeThis) {
-            if ($scope = $reflector->getClosureScopeClass()) {
-                $scope = $scope->name;
-                $object = $reflector->getClosureThis();
-            }
         } else {
-            if($reflector->isScopeRequired() && $scope = $reflector->getClosureScopeClass()){
-                $scope = $scope->name;
-            }
             if($reflector->isBindingRequired()){
                 $object = $reflector->getClosureThis();
+                if($scope = $reflector->getClosureScopeClass()){
+                    $scope = $scope->name;
+                }
+            } elseif($reflector->isScopeRequired()) {
+                if($scope = $reflector->getClosureScopeClass()){
+                    $scope = $scope->name;
+                }
+                if($this->serializeThis){
+                    $object = $reflector->getClosureThis();
+                }
             }
         }
 
@@ -339,7 +341,11 @@ class SerializableClosure implements Serializable
 
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
 
-        if ($this !== $this->code['this'] && ($this->code['scope'] !== null || $this->code['this'] !== null)) {
+        if($this->code['this'] === $this){
+            $this->code['this'] = null;
+        }
+
+        if ($this->code['scope'] !== null || $this->code['this'] !== null) {
             if($this->code['this'] !== null){
                 $this->isBound = $this->serializeThis = true;
             }
