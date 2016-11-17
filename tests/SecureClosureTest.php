@@ -8,34 +8,30 @@
  * Licensed under the MIT License
  * =========================================================================== */
 
+namespace Opis\Colibri\Test;
+
+use Closure;
 use Opis\Closure\SecureClosure;
 use Opis\Closure\DefaultSecurityProvider;
 
 class SecureClosureTest extends ClosureTest
 {
-    
-    protected function s($closure, $binded = false)
+    protected function s($closure, $bindThis = false)
     {
-        if($closure instanceof \Closure)
+        if($closure instanceof Closure)
         {
             if(null === SecureClosure::getSecurityProvider())
             {
                 SecureClosure::setSecurityProvider(new DefaultSecurityProvider('secret'));
             }
             
-            $closure = new SecureClosure($closure, $binded);
+            $closure = new SecureClosure($closure, $bindThis);
         }
         return unserialize(serialize($closure))->getClosure();
     }
     
     public function testSecureClosureFailWithoutProvider()
     {
-        if($this->r())
-        {
-            $this->markTestSkipped('This test requires PHP >=5.4');
-            return;
-        }
-        
         $this->setExpectedException('RuntimeException');
         
         serialize(new SecureClosure(function(){    
@@ -54,7 +50,5 @@ class SecureClosureTest extends ClosureTest
         $value = serialize(new SecureClosure($closure));
         $value = str_replace('/*x*/', '/*y*/', $value);
         $value = unserialize($value);
-        
     }
-    
 }

@@ -1,0 +1,10 @@
+<phpunit bootstrap="./vendor/autoload.php">
+    <testsuites>
+        <testsuite name="PHP 5.3 Tests">
+            <file phpVersion="5.3.0" phpVersionOperator=">=">./tests/CommonTest.php</file>
+        </testsuite>
+        <testsuite name="Closure Tests">
+            <directory suffix="Test.php" phpVersion="5.4.0" phpVersionOperator=">=">./tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

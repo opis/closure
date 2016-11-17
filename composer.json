@@ -20,6 +20,11 @@
     "autoload": {
         "psr-4": {"Opis\\Closure\\": "lib/"}
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Opis\\Closure\\Test\\": "tests/"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "2.3.x-dev"
