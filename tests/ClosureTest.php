@@ -270,6 +270,24 @@ class ClosureTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(true, $os(true));
     }
+
+    public function testClosureStatic()
+    {
+        $f = static function(){};
+
+        $rc = new \Opis\Closure\ReflectionClosure($f);
+        $this->assertTrue($rc->isStatic());
+    }
+
+    public function testClosureStaticFail()
+    {
+        $f = static
+        // This will not work
+        function(){};
+
+        $rc = new \Opis\Closure\ReflectionClosure($f);
+        $this->assertFalse($rc->isStatic());
+    }
     
 }
 
