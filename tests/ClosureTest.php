@@ -10,6 +10,8 @@
 
 namespace Opis\Colibri\Test;
 
+use Opis\Closure\ReflectionClosure;
+
 class ClosureTest extends CommonTest
 {
     
@@ -56,6 +58,23 @@ class ClosureTest extends CommonTest
         $u = $this->s($b);
         
         $this->assertEquals('static protected called', $u());
+    }
+
+
+    public function testClosureStatic()
+    {
+        $f = static function(){};
+        $rc = new ReflectionClosure($f);
+        $this->assertTrue($rc->isStatic());
+    }
+
+    public function testClosureStaticFail()
+    {
+        $f = static
+            // This will not work
+        function(){};
+        $rc = new ReflectionClosure($f);
+        $this->assertFalse($rc->isStatic());
     }
 }
 
