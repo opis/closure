@@ -273,6 +273,12 @@ class ClosureTest extends PHPUnit_Framework_TestCase
 
     public function testClosureStatic()
     {
+        if($this->r())
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+
         $f = static function(){};
 
         $rc = new \Opis\Closure\ReflectionClosure($f);
@@ -281,6 +287,12 @@ class ClosureTest extends PHPUnit_Framework_TestCase
 
     public function testClosureStaticFail()
     {
+        if($this->r())
+        {
+            $this->markTestSkipped('This test requires PHP >=5.4');
+            return;
+        }
+
         $f = static
         // This will not work
         function(){};
