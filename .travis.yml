@@ -19,4 +19,4 @@ install:
   - travis_retry composer self-update
   - travis_wait composer install --no-interaction --prefer-source --ignore-platform-reqs --dev
 
-script: ./vendor/bin/phpunit tests
+script: ./vendor/bin/phpunit
