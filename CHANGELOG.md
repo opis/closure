@@ -1,5 +1,10 @@
 CHANGELOG
 ---------
+### v2.3.0, 2016.11.17
+
+* Added `isBindingRequired` and `isScopeRequired` to the `Opis\Closure\ReflectionClosure` class
+* Automatically detects when the scope and/or the bound object of a closure needs to be serialized.
+
 ### v2.2.1, 2016.08.20
 
 * Fixed a bug in `Opis\Closure\ReflectionClosure::fetchItems`
