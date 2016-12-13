@@ -287,7 +287,7 @@ class ReflectionClosure extends ReflectionFunction
 
                     if ($name[0] == '\\' || ($selfOrStatic = ($name == 'static' || $name == 'self'))) {
                         $code .= $buffer . ($is_array ? $token[1] : $token);
-                        if($selfOrStatic){
+                        if(isset($selfOrStatic) && $selfOrStatic){
                             $isUsingScope = true;
                         }
                     } elseif ($new_key_word || ($is_array && ($token[0] == T_VARIABLE || $token[0] == T_DOUBLE_COLON))) {
