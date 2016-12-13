@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v2.3.1, 2016.12.13
+
+* Hotfix. See [PR](https://github.com/opis/closure/pull/7)
+
 ### v2.3.0, 2016.11.17
 
 * Added `isBindingRequired` and `isScopeRequired` to the `Opis\Closure\ReflectionClosure` class
