@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v2.3.2, 2016.12.15
+
+* Fixed a bug that prevented namespace resolution to be done properly
+
 ### v2.3.1, 2016.12.13
 
 * Hotfix. See [PR](https://github.com/opis/closure/pull/7)
