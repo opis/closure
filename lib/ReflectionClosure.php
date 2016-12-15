@@ -208,6 +208,14 @@ class ReflectionClosure extends ReflectionFunction
                                 $buffer = $name = $token[1];
                                 $new_key_word = false;
                                 $state = 'name';
+                                if($token[0] === T_STRING){
+                                    if ($classes === null) {
+                                        $classes = $this->getClasses();
+                                    }
+                                    if (isset($classes[$name])) {
+                                        $buffer = $name = $classes[$name];
+                                    }
+                                }
                                 break 2;
                             case T_STATIC:
                                 $isUsingScope = true;
@@ -337,6 +345,14 @@ class ReflectionClosure extends ReflectionFunction
                                 $code .= $buffer;
                                 $buffer = $name = $token[1];
                                 $state = 'name';
+                                if($token[0] === T_STRING){
+                                    if ($classes === null) {
+                                        $classes = $this->getClasses();
+                                    }
+                                    if (isset($classes[$name])) {
+                                        $buffer = $name = $classes[$name];
+                                    }
+                                }
                                 break 2;
                             default:
                                 $code .= $buffer . $token[1];
