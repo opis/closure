@@ -50,18 +50,18 @@ This library is available on [Packagist](https://packagist.org/packages/opis/clo
 ```json
 {
     "require": {
-        "opis/closure": "^2.3.2"
+        "opis/closure": "^2.4.0"
     }
 }
 ```
 
 If you are unable to use [Composer](http://getcomposer.org) you can download the
-[tar.gz](https://github.com/opis/closure/archive/2.3.2.tar.gz) or the [zip](https://github.com/opis/closure/archive/2.3.2.zip)
+[tar.gz](https://github.com/opis/closure/archive/2.4.0.tar.gz) or the [zip](https://github.com/opis/closure/archive/2.4.0.zip)
 archive file, extract the content of the archive and include de `autoload.php` file into your project. 
 
 ```php
 
-require_once 'path/to/closure-2.3.2/autoload.php';
+require_once 'path/to/closure-2.4.0/autoload.php';
 
 ```
 

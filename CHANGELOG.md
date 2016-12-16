@@ -1,5 +1,14 @@
 CHANGELOG
 ---------
+### v2.4.0, 2016.12.16
+
+* The parser was refactored and improved
+* Refactored `Opis\Closure\SerializableClosure::__invoke` method
+* `Opis\Closure\{ISecurityProvider, SecurityProvider}` were added
+* `Opis\Closure\{SecurityProviderInterface, DefaultSecurityProvider, SecureClosure}` were deprecated
+and they will be removed in the next major version
+* `setSecretKey` and `addSecurityProvider` static methods were added to `Opis\Colibri\SerializableClosure`
+
 ### v2.3.2, 2016.12.15
 
 * Fixed a bug that prevented namespace resolution to be done properly
