@@ -49,11 +49,6 @@ class SerializableClosure implements Serializable
     protected $reference;
 
     /**
-     * @var boolean Indicates if closure is bound to an object
-     */
-    protected $isBound = false;
-
-    /**
      * @var boolean Indicates if closure must be serialized with bounded object
      */
     protected $serializeThis = false;
@@ -137,10 +132,7 @@ class SerializableClosure implements Serializable
      */
     public function __invoke()
     {
-        return $this->isBound
-            ? call_user_func_array($this->closure, func_get_args())
-            : $this->getReflector()->invokeArgs(func_get_args());
-
+        return call_user_func_array($this->closure, func_get_args());
     }
 
     /**
@@ -234,7 +226,7 @@ class SerializableClosure implements Serializable
 
         if ($this->code['scope'] !== null || $this->code['this'] !== null) {
             if($this->code['this'] !== null){
-                $this->isBound = $this->serializeThis = true;
+                $this->serializeThis = true;
             }
             $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
         }
