@@ -84,6 +84,10 @@ class SerializableClosure implements Serializable
      */
     protected static $deserialized;
 
+    /**
+     * @var ISecurityProvider|null
+     */
+    protected static $securityProvider;
 
     /**
      * Constructor
@@ -190,6 +194,10 @@ class SerializableClosure implements Serializable
             'self' => $this->reference,
         ));
 
+        if(static::$securityProvider !== null){
+            $ret = serialize(static::$securityProvider->sign($ret));
+        }
+
         if (!--$this->scope->serializations && !--$this->scope->toserialize) {
             $this->scope->storage = null;
         }
@@ -201,6 +209,7 @@ class SerializableClosure implements Serializable
      * Implementation of Serializable::unserialize()
      *
      * @param   string $data Serialized data
+     * @throws SecurityException
      */
     public function unserialize($data)
     {
@@ -212,6 +221,19 @@ class SerializableClosure implements Serializable
         }
 
         $this->code = unserialize($data);
+
+        if(isset($this->code['hash'])){
+            if(static::$securityProvider !== null){
+                if(!static::$securityProvider->verify($this->code)){
+                    throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized." .
+                        "Make sure you are using the same security provider, with the same settings, " .
+                        "both for serialization and unserialization.");
+                }
+                $this->code = unserialize($this->code['closure']);
+            } else {
+                $this->code = unserialize($this->code['closure']);
+            }
+        }
 
         if ($this->code['use']) {
             $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
@@ -312,9 +334,28 @@ class SerializableClosure implements Serializable
     }
 
     /**
+     * @param string $secret
+     */
+    public static function setSecretKey($secret)
+    {
+        if(static::$securityProvider === null){
+            static::$securityProvider = new SecurityProvider($secret);
+        }
+    }
+
+    /**
+     * @param ISecurityProvider $securityProvider
+     */
+    public static function addSecurityProvider(ISecurityProvider $securityProvider)
+    {
+        static::$securityProvider = $securityProvider;
+    }
+
+    /**
      * Internal method used to unserialize closures in PHP 5.3
      *
      * @param   string &$data Serialized closure
+     * @throws SecurityException
      */
     protected function unserializePHP53(&$data)
     {
@@ -324,6 +365,19 @@ class SerializableClosure implements Serializable
         }
 
         $this->code = unserialize($data);
+
+        if(isset($this->code['hash'])){
+            if(static::$securityProvider !== null){
+                if(!static::$securityProvider->verify($this->code)){
+                    throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized." .
+                        "Make sure you are using the same security provider, with the same settings, " .
+                        "both for serialization and unserialization.");
+                }
+                $this->code = unserialize($this->code['closure']);
+            } else {
+                $this->code = unserialize($this->code['closure']);
+            }
+        }
 
         if (isset(static::$deserialized[$this->code['self']->hash])) {
             $this->closure = static::$deserialized[$this->code['self']->hash];
