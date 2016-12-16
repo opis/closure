@@ -320,6 +320,7 @@ class ReflectionClosure extends ReflectionFunction
                             break;
                         case T_NS_SEPARATOR:
                         case T_STRING:
+                        case T_STATIC:
                             $id_start = $token[1];
                             $id_start_ci = strtolower($id_start);
                             $id_name = '';
@@ -388,7 +389,9 @@ class ReflectionClosure extends ReflectionFunction
                         default:
                             if($id_start !== '\\'){
                                 if($context === 'instanceof' || $context === 'args'){
-                                    if(!($php7 && in_array($id_start_ci, $php7_types))){
+                                    if($id_start_ci === 'self' || $id_start_ci === 'static'){
+                                        $isUsingScope = true;
+                                    } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
                                         if($classes === null){
                                             $classes = $this->getClasses();
                                         }
