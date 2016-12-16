@@ -108,6 +108,7 @@ class ReflectionClosure extends ReflectionFunction
 
         for($i = 0, $l = count($tokens); $i < $l; $i++) {
             $token = $tokens[$i];
+            echo $state, ' => ', (is_array($token) ? $token[1] : $token), PHP_EOL;
             switch ($state) {
                 case 'start':
                     if ($token[0] === T_FUNCTION || $token[0] === T_STATIC) {
@@ -388,14 +389,16 @@ class ReflectionClosure extends ReflectionFunction
                         default:
                             if($id_start !== '\\'){
                                 if($context === 'instanceof' || $context === 'args'){
-                                    if($classes === null){
-                                        $classes = $this->getClasses();
-                                    }
-                                    if(isset($classes[$id_start_ci])){
-                                        $id_start = $classes[$id_start_ci];
-                                    }
-                                    if($id_start[0] !== '\\'){
-                                        $id_start = $nsf . '\\' . $id_start;
+                                    if(!($php7 && in_array($id_start_ci, $php7_types))){
+                                        if($classes === null){
+                                            $classes = $this->getClasses();
+                                        }
+                                        if(isset($classes[$id_start_ci])){
+                                            $id_start = $classes[$id_start_ci];
+                                        }
+                                        if($id_start[0] !== '\\'){
+                                            $id_start = $nsf . '\\' . $id_start;
+                                        }
                                     }
                                 } else {
                                     if($constants === null){
