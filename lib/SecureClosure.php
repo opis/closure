@@ -49,8 +49,9 @@ class SecureClosure extends SerializableClosure
      * Override unserialize method
      *
      * @param   string $data Serialized data
+     * @throws RuntimeException
+     * @throws SecurityException
      */
-
     public function unserialize($data)
     {
         if (static::$securityProvider === null) {

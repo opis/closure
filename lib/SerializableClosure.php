@@ -89,7 +89,7 @@ class SerializableClosure implements Serializable
      * Constructor
      *
      * @param   Closure $closure Closure you want to serialize
-     * @param   boolean $serializeThis - Obsolete
+     * @param   boolean $serializeThis - Deprecated
      */
     public function __construct(Closure $closure, $serializeThis = false)
     {
@@ -252,7 +252,7 @@ class SerializableClosure implements Serializable
      * Wraps a closure and sets the serialization context (if any)
      *
      * @param   Closure $closure Closure to be wrapped
-     * @param   boolean $serializeThis - Obsolete
+     * @param   boolean $serializeThis - Deprecated
      *
      * @return  self    The wrapped closure
      */
