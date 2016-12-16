@@ -10,6 +10,10 @@
 
 namespace Opis\Closure;
 
+/**
+ * Interface SecurityProviderInterface
+ * @deprecated 2.4.0 Marked for removal in 3.0.0
+ */
 interface SecurityProviderInterface
 {
     /**

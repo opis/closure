@@ -14,6 +14,7 @@ use RuntimeException;
 
 /**
  * Provides a wrapper for secure serialization of closures
+ * @deprecated 2.4.0 Marked for removal in 3.0.0
  */
 class SecureClosure extends SerializableClosure
 {
