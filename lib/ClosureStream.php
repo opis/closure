@@ -14,7 +14,7 @@ class ClosureStream
 {
     const STREAM_PROTO = 'closure';
 
-    protected static $isRegistred = false;
+    protected static $isRegistered = false;
 
     protected $content;
 
@@ -86,8 +86,8 @@ class ClosureStream
 
     public static function register()
     {
-        if (!static::$isRegistred) {
-            static::$isRegistred = stream_wrapper_register(static::STREAM_PROTO, __CLASS__);
+        if (!static::$isRegistered) {
+            static::$isRegistered = stream_wrapper_register(static::STREAM_PROTO, __CLASS__);
         }
     }
 
