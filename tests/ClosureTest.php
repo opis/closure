@@ -329,6 +329,17 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($u[0]->getF() === $u[1]->getF());
     }
 
+    public function testCustomSerializationSameClosures2()
+    {
+        $f =  function ($value){
+            return $value;
+        };
+
+        $a = array(new Abc($f), new Abc($f));
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
+        $this->assertTrue($u[0]->getF() === $u[1]->getF());
+    }
+
 }
 
 class ObjnObj implements Serializable {
