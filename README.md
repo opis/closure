@@ -1,6 +1,6 @@
 Opis Closure
 ====================
-[![Build Status](https://travis-ci.org/opis/closure.png?branch=master)](https://travis-ci.org/opis/closure)
+[![Build Status](https://travis-ci.org/opis/closure.png?branch=3.0)](https://travis-ci.org/opis/closure)
 [![Latest Stable Version](https://poser.pugx.org/opis/closure/v/stable.png)](https://packagist.org/packages/opis/closure)
 [![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
@@ -14,7 +14,7 @@ serialization by providing a wrapper that will make all closures serializable.
 
 * Serialize any closure
 * Doesn't use `eval` for closure serialization or unserialization
-* Works with any PHP version that has support for closures (Yes, even with PHP 5.3)
+* Works with any PHP version that has support for closures
 * Supports PHP 7.0 syntax
 * Handles all variables referenced/imported in `use()` and automatically wraps all referenced/imported closures for
 proper serialization
@@ -41,7 +41,7 @@ in order for the closure to work after deserialization
 
 ### Requirements
 
-* PHP 5.3.* or higher
+* PHP 5.4.* or higher
 
 ### Installation
 
@@ -50,18 +50,18 @@ This library is available on [Packagist](https://packagist.org/packages/opis/clo
 ```json
 {
     "require": {
-        "opis/closure": "^2.4.0"
+        "opis/closure": "3.0.*@dev"
     }
 }
 ```
 
 If you are unable to use [Composer](http://getcomposer.org) you can download the
-[tar.gz](https://github.com/opis/closure/archive/2.4.0.tar.gz) or the [zip](https://github.com/opis/closure/archive/2.4.0.zip)
+[tar.gz](https://github.com/opis/closure/archive/3.0.tar.gz) or the [zip](https://github.com/opis/closure/archive/3.0.zip)
 archive file, extract the content of the archive and include de `autoload.php` file into your project. 
 
 ```php
 
-require_once 'path/to/closure-2.4.0/autoload.php';
+require_once 'path/to/closure-3.0/autoload.php';
 
 ```
 
