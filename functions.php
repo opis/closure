@@ -30,7 +30,7 @@ function serialize($data)
  */
 function unserialize($data)
 {
-    $data = SerializableClosure::unserializeData($data);
+    $data = \unserialize($data);
     SerializableClosure::unwrapClosures($data);
     return $data;
 }

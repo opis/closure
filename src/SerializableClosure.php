@@ -306,7 +306,7 @@ class SerializableClosure implements Serializable
                 $data = $storage[$data];
                 return;
             }
-            $data = clone($data);
+            $data = $storage[$data] = clone($data);
             $reflection = new ReflectionObject($data);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             foreach ($reflection->getProperties($filter) as $property){
