@@ -291,6 +291,44 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $rc = new ReflectionClosure($f);
         $this->assertFalse($rc->isStatic());
     }
+
+    public function testCustomSerialization()
+    {
+        $f =  function ($value){
+            return $value;
+        };
+
+        $a = new Abc($f);
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
+        $this->assertTrue($u->test(true));
+    }
+
+    public function testCustomSerializationSameObjects()
+    {
+        $f =  function ($value){
+            return $value;
+        };
+
+        $i = new Abc($f);
+        $a = array($i, $i);
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
+
+        $this->assertTrue($u[0] === $u[1]);
+    }
+
+
+    public function testCustomSerializationSameClosures()
+    {
+        $f =  function ($value){
+            return $value;
+        };
+
+        $i = new Abc($f);
+        $a = array($i, $i);
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
+        $this->assertTrue($u[0]->getF() === $u[1]->getF());
+    }
+
 }
 
 class ObjnObj implements Serializable {
@@ -341,4 +379,25 @@ class A
 class ObjSelf
 {
     public $o;
+}
+
+class Abc
+{
+    private $f;
+
+    public function __construct(Closure $f)
+    {
+        $this->f = $f;
+    }
+
+    public function getF()
+    {
+        return $this->f;
+    }
+
+    public function test($value)
+    {
+        $f = $this->f;
+        return $f($value);
+    }
 }
