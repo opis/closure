@@ -150,7 +150,7 @@ class SerializableClosure implements Serializable
 
         $this->mapByReference($use);
 
-        $ret = serialize(array(
+        $ret = \serialize(array(
             'use' => $use,
             'function' => $code,
             'scope' => $scope,
@@ -191,7 +191,7 @@ class SerializableClosure implements Serializable
             $data = $data['closure'];
         }
 
-        $this->code = unserialize($data);
+        $this->code = \unserialize($data);
 
         $this->code['objects'] = array();
 
@@ -279,6 +279,78 @@ class SerializableClosure implements Serializable
     public static function addSecurityProvider(ISecurityProvider $securityProvider)
     {
         static::$securityProvider = $securityProvider;
+    }
+
+    /**
+     * Wrap closures
+     *
+     * @param $data
+     * @param SplObjectStorage|null $storage
+     */
+    public static function wrapClosures(&$data, SplObjectStorage $storage = null)
+    {
+        static::enterContext();
+
+        if($storage === null){
+            $storage = new SplObjectStorage();
+        }
+
+        if($data instanceof Closure){
+            $data = static::from($data);
+        } elseif (is_array($data)){
+            foreach ($data as &$value){
+                static::wrapClosures($value, $storage);
+            }
+        } elseif (is_object($data) && ! $data instanceof static){
+            if(isset($storage[$data])){
+                $data = $storage[$data];
+                return;
+            }
+            $data = clone($data);
+            $reflection = new ReflectionObject($data);
+            $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
+            foreach ($reflection->getProperties($filter) as $property){
+                $property->setAccessible(true);
+                $value = $property->getValue($data);
+                if(is_array($value) || is_object($value)){
+                    static::wrapClosures($value, $storage);
+                    $property->setValue($data, $value);
+                }
+            }
+        }
+
+        static::exitContext();
+    }
+
+
+    /**
+     * Unwrap closures
+     * @param $data
+     */
+    public static function unwrapClosures(&$data)
+    {
+        if($data instanceof static){
+            $data = $data->getClosure();
+        } elseif (is_array($data)){
+            foreach ($data as &$value){
+                static::unwrapClosures($value);
+            }
+        }elseif ($data instanceof \stdClass){
+            foreach (get_object_vars($data) as $property){
+                static::unwrapClosures($data->{$property});
+            }
+        } elseif (is_object($data) && !($data instanceof Closure)){
+            $reflection = new ReflectionObject($data);
+            $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
+            foreach ($reflection->getProperties($filter) as $property){
+                $property->setAccessible(true);
+                $value = $property->getValue($data);
+                if(is_array($value) || is_object($value)){
+                    static::unwrapClosures($value);
+                    $property->setValue($data, $value);
+                }
+            }
+        }
     }
 
     /**
