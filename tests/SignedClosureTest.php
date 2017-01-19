@@ -33,7 +33,7 @@ class SignedClosureTest extends ClosureTest
         SerializableClosure::setSecretKey('secret');
 
         $value = serialize(new SerializableClosure($closure));
-        $value = str_replace('/*x*/', '/*y*/', $value);
-        $value = unserialize($value);
+        $value = str_replace('*x*', '*y*', $value);
+        unserialize($value);
     }
 }

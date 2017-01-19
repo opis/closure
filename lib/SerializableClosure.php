@@ -21,7 +21,6 @@ use ReflectionProperty;
  */
 class SerializableClosure implements Serializable
 {
-
     /**
      * @var Closure Wrapped closure
      *
@@ -143,6 +142,7 @@ class SerializableClosure implements Serializable
         }
 
         $this->reference = spl_object_hash($this->closure);
+
         $this->scope->storage[$this->closure] = $this;
 
         $use = $reflector->getUseVariables();
@@ -159,7 +159,7 @@ class SerializableClosure implements Serializable
         ));
 
         if(static::$securityProvider !== null){
-            $ret = serialize(static::$securityProvider->sign($ret));
+            $ret =  '@' . json_encode(static::$securityProvider->sign($ret));
         }
 
         if (!--$this->scope->serializations && !--$this->scope->toserialize) {
@@ -179,20 +179,19 @@ class SerializableClosure implements Serializable
     {
         ClosureStream::register();
 
-        $this->code = unserialize($data);
-
-        if(isset($this->code['hash'])){
+        if($data[0] === '@'){
+            $data = json_decode(substr($data, 1), true);
             if(static::$securityProvider !== null){
-                if(!static::$securityProvider->verify($this->code)){
+                if(!static::$securityProvider->verify($data)){
                     throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized." .
                         "Make sure you are using the same security provider, with the same settings, " .
                         "both for serialization and unserialization.");
                 }
-                $this->code = unserialize($this->code['closure']);
-            } else {
-                $this->code = unserialize($this->code['closure']);
             }
+            $data = $data['closure'];
         }
+
+        $this->code = unserialize($data);
 
         $this->code['objects'] = array();
 

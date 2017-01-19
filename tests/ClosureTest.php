@@ -150,10 +150,10 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
     public function testClosureUseSelfInInstance2()
     {
         $i = new ObjSelf();
-        $c = function () use($i, &$c){
-            return $c === $i->o;
+        $c = function () use(&$c, $i){
+            return $c == $i->o;
         };
-        $i->o = $c;
+        $i->o = &$c;
         $u = $this->s($c);
         $this->assertTrue($u());
     }
