@@ -227,7 +227,7 @@ class ObjnObj implements Serializable {
 
     public function unserialize($data) {
 
-        $data = SerializableClosure::unserializeData($data);
+        $data = unserialize($data);
 
         $this->subtest = $data['subtest'];
         $this->func = $data['func']->getClosure();

@@ -72,11 +72,11 @@ class ReflectionClosure extends ReflectionFunction
 
         $className = null;
 
-        if (SerializableClosure::supportBinding()) {
-            if (null !== $className = $this->getClosureScopeClass()) {
-                $className = '\\' . trim($className->getName(), '\\');
-            }
+
+        if (null !== $className = $this->getClosureScopeClass()) {
+            $className = '\\' . trim($className->getName(), '\\');
         }
+
 
         $php7 = '7' === "\u{37}";
         $php7_types = array('string', 'int', 'bool', 'float');

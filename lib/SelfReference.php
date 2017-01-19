@@ -24,10 +24,10 @@ class SelfReference
     /**
      * Constructor
      *
-     * @param object $object
+     * @param string $hash
      */
-    public function __construct($object)
+    public function __construct($hash)
     {
-        $this->hash = spl_object_hash($object);
+        $this->hash = $hash;
     }
 }

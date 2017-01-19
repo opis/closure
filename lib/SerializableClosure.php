@@ -64,27 +64,6 @@ class SerializableClosure implements Serializable
     protected static $context;
 
     /**
-     * @var boolean Indicates is closures can be bound to objects
-     *
-     * @see \Opis\Closure\SerializableClosure::supportBinding()
-     */
-    protected static $bindingSupported;
-
-    /**
-     * @var integer Number of unserializations in progress
-     *
-     * @see \Opis\Closure\SerializableClosure::unserializePHP53()
-     */
-    protected static $unserializations = 0;
-
-    /**
-     * @var array Unserialized closures
-     *
-     * @see \Opis\Closure\SerializableClosure::unserializePHP53()
-     */
-    protected static $deserialized;
-
-    /**
      * @var ISecurityProvider|null
      */
     protected static $securityProvider;
@@ -158,23 +137,20 @@ class SerializableClosure implements Serializable
         $scope = $object = null;
         $reflector = $this->getReflector();
 
-        if (!static::supportBinding()) {
-            $this->reference = new SelfReference($this->closure);
-        } else {
-            if($reflector->isBindingRequired()){
+        if($reflector->isBindingRequired()){
+            $object = $reflector->getClosureThis();
+            if($scope = $reflector->getClosureScopeClass()){
+                $scope = $scope->name;
+            }
+        } elseif($reflector->isScopeRequired()) {
+            if($scope = $reflector->getClosureScopeClass()){
+                $scope = $scope->name;
+            }
+            if($this->serializeThis){
                 $object = $reflector->getClosureThis();
-                if($scope = $reflector->getClosureScopeClass()){
-                    $scope = $scope->name;
-                }
-            } elseif($reflector->isScopeRequired()) {
-                if($scope = $reflector->getClosureScopeClass()){
-                    $scope = $scope->name;
-                }
-                if($this->serializeThis){
-                    $object = $reflector->getClosureThis();
-                }
             }
         }
+
 
         $this->scope->storage[$this->closure] = $this;
 
@@ -215,11 +191,6 @@ class SerializableClosure implements Serializable
     {
         ClosureStream::register();
 
-        if (!static::supportBinding()) {
-            $this->unserializePHP53($data);
-            return;
-        }
-
         $this->code = unserialize($data);
 
         if(isset($this->code['hash'])){
@@ -254,20 +225,6 @@ class SerializableClosure implements Serializable
         }
 
         $this->code = $this->code['function'];
-    }
-
-    /**
-     * Indicates is closures can be bound to objects
-     *
-     * @return boolean
-     */
-    public static function supportBinding()
-    {
-        if (static::$bindingSupported === null) {
-            static::$bindingSupported = method_exists('Closure', 'bindTo');
-        }
-
-        return static::$bindingSupported;
     }
 
     /**
@@ -316,24 +273,6 @@ class SerializableClosure implements Serializable
     }
 
     /**
-     * Helper method for unserialization
-     */
-    public static function unserializeData($data)
-    {
-        if (!static::$unserializations++) {
-            static::$deserialized = array();
-        }
-
-        $value = unserialize($data);
-
-        if (!--static::$unserializations) {
-            static::$deserialized = null;
-        }
-
-        return $value;
-    }
-
-    /**
      * @param string $secret
      */
     public static function setSecretKey($secret)
@@ -349,59 +288,6 @@ class SerializableClosure implements Serializable
     public static function addSecurityProvider(ISecurityProvider $securityProvider)
     {
         static::$securityProvider = $securityProvider;
-    }
-
-    /**
-     * Internal method used to unserialize closures in PHP 5.3
-     *
-     * @param   string &$data Serialized closure
-     * @throws SecurityException
-     */
-    protected function unserializePHP53(&$data)
-    {
-
-        if (!static::$unserializations++) {
-            static::$deserialized = array();
-        }
-
-        $this->code = unserialize($data);
-
-        if(isset($this->code['hash'])){
-            if(static::$securityProvider !== null){
-                if(!static::$securityProvider->verify($this->code)){
-                    throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized." .
-                        "Make sure you are using the same security provider, with the same settings, " .
-                        "both for serialization and unserialization.");
-                }
-                $this->code = unserialize($this->code['closure']);
-            } else {
-                $this->code = unserialize($this->code['closure']);
-            }
-        }
-
-        if (isset(static::$deserialized[$this->code['self']->hash])) {
-            $this->closure = static::$deserialized[$this->code['self']->hash];
-            goto setcode;
-        }
-
-        static::$deserialized[$this->code['self']->hash] = null;
-
-        if ($this->code['use']) {
-            $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
-            extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
-        }
-
-        $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
-
-        static::$deserialized[$this->code['self']->hash] = $this->closure;
-
-        setcode:
-
-        $this->code = $this->code['function'];
-
-        if (!--static::$unserializations) {
-            static::$deserialized = null;
-        }
     }
 
     /**
@@ -426,9 +312,6 @@ class SerializableClosure implements Serializable
         if ($value instanceof static) {
             $pointer = &$value->getClosurePointer();
             return $pointer;
-        } elseif ($value instanceof SelfReference) {
-            $pointer = &static::$deserialized[$value->hash];
-            return $pointer;
         } elseif (is_array($value)) {
             $pointer = array_map(array($this, __FUNCTION__), $value);
             return $pointer;
@@ -452,11 +335,7 @@ class SerializableClosure implements Serializable
     {
         if ($value instanceof Closure) {
             if (isset($this->scope->storage[$value])) {
-                if (static::supportBinding()) {
-                    $ret = $this->scope->storage[$value];
-                } else {
-                    $ret = $this->scope->storage[$value]->reference;
-                }
+                $ret = $this->scope->storage[$value];
                 return $ret;
             }
 
