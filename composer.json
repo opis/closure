@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Opis\\Closure\\": "lib/"
+            "Opis\\Closure\\": "src/"
         },
         "files": ["functions.php"]
     },
