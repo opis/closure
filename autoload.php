@@ -8,6 +8,8 @@
  * Licensed under the MIT License
  * =========================================================================== */
 
+require_once 'functions.php';
+
 spl_autoload_register(function($class){
    
     $class = ltrim($class, '\\');
