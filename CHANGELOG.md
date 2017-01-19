@@ -1,5 +1,16 @@
 CHANGELOG
 ---------
+### v3.0.0
+
+* Dropped PHP 5.3 support
+* Moved source files from `lib` to `src` folder
+* Removed second parameter from `Opis\Closure\SerializableClosure::from` method and from constructor
+* Removed `Opis\Closure\{SecurityProviderInterface, DefaultSecurityProvider, SecureClosure}` classes
+* Refactored how signed closures were handled
+* Added `wrapClosures` and `unwrapClosures` static methods to `Opis\Closure\SerializableClosure` class
+* Added `Opis\Colosure\serialize` and `Opis\Closure\unserialize` functions
+* Improved serialization. You can now serialize arbitrary objects and the library will automatically wrap all closures
+
 ### v2.4.0, 2016.12.16
 
 * The parser was refactored and improved
