@@ -18,7 +18,18 @@ namespace Opis\Closure;
  */
 function serialize($data)
 {
-    SerializableClosure::wrapClosures($data);
+    static $counter = 0, $storage = null;
+
+    if($counter++ === 0){
+        $storage = new \SplObjectStorage();
+    }
+
+    SerializableClosure::wrapClosures($data, $storage);
+
+    if(--$counter === 0){
+        $storage = null;
+    }
+
     return \serialize($data);
 }
 
