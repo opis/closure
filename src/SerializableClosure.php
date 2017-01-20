@@ -345,8 +345,8 @@ class SerializableClosure implements Serializable
                 static::unwrapClosures($value);
             }
         }elseif ($data instanceof \stdClass){
-            foreach (get_object_vars($data) as $property){
-                static::unwrapClosures($data->{$property});
+            foreach ($data as &$property){
+                static::unwrapClosures($property);
             }
         } elseif (is_object($data) && !($data instanceof Closure)){
             $reflection = new ReflectionObject($data);
