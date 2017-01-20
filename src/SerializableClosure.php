@@ -301,6 +301,15 @@ class SerializableClosure implements Serializable
             foreach ($data as &$value){
                 static::wrapClosures($value, $storage);
             }
+        } elseif($data instanceof \stdClass){
+            if(isset($storage[$data])){
+                $data = $storage[$data];
+                return;
+            }
+            $data = $storage[$data] = clone($data);
+            foreach ($data as &$value){
+                static::wrapClosures($value, $storage);
+            }
         } elseif (is_object($data) && ! $data instanceof static){
             if(isset($storage[$data])){
                 $data = $storage[$data];
