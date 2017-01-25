@@ -342,6 +342,23 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($u[0]->getF() === $u[1]->getF());
     }
 
+    public function testPrivateMethodClone()
+    {
+        $a = new Clone1();
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
+        $this->assertEquals(1, $u->value());
+    }
+
+    public function testPrivateMethodClone2()
+    {
+        $a = new Clone1();
+        $f = function () use($a){
+            return $a->value();
+        };
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
+        $this->assertEquals(1, $u());
+    }
+
 }
 
 class ObjnObj implements Serializable {
@@ -412,5 +429,19 @@ class Abc
     {
         $f = $this->f;
         return $f($value);
+    }
+}
+
+class Clone1
+{
+    private $a = 1;
+
+    private function __clone()
+    {
+    }
+
+    public function value()
+    {
+        return $this->a;
     }
 }

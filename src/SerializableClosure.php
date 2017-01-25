@@ -315,16 +315,17 @@ class SerializableClosure implements Serializable
                 $data = $storage[$data];
                 return;
             }
-            $data = $storage[$data] = clone($data);
+            $instance = $data;
             $reflection = new ReflectionObject($data);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
+            $storage[$instance] = $data = $reflection->newInstanceWithoutConstructor();
             foreach ($reflection->getProperties($filter) as $property){
                 $property->setAccessible(true);
-                $value = $property->getValue($data);
+                $value = $property->getValue($instance);
                 if(is_array($value) || is_object($value)){
                     static::wrapClosures($value, $storage);
-                    $property->setValue($data, $value);
                 }
+                $property->setValue($data, $value);
             }
         }
 
@@ -396,7 +397,7 @@ class SerializableClosure implements Serializable
             $pointer = (object)$pointer;
             return $pointer;
         } elseif (is_object($value) && !($value instanceof Closure)){
-            $pointer = clone($value);
+            $pointer = $value;
             $reflection = new ReflectionObject($pointer);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             foreach ($reflection->getProperties($filter) as $property){
@@ -456,16 +457,17 @@ class SerializableClosure implements Serializable
             $this->mapByReference($value);
             $data = (object) $value;
         } elseif (is_object($data) && !$data instanceof SerializableClosure){
-            $data = clone($data);
+            $instance = $data;
             $reflection = new ReflectionObject($data);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
+            $data = $reflection->newInstanceWithoutConstructor();
             foreach ($reflection->getProperties($filter) as $property){
                 $property->setAccessible(true);
-                $value = $property->getValue($data);
+                $value = $property->getValue($instance);
                 if(is_array($value) || is_object($value)){
                     $this->mapByReference($value);
-                    $property->setValue($data, $value);
                 }
+                $property->setValue($data, $value);
             }
         }
     }
