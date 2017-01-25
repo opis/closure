@@ -97,7 +97,6 @@ class SerializableClosure implements Serializable
         if ($this->reflector === null) {
             $this->reflector = new ReflectionClosure($this->closure, $this->code);
             $this->code = null;
-            $this->useVars = null;
         }
 
         return $this->reflector;
@@ -201,7 +200,6 @@ class SerializableClosure implements Serializable
         }
 
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
-
 
         if($this->code['this'] === $this){
             $this->code['this'] = null;
@@ -422,8 +420,6 @@ class SerializableClosure implements Serializable
      * Internal method used to map closures by reference
      *
      * @param   mixed &$data
-     *
-     * @return  mixed   The mapped values
      */
     protected function mapByReference(&$data)
     {

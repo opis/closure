@@ -27,7 +27,7 @@ class ClosureScope
     public $toserialize = 0;
 
     /**
-     * @var SplObjectStorage Wrapped closures in current scope
+     * @var \SplObjectStorage Wrapped closures in current scope
      */
     public $storage;
 }

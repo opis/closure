@@ -47,7 +47,7 @@ class Analyzer extends ClosureAnalyzer
      */
     protected function determineCode(array &$data)
     {
-
+        return null;
     }
 
     /**
@@ -56,7 +56,7 @@ class Analyzer extends ClosureAnalyzer
      */
     protected function determineContext(array &$data)
     {
-
+        return null;
     }
 
 }
