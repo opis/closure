@@ -68,17 +68,15 @@ archive file, extract the content of the archive and include de `autoload.php` f
 
 ```php
 
-require_once 'path/to/closure-3.0/autoload.php';
+require_once 'path/to/opis/closure-3.0/autoload.php';
 
 ```
 
 ### SuperClosure support
 
-[SuperClosure](https://github.com/jeremeamia/super_closure) is the most 
-popular an widely used closure serialization library. 
-Starting with version `2.2.0`, *Opis Closure* is shipped with an analyzer(`Opis\Closure\Analyzer`)
-which aims to provide *Opis Closure*'s parsing precision and speed to *SuperClosure*.
+**Opis Closure** is shipped with an analyzer(`Opis\Closure\Analyzer`) which 
+aims to provide *Opis Closure*'s parsing precision and speed to [SuperClosure](https://github.com/jeremeamia/super_closure).
 
 ### Documentation
 
-Examples and documentation can be found [here](http://opis.io/closure)
+Examples and documentation can be found [here](http://www.opis.io/closure)
