@@ -44,12 +44,6 @@ in order for the closure to work after deserialization
 
 * PHP 5.4.* or higher
 
-### Migrating from 2.x
-
-The support for PHP 5.3 was dropped. You can continue using the `2.x` version of **Opis Colibri** if your project needs
-to support PHP 5.3, otherwise migrating to version `3.x` is simply a matter of updating your `composer.json` file
-(assuming your not using one of the removed classes - see [CHANGELOG](https://github.com/opis/closure/blob/master/CHANGELOG.md)).
-
 ### Installation
 
 This library is available on [Packagist](https://packagist.org/packages/opis/closure) and can be installed using [Composer](http://getcomposer.org).
@@ -71,6 +65,13 @@ archive file, extract the content of the archive and include de `autoload.php` f
 require_once 'path/to/opis/closure-3.0/autoload.php';
 
 ```
+
+### Migrating from 2.x
+
+If your project needs to support PHP 5.3 you can continue using the `2.x` version
+of **Opis Closure**. Otherwise, assuming you are not using one of the removed/refactored classes or features(see 
+[CHANGELOG](https://github.com/opis/closure/blob/master/CHANGELOG.md)), migrating to version `3.x` is simply a matter
+of updating your `composer.json` file. 
 
 ### SuperClosure support
 
