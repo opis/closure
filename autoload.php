@@ -1,10 +1,7 @@
 <?php
 /* ===========================================================================
- * Opis Project
- * http://opis.io
- * ===========================================================================
- * Copyright (c) 2013-2017 Opis Project
- * 
+ * Copyright (c) 2014-2017 The Opis Project
+ *
  * Licensed under the MIT License
  * =========================================================================== */
 
@@ -13,7 +10,7 @@ require_once 'functions.php';
 spl_autoload_register(function($class){
    
     $class = ltrim($class, '\\');
-    $dir = __DIR__ . '/lib';
+    $dir = __DIR__ . '/src';
     $namespace = 'Opis\Closure';
     
     if(strpos($class, $namespace) === 0)
