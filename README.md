@@ -35,16 +35,15 @@ proper serialization
 - Automatically detects when the scope and/or the bound object of a closure needs to be serialized
 in order for the closure to work after deserialization
 
-
-### License
+## License
 
 **Opis Closure** is licensed under the [MIT License (MIT)](http://opensource.org/licenses/MIT). 
 
-### Requirements
+## Requirements
 
 * PHP 5.4.* or higher
 
-### Installation
+## Installation
 
 This library is available on [Packagist](https://packagist.org/packages/opis/closure) and can be installed using [Composer](http://getcomposer.org).
 
@@ -72,6 +71,10 @@ If your project needs to support PHP 5.3 you can continue using the `2.x` versio
 of **Opis Closure**. Otherwise, assuming you are not using one of the removed/refactored classes or features(see 
 [CHANGELOG](https://github.com/opis/closure/blob/master/CHANGELOG.md)), migrating to version `3.x` is simply a matter
 of updating your `composer.json` file. 
+
+### Semantic versioning
+
+**Opis Closure** follows the [SemVer](http://semver.org/) specifications.
 
 ### SuperClosure support
 
