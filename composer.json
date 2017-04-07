@@ -1,6 +1,6 @@
 {
     "name": "opis/closure",
-    "description": "A library for PHP 5.3+ that can be used to serialize closures (anonymous functions).",
+    "description": "A library that can be used to serialize closures (anonymous functions) or arbitrary objects.",
     "keywords": ["closure", "serialization", "function", "serializable", "serialize", "anonymous functions"],
     "homepage": "http://www.opis.io/closure",
     "license": "MIT",
