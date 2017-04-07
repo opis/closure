@@ -74,7 +74,7 @@ of updating your `composer.json` file.
 
 ### Semantic versioning
 
-**Opis Closure** follows the [SemVer](http://semver.org/) specifications.
+**Opis Closure** follows [SemVer](http://semver.org/) specifications.
 
 ### SuperClosure support
 
