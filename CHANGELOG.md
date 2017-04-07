@@ -1,6 +1,6 @@
 CHANGELOG
 ---------
-### v3.0.0
+### v3.0.0, 2017.04.07
 
 * Dropped PHP 5.3 support
 * Moved source files from `lib` to `src` folder
