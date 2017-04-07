@@ -277,6 +277,14 @@ class SerializableClosure implements Serializable
     }
 
     /**
+     * @return null|ISecurityProvider
+     */
+    public static function getSecurityProvider()
+    {
+        return static::$securityProvider;
+    }
+
+    /**
      * Wrap closures
      *
      * @param $data
