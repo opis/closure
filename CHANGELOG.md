@@ -18,7 +18,7 @@ CHANGELOG
 * `Opis\Closure\{ISecurityProvider, SecurityProvider}` were added
 * `Opis\Closure\{SecurityProviderInterface, DefaultSecurityProvider, SecureClosure}` were deprecated
 and they will be removed in the next major version
-* `setSecretKey` and `addSecurityProvider` static methods were added to `Opis\Colibri\SerializableClosure`
+* `setSecretKey` and `addSecurityProvider` static methods were added to `Opis\Closure\SerializableClosure`
 
 ### v2.3.2, 2016.12.15
 

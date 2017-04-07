@@ -5,7 +5,7 @@
  * Licensed under the MIT License
  * =========================================================================== */
 
-namespace Opis\Colibri\Test;
+namespace Opis\Closure\Test;
 
 use Opis\Closure\SerializableClosure;
 
