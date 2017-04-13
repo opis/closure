@@ -229,6 +229,17 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(true, $os(true));
     }
 
+    public function testClosureCurlySyntax()
+    {
+        $f = function (){
+            $x = (object)array('a' => 1, 'b' => 3);
+            $b = 'b';
+            return $x->{'a'} + $x->{$b};
+        };
+        $f = $this->s($f);
+        $this->assertEquals(4, $f());
+    }
+
     public function testClosureBindToObject()
     {
         $a = new A();

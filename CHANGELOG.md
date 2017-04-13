@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.1, 2017.04.13
+
+* Fixed a bug in 'ignore_next' state
+
 ### v3.0.0, 2017.04.07
 
 * Dropped PHP 5.3 support
