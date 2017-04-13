@@ -306,11 +306,20 @@ class ReflectionClosure extends ReflectionFunction
                     }
                     break;
                 case 'ignore_next':
-                    if($token[0] === T_WHITESPACE){
-                        $code .= $token[1];
-                    } else {
-                        $code .= is_array($token) ? $token[1] : $token;
-                        $state = $lastState;
+                    switch ($token[0]){
+                        case T_WHITESPACE:
+                            $code .= $token[1];
+                            break;
+                        case T_CLASS:
+                        case T_STATIC:
+                        case T_VARIABLE:
+                        case T_STRING:
+                            $code .= $token[1];
+                            $state = $lastState;
+                            break;
+                        default:
+                            $state = $lastState;
+                            $i--;
                     }
                     break;
                 case 'id_start':

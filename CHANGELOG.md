@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v2.4.1, 2017.04.13
+
+* Fixed a bug in 'ignore_next' state
+
 ### v2.4.0, 2016.12.16
 
 * The parser was refactored and improved
