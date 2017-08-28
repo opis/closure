@@ -450,7 +450,7 @@ class A2
     public function getPhrase()
     {
         $c = $this->closure1;
-        return $c;
+        return $c();
     }
 
     public function getEquality()
