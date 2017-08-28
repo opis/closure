@@ -1,5 +1,10 @@
 CHANGELOG
 ---------
+### v3.0.2, 2017.08.28
+
+* Fixed a bug where `$this` object was not handled properly inside the 
+`SerializableClosre::serialize` method. 
+
 ### v3.0.1, 2017.04.13
 
 * Fixed a bug in 'ignore_next' state
