@@ -17,29 +17,31 @@ class ClosureContext
     /**
      * @var ClosureScope Closures scope
      */
-
     public $scope;
 
     /**
      * @var SplObjectStorage Wrapped closures in this context
      */
-
     public $instances;
+
+    /**
+     * @var SplObjectStorage Wrapped arbitrary objects
+     */
+    public $objects;
 
     /**
      * @var integer
      */
-
     public $locks;
 
     /**
      * Constructor
      */
-
     public function __construct()
     {
         $this->scope = new ClosureScope();
         $this->instances = new SplObjectStorage();
+        $this->objects = new SplObjectStorage();
         $this->locks = 0;
     }
 }

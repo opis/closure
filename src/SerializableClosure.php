@@ -128,6 +128,7 @@ class SerializableClosure implements Serializable
 
         if($reflector->isBindingRequired()){
             $object = $reflector->getClosureThis();
+            static::wrapClosures($object);
             if($scope = $reflector->getClosureScopeClass()){
                 $scope = $scope->name;
             }
@@ -295,7 +296,7 @@ class SerializableClosure implements Serializable
         static::enterContext();
 
         if($storage === null){
-            $storage = new SplObjectStorage();
+            $storage = static::$context->objects;
         }
 
         if($data instanceof Closure){

@@ -15,19 +15,11 @@ namespace Opis\Closure;
  */
 function serialize($data)
 {
-    static $counter = 0, $storage = null;
-
-    if($counter++ === 0){
-        $storage = new \SplObjectStorage();
-    }
-
-    SerializableClosure::wrapClosures($data, $storage);
-
-    if(--$counter === 0){
-        $storage = null;
-    }
-
-    return \serialize($data);
+    SerializableClosure::enterContext();
+    SerializableClosure::wrapClosures($data);
+    $data = \serialize($data);
+    SerializableClosure::exitContext();
+    return $data;
 }
 
 /**
