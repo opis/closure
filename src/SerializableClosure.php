@@ -384,6 +384,12 @@ class SerializableClosure implements Serializable
      */
     protected function &mapPointers(&$value)
     {
+        static $scope = null;
+
+        if($scope === null){
+            $scope = new ClosureScope();
+        }
+
         if ($value instanceof static) {
             $pointer = &$value->getClosurePointer();
             return $pointer;
@@ -394,11 +400,21 @@ class SerializableClosure implements Serializable
             $pointer = array_map(array($this, __FUNCTION__), $value);
             return $pointer;
         } elseif ($value instanceof \stdClass) {
-            $pointer = (array)$value;
+            if(isset($scope[$value])){
+                return $scope[$value];
+            }
+
+            $pointer = (array) $value;
             $pointer = array_map(array($this, __FUNCTION__), $pointer);
             $pointer = (object)$pointer;
+            $scope[$value] = $pointer;
             return $pointer;
+
         } elseif (is_object($value) && !($value instanceof Closure)){
+            if(isset($scope[$value])){
+                return $scope[$value];
+            }
+            $scope[$value] = $value;
             $pointer = $value;
             $reflection = new ReflectionObject($pointer);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
@@ -415,6 +431,7 @@ class SerializableClosure implements Serializable
                     $property->setValue($pointer, $this->mapPointers($item));
                 }
             }
+
             return $pointer;
         }
         return $value;
@@ -446,21 +463,33 @@ class SerializableClosure implements Serializable
                 $instance->scope = $this->scope;
             }
 
-            $this->scope[$data] = $instance;
-            $data = $instance;
+            $data = $this->scope[$data] = $instance;
         } elseif (is_array($data)) {
             foreach ($data as &$value){
                 $this->mapByReference($value);
             }
         } elseif ($data instanceof \stdClass) {
-            $value = (array) $data;
-            $this->mapByReference($value);
-            $data = (object) $value;
+            if(isset($this->scope[$data])){
+                $data = $this->scope[$data];
+                return;
+            }
+            $instance = $data;
+            $this->scope[$instance] = $data = clone($data);
+
+            foreach ($data as &$value){
+                $this->mapByReference($value);
+            }
+
         } elseif (is_object($data) && !$data instanceof SerializableClosure){
+            if(isset($this->scope[$data])){
+                $data = $this->scope[$data];
+                return;
+            }
+
             $instance = $data;
             $reflection = new ReflectionObject($data);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
-            $data = $reflection->newInstanceWithoutConstructor();
+            $this->scope[$instance] = $data = $reflection->newInstanceWithoutConstructor();
             foreach ($reflection->getProperties($filter) as $property){
                 $property->setAccessible(true);
                 $value = $property->getValue($instance);
