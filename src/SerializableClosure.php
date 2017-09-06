@@ -289,9 +289,9 @@ class SerializableClosure implements Serializable
      * Wrap closures
      *
      * @param $data
-     * @param ClosureScope|null $storage
+     * @param ClosureScope|SplObjectStorage|null $storage
      */
-    public static function wrapClosures(&$data, ClosureScope $storage = null)
+    public static function wrapClosures(&$data, SplObjectStorage $storage = null)
     {
         static::enterContext();
 
@@ -399,7 +399,8 @@ class SerializableClosure implements Serializable
             return $pointer;
         } elseif ($value instanceof \stdClass) {
             if(isset($scope[$value])){
-                return $scope[$value];
+                $pointer = $scope[$value];
+                return $pointer;
             }
             $pointer = (array) $value;
             $pointer = array_map(array($this, __FUNCTION__), $pointer);
@@ -408,7 +409,8 @@ class SerializableClosure implements Serializable
             return $pointer;
         } elseif (is_object($value) && !($value instanceof Closure)){
             if(isset($scope[$value])){
-                return $scope[$value];
+                $pointer = $scope[$value];
+                return $pointer;
             }
             $scope[$value] = $value;
             $pointer = $value;
