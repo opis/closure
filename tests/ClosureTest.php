@@ -380,6 +380,21 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $u());
     }
 
+    public function testNestedObjects()
+    {
+        $parent = new Entity();
+        $child = new Entity();
+        $parent->children[] = $child;
+        $child->parent = $parent;
+
+        $f = function () use($parent, $child){
+            return $parent === $child->parent;
+        };
+
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
+        $this->assertTrue($u());
+    }
+
 }
 
 class ObjnObj implements Serializable {
@@ -499,5 +514,10 @@ class Clone1
     {
         return $this->a;
     }
+}
+
+class Entity {
+    public $parent;
+    public $children = [];
 }
 
