@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.1.0
+
+* `Opis\Closure\ClosureScope` now extends `SplObjectStorage`
+
 ### v3.0.2, 2017.08.28
 
 * Fixed a bug where `$this` object was not handled properly inside the 

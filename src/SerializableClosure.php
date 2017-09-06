@@ -191,8 +191,10 @@ class SerializableClosure implements Serializable
         $this->code['objects'] = array();
 
         if ($this->code['use']) {
+            $this->scope = new ClosureScope();
             $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
             extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
+            $this->scope = null;
         }
 
         $this->closure = include(ClosureStream::STREAM_PROTO . '://' . $this->code['function']);
@@ -384,11 +386,7 @@ class SerializableClosure implements Serializable
      */
     protected function &mapPointers(&$value)
     {
-        static $scope = null;
-
-        if($scope === null){
-            $scope = new ClosureScope();
-        }
+        $scope = $this->scope;
 
         if ($value instanceof static) {
             $pointer = &$value->getClosurePointer();
@@ -403,13 +401,11 @@ class SerializableClosure implements Serializable
             if(isset($scope[$value])){
                 return $scope[$value];
             }
-
             $pointer = (array) $value;
             $pointer = array_map(array($this, __FUNCTION__), $pointer);
             $pointer = (object)$pointer;
             $scope[$value] = $pointer;
             return $pointer;
-
         } elseif (is_object($value) && !($value instanceof Closure)){
             if(isset($scope[$value])){
                 return $scope[$value];
