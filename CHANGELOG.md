@@ -1,10 +1,10 @@
 CHANGELOG
 ---------
-### v3.1.0
+### v3.1.0, 2017.09.06
 
 * `Opis\Closure\ClosureScope` now extends `SplObjectStorage`
 * The `storage` property was removed from `Opis\Closure\ClosureScope`
-* Fixed a bug related to `ClosureScope`
+* Fixed [a bug](https://github.com/opis/closure/issues/10) related to `ClosureScope` 
 * The `instances` and `objects` properties were removed from `Opis\Closure\ClosureContext`
 
 ### v3.0.2, 2017.08.28
