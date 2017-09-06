@@ -119,16 +119,14 @@ class SerializableClosure implements Serializable
             $this->scope->toserialize++;
         }
 
-        if (!$this->scope->serializations++) {
-            $this->scope->storage = new SplObjectStorage();
-        }
+        $this->scope->serializations++;
 
         $scope = $object = null;
         $reflector = $this->getReflector();
 
         if($reflector->isBindingRequired()){
             $object = $reflector->getClosureThis();
-            static::wrapClosures($object);
+            static::wrapClosures($object, $this->scope);
             if($scope = $reflector->getClosureScopeClass()){
                 $scope = $scope->name;
             }
@@ -140,7 +138,7 @@ class SerializableClosure implements Serializable
 
         $this->reference = spl_object_hash($this->closure);
 
-        $this->scope->storage[$this->closure] = $this;
+        $this->scope[$this->closure] = $this;
 
         $use = $reflector->getUseVariables();
         $code = $reflector->getCode();
@@ -160,7 +158,7 @@ class SerializableClosure implements Serializable
         }
 
         if (!--$this->scope->serializations && !--$this->scope->toserialize) {
-            $this->scope->storage = null;
+            $this->scope = null;
         }
 
         return $ret;
@@ -227,11 +225,11 @@ class SerializableClosure implements Serializable
     {
         if (static::$context === null) {
             $instance = new static($closure);
-        } elseif (isset(static::$context->instances[$closure])) {
-            $instance = static::$context->instances[$closure];
+        } elseif (isset(static::$context->scope[$closure])) {
+            $instance = static::$context->scope[$closure];
         } else {
             $instance = new static($closure);
-            static::$context->instances[$closure] = $instance;
+            static::$context->scope[$closure] = $instance;
         }
 
         return $instance;
@@ -289,14 +287,14 @@ class SerializableClosure implements Serializable
      * Wrap closures
      *
      * @param $data
-     * @param SplObjectStorage|null $storage
+     * @param ClosureScope|null $storage
      */
-    public static function wrapClosures(&$data, SplObjectStorage $storage = null)
+    public static function wrapClosures(&$data, ClosureScope $storage = null)
     {
         static::enterContext();
 
         if($storage === null){
-            $storage = static::$context->objects;
+            $storage = static::$context->scope;
         }
 
         if($data instanceof Closure){
@@ -435,8 +433,8 @@ class SerializableClosure implements Serializable
                 return;
             }
 
-            if (isset($this->scope->storage[$data])) {
-                $data = $this->scope->storage[$data];
+            if (isset($this->scope[$data])) {
+                $data = $this->scope[$data];
                 return;
             }
 
@@ -448,7 +446,7 @@ class SerializableClosure implements Serializable
                 $instance->scope = $this->scope;
             }
 
-            $this->scope->storage[$data] = $instance;
+            $this->scope[$data] = $instance;
             $data = $instance;
         } elseif (is_array($data)) {
             foreach ($data as &$value){
