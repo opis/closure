@@ -395,6 +395,19 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($u());
     }
 
+    public function testNestedObjects2()
+    {
+        $child = new stdClass();
+        $parent = new stdClass();
+        $child->parent = $parent;
+        $parent->childern = [$child];
+        $parent->closure = function () use($child){
+            return true;
+        };
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($parent))->closure;
+        $this->assertTrue($u());
+    }
+
 }
 
 class ObjnObj implements Serializable {

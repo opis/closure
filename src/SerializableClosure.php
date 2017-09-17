@@ -339,28 +339,42 @@ class SerializableClosure implements Serializable
 
     /**
      * Unwrap closures
+     *
      * @param $data
+     * @param SplObjectStorage|null $storage
      */
-    public static function unwrapClosures(&$data)
+    public static function unwrapClosures(&$data, SplObjectStorage $storage = null)
     {
+        if($storage === null){
+            $storage = static::$context->scope;
+        }
+
         if($data instanceof static){
             $data = $data->getClosure();
         } elseif (is_array($data)){
             foreach ($data as &$value){
-                static::unwrapClosures($value);
+                static::unwrapClosures($value, $storage);
             }
         }elseif ($data instanceof \stdClass){
+            if(isset($storage[$data])){
+                return;
+            }
+            $storage[$data] = true;
             foreach ($data as &$property){
-                static::unwrapClosures($property);
+                static::unwrapClosures($property, $storage);
             }
         } elseif (is_object($data) && !($data instanceof Closure)){
+            if(isset($storage[$data])){
+                return;
+            }
+            $storage[$data] = true;
             $reflection = new ReflectionObject($data);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             foreach ($reflection->getProperties($filter) as $property){
                 $property->setAccessible(true);
                 $value = $property->getValue($data);
                 if(is_array($value) || is_object($value)){
-                    static::unwrapClosures($value);
+                    static::unwrapClosures($value, $storage);
                     $property->setValue($data, $value);
                 }
             }
