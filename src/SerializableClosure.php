@@ -192,7 +192,7 @@ class SerializableClosure implements Serializable
 
         if ($this->code['use']) {
             $this->scope = new ClosureScope();
-            $this->code['use'] = array_map(array($this, 'mapPointers'), $this->code['use']);
+            $this->code['use'] = &$this->mapPointers($this->code['use']);
             extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
             $this->scope = null;
         }
@@ -380,40 +380,44 @@ class SerializableClosure implements Serializable
     /**
      * Internal method used to map the pointers on unserialization
      *
-     * @param   mixed &$value The value to map
+     * @param   mixed &$data The value to map
      *
      * @return  mixed   Mapped pointers
      */
-    protected function &mapPointers(&$value)
+    protected function &mapPointers(&$data)
     {
         $scope = $this->scope;
 
-        if ($value instanceof static) {
-            $pointer = &$value->getClosurePointer();
+        if ($data instanceof static) {
+            $pointer = &$data->getClosurePointer();
             return $pointer;
-        } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
+        } elseif ($data instanceof SelfReference && $data->hash === $this->code['self']){
             $pointer = &$this->getClosurePointer();
             return $pointer;
-        }elseif (is_array($value)) {
-            $pointer = array_map(array($this, __FUNCTION__), $value);
+        }elseif (is_array($data)) {
+            $pointer = [];
+            foreach ($data as $key => $value){
+                $pointer[$key] = &$this->mapPointers($value);
+            }
             return $pointer;
-        } elseif ($value instanceof \stdClass) {
-            if(isset($scope[$value])){
-                $pointer = $scope[$value];
+        } elseif ($data instanceof \stdClass) {
+            if(isset($scope[$data])){
+                $pointer = $scope[$data];
                 return $pointer;
             }
-            $pointer = (array) $value;
-            $pointer = array_map(array($this, __FUNCTION__), $pointer);
-            $pointer = (object)$pointer;
-            $scope[$value] = $pointer;
+            $pointer = $data;
+            $scope[$data] = $pointer;
+            foreach ($data as $key => $value){
+                $pointer->{$key} = &$this->mapPointers($value);
+            }
             return $pointer;
-        } elseif (is_object($value) && !($value instanceof Closure)){
-            if(isset($scope[$value])){
-                $pointer = $scope[$value];
+        } elseif (is_object($data) && !($data instanceof Closure)){
+            if(isset($scope[$data])){
+                $pointer = $scope[$data];
                 return $pointer;
             }
-            $scope[$value] = $value;
-            $pointer = $value;
+            $scope[$data] = $data;
+            $pointer = $data;
             $reflection = new ReflectionObject($pointer);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             foreach ($reflection->getProperties($filter) as $property){
@@ -432,7 +436,7 @@ class SerializableClosure implements Serializable
 
             return $pointer;
         }
-        return $value;
+        return $data;
     }
 
     /**
