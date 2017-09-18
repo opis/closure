@@ -1,6 +1,6 @@
 CHANGELOG
 ---------
-### v3.0.4
+### v3.0.4, 2017.09.18
 
 * \[*internal*\] Refactored `SerializableClosure::mapPointers` method
 * \[*internal*\] Added a new optional argument to `SerializableClosure::unwrapClosures`
