@@ -61,7 +61,7 @@ class SerializableClosure implements Serializable
     protected static $securityProvider;
 
     /** Array recursive constant*/
-    const ARRAY_RECURSIVE_KEY = '___key___';
+    const ARRAY_RECURSIVE_KEY = '¯\_(ツ)_/¯';
 
     /**
      * Constructor
