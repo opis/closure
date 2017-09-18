@@ -1,5 +1,12 @@
 CHANGELOG
 ---------
+### v3.0.4
+
+* \[*internal*\] Refactored `SerializableClosure::mapPointers` method
+* \[*internal*\] Added a new optional argument to `SerializableClosure::unwrapClosures`
+* \[*internal*\] Removed `SerializableClosure::getClosurePointer` method
+* Fixed various bugs
+
 ### v3.0.3, 2017.09.06
 
 * Fixed a bug related to nested object references 
