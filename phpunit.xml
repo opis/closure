@@ -1,7 +1,10 @@
 <phpunit bootstrap="./vendor/autoload.php">
     <testsuites>
-        <testsuite name="Closure Tests">
-            <directory suffix="Test.php" phpVersion="5.4.0" phpVersionOperator=">=">./tests</directory>
+        <testsuite name="Main">
+            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ClosureTest.php</file>
+        </testsuite>
+        <testsuite name="Signed">
+            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SignedClosureTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

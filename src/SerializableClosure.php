@@ -189,6 +189,7 @@ class SerializableClosure implements Serializable
             $data = $data['closure'];
         }
 
+
         $this->code = \unserialize($data);
 
         $this->code['objects'] = array();
@@ -305,9 +306,17 @@ class SerializableClosure implements Serializable
         if($data instanceof Closure){
             $data = static::from($data);
         } elseif (is_array($data)){
-            foreach ($data as &$value){
+            if(isset($data[self::ARRAY_RECURSIVE_KEY])){
+                return;
+            }
+            $data[self::ARRAY_RECURSIVE_KEY] = true;
+            foreach ($data as $key => &$value){
+                if($key === self::ARRAY_RECURSIVE_KEY){
+                    continue;
+                }
                 static::wrapClosures($value, $storage);
             }
+            unset($data[self::ARRAY_RECURSIVE_KEY]);
         } elseif($data instanceof \stdClass){
             if(isset($storage[$data])){
                 $data = $storage[$data];
@@ -355,9 +364,17 @@ class SerializableClosure implements Serializable
         if($data instanceof static){
             $data = $data->getClosure();
         } elseif (is_array($data)){
-            foreach ($data as &$value){
+            if(isset($data[self::ARRAY_RECURSIVE_KEY])){
+                return;
+            }
+            $data[self::ARRAY_RECURSIVE_KEY] = true;
+            foreach ($data as $key => &$value){
+                if($key === self::ARRAY_RECURSIVE_KEY){
+                    continue;
+                }
                 static::unwrapClosures($value, $storage);
             }
+            unset($data[self::ARRAY_RECURSIVE_KEY]);
         }elseif ($data instanceof \stdClass){
             if(isset($storage[$data])){
                 return;
@@ -433,7 +450,7 @@ class SerializableClosure implements Serializable
             }
             $pointer = $data;
             $scope[$data] = $pointer;
-            foreach ($data as $key => $value){
+            foreach ($data as $key => &$value){
                 $pointer->{$key} = &$this->mapPointers($value);
             }
             return $pointer;
