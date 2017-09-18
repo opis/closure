@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.5, 2017.09.18
+
+* Fixed a bug related to nested references
+
 ### v3.0.4, 2017.09.18
 
 * \[*internal*\] Refactored `SerializableClosure::mapPointers` method

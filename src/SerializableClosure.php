@@ -191,6 +191,9 @@ class SerializableClosure implements Serializable
 
         $this->code = \unserialize($data);
 
+        // unset data
+        unset($data);
+
         $this->code['objects'] = array();
 
         if ($this->code['use']) {
