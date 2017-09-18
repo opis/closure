@@ -408,6 +408,17 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($u());
     }
 
+    public function testRecursiveArray()
+    {
+        $a = ['foo'];
+        $a[] = &$a;
+        $f = function () use($a){
+            return $a[1][0];
+        };
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
+        $this->assertEquals('foo', $u());
+    }
+
 }
 
 class ObjnObj implements Serializable {

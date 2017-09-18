@@ -60,6 +60,9 @@ class SerializableClosure implements Serializable
      */
     protected static $securityProvider;
 
+    /** Array recursive constant*/
+    const ARRAY_RECURSIVE_KEY = '___key___';
+
     /**
      * Constructor
      *
@@ -409,10 +412,19 @@ class SerializableClosure implements Serializable
             $pointer = &$this->getClosurePointer();
             return $pointer;
         }elseif (is_array($data)) {
+            if(isset($data[self::ARRAY_RECURSIVE_KEY])){
+                $pointer = &$data[self::ARRAY_RECURSIVE_KEY];
+                return $pointer;
+            }
             $pointer = [];
-            foreach ($data as $key => $value){
+            $data[self::ARRAY_RECURSIVE_KEY] = &$pointer;
+            foreach ($data as $key => &$value){
+                if($key === self::ARRAY_RECURSIVE_KEY){
+                    continue;
+                }
                 $pointer[$key] = &$this->mapPointers($value);
             }
+            unset($data[self::ARRAY_RECURSIVE_KEY]);
             return $pointer;
         } elseif ($data instanceof \stdClass) {
             if(isset($scope[$data])){
@@ -481,9 +493,17 @@ class SerializableClosure implements Serializable
 
             $data = $this->scope[$data] = $instance;
         } elseif (is_array($data)) {
-            foreach ($data as &$value){
+            if(isset($data[self::ARRAY_RECURSIVE_KEY])){
+                return;
+            }
+            $data[self::ARRAY_RECURSIVE_KEY] = true;
+            foreach ($data as $key => &$value){
+                if($key === self::ARRAY_RECURSIVE_KEY){
+                    continue;
+                }
                 $this->mapByReference($value);
             }
+            unset($data[self::ARRAY_RECURSIVE_KEY]);
         } elseif ($data instanceof \stdClass) {
             if(isset($this->scope[$data])){
                 $data = $this->scope[$data];
