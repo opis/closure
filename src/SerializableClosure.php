@@ -417,6 +417,8 @@ class SerializableClosure implements Serializable
             foreach ($data as $key => &$value){
                 if($key === self::ARRAY_RECURSIVE_KEY){
                     continue;
+                } elseif ($value instanceof static) {
+                    $data[$key] = &$value->closure;
                 } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
                     $data[$key] = &$this->closure;
                 } else {
@@ -432,6 +434,8 @@ class SerializableClosure implements Serializable
             foreach ($data as $key => &$value){
                 if($key === self::ARRAY_RECURSIVE_KEY){
                     continue;
+                } elseif ($value instanceof static) {
+                    $data->{$key} = &$value->closure;
                 } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
                     $data->{$key} = &$this->closure;
                 } else {

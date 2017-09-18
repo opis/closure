@@ -111,9 +111,8 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($u, $u());
     }
 
-    /*public function testClosureUseSelfInMultiArray()
+    public function testClosureUseSelfInMultiArray()
     {
-return;
         $a = array();
         $x = null;
 
@@ -133,7 +132,7 @@ return;
         $u = $this->s($c);
 
         $this->assertEquals($u, $u(0));
-    }*/
+    }
 
     public function testClosureUseSelfInInstance()
     {
