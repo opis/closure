@@ -189,14 +189,13 @@ class SerializableClosure implements Serializable
             $data = $data['closure'];
         }
 
-
         $this->code = \unserialize($data);
 
         $this->code['objects'] = array();
 
         if ($this->code['use']) {
             $this->scope = new ClosureScope();
-            $this->code['use'] = &$this->mapPointers($this->code['use']);
+            $this->mapPointers($this->code['use']);
             extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
             $this->scope = null;
         }
@@ -348,7 +347,6 @@ class SerializableClosure implements Serializable
         static::exitContext();
     }
 
-
     /**
      * Unwrap closures
      *
@@ -412,74 +410,66 @@ class SerializableClosure implements Serializable
     }
 
     /**
-     * Internal method used to map the pointers on unserialization
-     *
-     * @param   mixed &$data The value to map
-     *
-     * @return  mixed   Mapped pointers
+     * Internal method used to map closure pointers
+     * @param $data
      */
-    protected function &mapPointers(&$data)
+    protected function mapPointers(&$data)
     {
         $scope = $this->scope;
 
         if ($data instanceof static) {
-            $pointer = &$data->getClosurePointer();
-            return $pointer;
-        } elseif ($data instanceof SelfReference && $data->hash === $this->code['self']){
-            $pointer = &$this->getClosurePointer();
-            return $pointer;
-        }elseif (is_array($data)) {
+            $data = &$data->closure;
+        } elseif (is_array($data)) {
             if(isset($data[self::ARRAY_RECURSIVE_KEY])){
-                $pointer = &$data[self::ARRAY_RECURSIVE_KEY];
-                return $pointer;
+                return;
             }
-            $pointer = [];
-            $data[self::ARRAY_RECURSIVE_KEY] = &$pointer;
+            $data[self::ARRAY_RECURSIVE_KEY] = true;
             foreach ($data as $key => &$value){
                 if($key === self::ARRAY_RECURSIVE_KEY){
                     continue;
+                } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
+                    $data[$key] = &$this->closure;
+                } else {
+                    $this->mapPointers($value);
                 }
-                $pointer[$key] = &$this->mapPointers($value);
             }
             unset($data[self::ARRAY_RECURSIVE_KEY]);
-            return $pointer;
         } elseif ($data instanceof \stdClass) {
             if(isset($scope[$data])){
-                $pointer = $scope[$data];
-                return $pointer;
+                return;
             }
-            $pointer = $data;
-            $scope[$data] = $pointer;
+            $scope[$data] = true;
             foreach ($data as $key => &$value){
-                $pointer->{$key} = &$this->mapPointers($value);
+                if($key === self::ARRAY_RECURSIVE_KEY){
+                    continue;
+                } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
+                    $data->{$key} = &$this->closure;
+                } else {
+                    $this->mapPointers($value);
+                }
             }
-            return $pointer;
         } elseif (is_object($data) && !($data instanceof Closure)){
             if(isset($scope[$data])){
-                $pointer = $scope[$data];
-                return $pointer;
+                return;
             }
-            $scope[$data] = $data;
-            $pointer = $data;
-            $reflection = new ReflectionObject($pointer);
+            $scope[$data] = true;
+            $reflection = new ReflectionObject($data);
             $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             foreach ($reflection->getProperties($filter) as $property){
                 $property->setAccessible(true);
-                $item = $property->getValue($pointer);
+                $item = $property->getValue($data);
                 if ($item instanceof SerializableClosure || ($item instanceof SelfReference && $item->hash === $this->code['self'])) {
                     $this->code['objects'][] = array(
-                        'instance' => $pointer,
+                        'instance' => $data,
                         'property' => $property,
                         'object' => $item instanceof SelfReference ? $this : $item,
                     );
                 } elseif (is_array($item) || is_object($item)) {
-                    $property->setValue($pointer, $this->mapPointers($item));
+                    $this->mapPointers($item);
+                    $property->setValue($data, $item);
                 }
             }
-
-            return $pointer;
         }
-        return $data;
     }
 
     /**
