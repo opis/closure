@@ -400,16 +400,6 @@ class SerializableClosure implements Serializable
     }
 
     /**
-     * Internal method used to get a reference from closure
-     *
-     * @return  Closure A pointer to closure
-     */
-    protected function &getClosurePointer()
-    {
-        return $this->closure;
-    }
-
-    /**
      * Internal method used to map closure pointers
      * @param $data
      */
