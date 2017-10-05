@@ -318,6 +318,7 @@ class SerializableClosure implements Serializable
                 }
                 static::wrapClosures($value, $storage);
             }
+            unset($value);
             unset($data[self::ARRAY_RECURSIVE_KEY]);
         } elseif($data instanceof \stdClass){
             if(isset($storage[$data])){
@@ -328,6 +329,7 @@ class SerializableClosure implements Serializable
             foreach ($data as &$value){
                 static::wrapClosures($value, $storage);
             }
+            unset($value);
         } elseif (is_object($data) && ! $data instanceof static){
             if(isset($storage[$data])){
                 $data = $storage[$data];
@@ -428,6 +430,7 @@ class SerializableClosure implements Serializable
                     $this->mapPointers($value);
                 }
             }
+            unset($value);
             unset($data[self::ARRAY_RECURSIVE_KEY]);
         } elseif ($data instanceof \stdClass) {
             if(isset($scope[$data])){
@@ -435,9 +438,7 @@ class SerializableClosure implements Serializable
             }
             $scope[$data] = true;
             foreach ($data as $key => &$value){
-                if($key === self::ARRAY_RECURSIVE_KEY){
-                    continue;
-                } elseif ($value instanceof static) {
+                if ($value instanceof static) {
                     $data->{$key} = &$value->closure;
                 } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
                     $data->{$key} = &$this->closure;
@@ -445,6 +446,7 @@ class SerializableClosure implements Serializable
                     $this->mapPointers($value);
                 }
             }
+            unset($value);
         } elseif (is_object($data) && !($data instanceof Closure)){
             if(isset($scope[$data])){
                 return;
@@ -507,6 +509,7 @@ class SerializableClosure implements Serializable
                 }
                 $this->mapByReference($value);
             }
+            unset($value);
             unset($data[self::ARRAY_RECURSIVE_KEY]);
         } elseif ($data instanceof \stdClass) {
             if(isset($this->scope[$data])){
@@ -519,7 +522,7 @@ class SerializableClosure implements Serializable
             foreach ($data as &$value){
                 $this->mapByReference($value);
             }
-
+            unset($value);
         } elseif (is_object($data) && !$data instanceof SerializableClosure){
             if(isset($this->scope[$data])){
                 $data = $this->scope[$data];
