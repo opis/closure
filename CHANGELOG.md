@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.6, 2017.10.06
+
+* Fixed a bug introduced by accident in 3.0.5
+
 ### v3.0.5, 2017.09.18
 
 * Fixed a bug related to nested references
