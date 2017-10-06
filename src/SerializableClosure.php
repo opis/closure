@@ -438,11 +438,9 @@ class SerializableClosure implements Serializable
             }
             $scope[$data] = true;
             foreach ($data as $key => &$value){
-                if ($value instanceof static) {
-                    $data->{$key} = &$value->closure;
-                } elseif ($value instanceof SelfReference && $value->hash === $this->code['self']){
+                if ($value instanceof SelfReference && $value->hash === $this->code['self']){
                     $data->{$key} = &$this->closure;
-                } else {
+                } elseif(is_array($value) || is_object($value)) {
                     $this->mapPointers($value);
                 }
             }
