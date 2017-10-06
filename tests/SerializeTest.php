@@ -137,7 +137,40 @@ class SerializeTest extends \PHPUnit_Framework_TestCase
 
         $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($obj));
         $c = $u->closure;
-        $this->assertTrue($c instanceof Closure);
+        $this->assertTrue($c($u));
+    }
+
+    public function testNestedObjects4()
+    {
+        $parent = new \stdClass;
+        $child1 = new \stdClass;
+
+        $child1->parent = $parent;
+
+        $parent->closure = function ($p) use ($child1) {
+            return $child1->parent === $p;
+        };
+
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($parent));
+        $c = $u->closure;
+        $this->assertTrue($c($u));
+    }
+
+    public function testNestedObjects5()
+    {
+        $parent = new \stdClass;
+        $child1 = new \stdClass;
+        $child2 = new \stdClass;
+
+        $child1->parent = $parent;
+        $child2->parent = $parent;
+
+        $parent->closure = function ($p) use ($child1, $child2) {
+            return $child1->parent === $child2->parent && $child1->parent === $p;
+        };
+
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($parent));
+        $c = $u->closure;
         $this->assertTrue($c($u));
     }
 }
