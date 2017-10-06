@@ -128,99 +128,17 @@ class SerializeTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($u());
     }
 
-    public function testRecursiveArray()
+    public function testNestedObjects3()
     {
-        $a = ['foo'];
-        $a[] = &$a;
-        $f = function () use($a){
-            return $a[1][0];
+        $obj = new \stdClass;
+        $obj->closure = function ($arg) use ($obj) {
+            return $arg === $obj;
         };
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
-        $this->assertEquals('foo', $u());
-    }
 
-    public function testRecursiveArray2()
-    {
-        $a = ['foo'];
-        $a[] = &$a;
-        $f = function () use(&$a){
-            return $a[1][0];
-        };
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
-        $this->assertEquals('foo', $u());
-    }
-
-    public function testRecursiveArray3()
-    {
-        $f = function () {
-            return true;
-        };
-        $a = [$f];
-        $a[] = &$a;
-
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
-        $u = $u[1][0];
-        $this->assertTrue($u());
-    }
-
-    public function testRecursiveArray4()
-    {
-        $a = [];
-        $f = function () use($a) {
-            return true;
-        };
-        $a[] = $f;
-        $a[] = &$a;
-
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
-        $u = $u[1][0];
-        $this->assertTrue($u());
-    }
-
-    public function testRecursiveArray5()
-    {
-        $a = [];
-        $f = function () use(&$a) {
-            return true;
-        };
-        $a[] = $f;
-        $a[] = &$a;
-
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($a));
-        $u = $u[1][0];
-        $this->assertTrue($u());
-    }
-
-    public function testRecursiveArray6()
-    {
-        $o = new stdClass();
-        $o->a = [];
-        $f = function () {
-            return true;
-        };
-        $a = &$o->a;
-        $a[] = $f;
-        $a[] = &$a;
-
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($o));
-        $u = $u->a[1][0];
-        $this->assertTrue($u());
-    }
-
-    public function testRecursiveArray7()
-    {
-        $o = new stdClass();
-        $o->a = [];
-        $f = function () use($o){
-            return true;
-        };
-        $a = &$o->a;
-        $a[] = $f;
-        $a[] = &$a;
-
-        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($o));
-        $u = $u->a[1][0];
-        $this->assertTrue($u());
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($obj));
+        $c = $u->closure;
+        $this->assertTrue($c instanceof Closure);
+        $this->assertTrue($c($u));
     }
 }
 
