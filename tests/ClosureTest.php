@@ -8,18 +8,19 @@
 namespace Opis\Closure\Test;
 
 use Closure;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 use Serializable;
 use Opis\Closure\ReflectionClosure;
 use Opis\Closure\SerializableClosure;
 
-class ClosureTest extends \PHPUnit_Framework_TestCase
+class ClosureTest extends TestCase
 {
     protected function s($closure, $bindThis = false)
     {
         if($closure instanceof Closure)
         {
-            $closure = new SerializableClosure($closure, $bindThis);
+            $closure = new SerializableClosure($closure);
         }
 
         return unserialize(serialize($closure))->getClosure();

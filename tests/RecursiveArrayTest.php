@@ -17,9 +17,10 @@
 
 namespace Opis\Closure\Test;
 
+use PHPUnit\Framework\TestCase;
 use stdClass;
 
-class RecursiveArrayTest extends \PHPUnit_Framework_TestCase
+class RecursiveArrayTest extends TestCase
 {
     public function testRecursiveArray()
     {

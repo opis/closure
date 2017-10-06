@@ -17,10 +17,11 @@
 
 namespace Opis\Closure\Test;
 
+use PHPUnit\Framework\TestCase;
 use stdClass;
 use Closure;
 
-class SerializeTest extends \PHPUnit_Framework_TestCase
+class SerializeTest extends TestCase
 {
     public function testCustomSerialization()
     {
