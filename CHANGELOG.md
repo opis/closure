@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.7. 2017.10.31
+
+* Bugfix: static properties are ignored now, since they are not serializable
+
 ### v3.0.6, 2017.10.06
 
 * Fixed a bug introduced by accident in 3.0.5
