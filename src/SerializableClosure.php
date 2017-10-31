@@ -337,9 +337,11 @@ class SerializableClosure implements Serializable
             }
             $instance = $data;
             $reflection = new ReflectionObject($data);
-            $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             $storage[$instance] = $data = $reflection->newInstanceWithoutConstructor();
-            foreach ($reflection->getProperties($filter) as $property){
+            foreach ($reflection->getProperties() as $property){
+                if($property->isStatic()){
+                    continue;
+                }
                 $property->setAccessible(true);
                 $value = $property->getValue($instance);
                 if(is_array($value) || is_object($value)){
@@ -392,8 +394,10 @@ class SerializableClosure implements Serializable
             }
             $storage[$data] = true;
             $reflection = new ReflectionObject($data);
-            $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
-            foreach ($reflection->getProperties($filter) as $property){
+            foreach ($reflection->getProperties() as $property){
+                if($property->isStatic()){
+                    continue;
+                }
                 $property->setAccessible(true);
                 $value = $property->getValue($data);
                 if(is_array($value) || is_object($value)){
@@ -451,8 +455,10 @@ class SerializableClosure implements Serializable
             }
             $scope[$data] = true;
             $reflection = new ReflectionObject($data);
-            $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
-            foreach ($reflection->getProperties($filter) as $property){
+            foreach ($reflection->getProperties() as $property){
+                if($property->isStatic()){
+                    continue;
+                }
                 $property->setAccessible(true);
                 $item = $property->getValue($data);
                 if ($item instanceof SerializableClosure || ($item instanceof SelfReference && $item->hash === $this->code['self'])) {
@@ -529,9 +535,11 @@ class SerializableClosure implements Serializable
 
             $instance = $data;
             $reflection = new ReflectionObject($data);
-            $filter = ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
             $this->scope[$instance] = $data = $reflection->newInstanceWithoutConstructor();
-            foreach ($reflection->getProperties($filter) as $property){
+            foreach ($reflection->getProperties() as $property){
+                if($property->isStatic()){
+                    continue;
+                }
                 $property->setAccessible(true);
                 $value = $property->getValue($instance);
                 if(is_array($value) || is_object($value)){
