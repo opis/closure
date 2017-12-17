@@ -332,6 +332,12 @@ class ReflectionClosure extends ReflectionFunction
                             $id_name = '';
                             $state = 'id_name';
                             break 2;
+                        case T_VARIABLE:
+                            if($context === 'new'){
+                                $code .= $token[1];
+                                $state = $lastState;
+                                continue;
+                            }
                         default:
                             $i--;//reprocess last
                             $state = 'id_name';
@@ -384,7 +390,7 @@ class ReflectionClosure extends ReflectionFunction
                                     if (isset($classes[$id_start_ci])) {
                                         $id_start = $classes[$id_start_ci];
                                     }
-                                    if(isset($id_start[0]) && $id_start[0] !== '\\'){
+                                    if($id_start[0] !== '\\'){
                                         $id_start = $nsf . '\\' . $id_start;
                                     }
                                 }
