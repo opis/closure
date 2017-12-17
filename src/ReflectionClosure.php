@@ -384,7 +384,7 @@ class ReflectionClosure extends ReflectionFunction
                                     if (isset($classes[$id_start_ci])) {
                                         $id_start = $classes[$id_start_ci];
                                     }
-                                    if($id_start[0] !== '\\'){
+                                    if(isset($id_start[0]) && $id_start[0] !== '\\'){
                                         $id_start = $nsf . '\\' . $id_start;
                                     }
                                 }
