@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.8, 2017.12.18
+
+* Fixed a bug. See [issue 16](https://github.com/opis/closure/issues/16)
+
 ### v3.0.7, 2017.10.31
 
 * Bugfix: static properties are ignored now, since they are not serializable
