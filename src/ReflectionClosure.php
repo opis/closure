@@ -333,11 +333,9 @@ class ReflectionClosure extends ReflectionFunction
                             $state = 'id_name';
                             break 2;
                         case T_VARIABLE:
-                            if($context === 'new'){
-                                $code .= $token[1];
-                                $state = $lastState;
-                                continue;
-                            }
+                            $code .= $token[1];
+                            $state = $lastState;
+                            break;
                         default:
                             $i--;//reprocess last
                             $state = 'id_name';
