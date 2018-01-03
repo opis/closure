@@ -76,6 +76,14 @@ of updating your `composer.json` file.
 
 **Opis Closure** follows [SemVer](http://semver.org/) specifications.
 
+### Arbitrary object serialization
+
+This feature was primarily introduced in order to support serializing an object bound 
+to a closure and available via `$this`. The implementation is far from being perfect 
+and it's really hard to make it work flawless. I will try to improve this, but I can 
+not guarantee anything. So my advice regarding the `Opis\Closure\serialize|unserialize` 
+functions is to use them with caution.
+
 ### SuperClosure support
 
 **Opis Closure** is shipped with an analyzer(`Opis\Closure\Analyzer`) which 
