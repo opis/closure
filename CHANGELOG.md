@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.10, 2018.01.04
+
+* Improved support for PHP 7.1 & 7.2
+
 ### v3.0.9, 2018.01.04
 
 * Fixed a bug where the return type was not properly resolved. 
