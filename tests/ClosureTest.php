@@ -301,19 +301,6 @@ class ClosureTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($rc->isStatic());
     }
 
-    public function testClosureNewVariable1() {
-        $f = function (){ $c = '\A'; new $c;};
-        $r = new ReflectionClosure($f);
-        $fs = 'function (){ $c = \'\A\'; new $c;}';
-        $this->assertEquals($fs, $r->getCode());
-    }
-
-    public function testClosureInstanceof() {
-        $f = function (){ $c = null; $b = '\X\y'; v($c instanceof $b);};
-        $r = new ReflectionClosure($f);
-        $fs = 'function (){ $c = null; $b = \'\X\y\'; v($c instanceof $b);}';
-        $this->assertEquals($fs, $r->getCode());
-    }
 }
 
 class ObjnObj implements Serializable {
