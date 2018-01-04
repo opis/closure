@@ -19,5 +19,6 @@ sudo: false
 install:
   - travis_retry composer self-update
   - travis_wait composer install --no-interaction --prefer-source --ignore-platform-reqs --dev
+  - travis_wait composer update
 
 script: ./vendor/bin/phpunit
