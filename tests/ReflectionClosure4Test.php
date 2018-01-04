@@ -21,7 +21,7 @@ use Closure;
 use Opis\Closure\ReflectionClosure;
 
 
-class ReflectionClosure4Test extends \PHPUnit_Framework_TestCase
+class ReflectionClosure4Test extends \PHPUnit\Framework\TestCase
 {
     protected function c(Closure $closure)
     {

@@ -14,7 +14,7 @@ use Opis\Closure\ReflectionClosure;
 use Foo\Bar;
 use Foo\Baz as Qux;
 
-class ReflectionClosureTest extends \PHPUnit_Framework_TestCase
+class ReflectionClosureTest extends \PHPUnit\Framework\TestCase
 {
     protected function c(Closure $closure)
     {

@@ -25,7 +25,7 @@ use Foo\{Bar, Baz as Qux};
 use function Foo\f1;
 use function Bar\{b1, b2 as b3};
 
-class ReflectionClosure3Test extends \PHPUnit_Framework_TestCase
+class ReflectionClosure3Test extends \PHPUnit\Framework\TestCase
 {
     protected function c(Closure $closure)
     {

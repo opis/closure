@@ -10,7 +10,7 @@ namespace Opis\Closure\Test;
 use stdClass;
 use Closure;
 
-class SerializeTest extends \PHPUnit_Framework_TestCase
+class SerializeTest extends \PHPUnit\Framework\TestCase
 {
     public function testCustomSerialization()
     {
