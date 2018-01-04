@@ -26,10 +26,12 @@ class ReflectionClosure extends ReflectionFunction
     protected static $constants = array();
     protected static $structures = array();
 
+
     /**
      * ReflectionClosure constructor.
      * @param Closure $closure
      * @param string|null $code
+     * @throws \ReflectionException
      */
     public function __construct(Closure $closure, $code = null)
     {
@@ -75,8 +77,20 @@ class ReflectionClosure extends ReflectionFunction
         }
 
 
-        $php7 = '7' === "\u{37}";
-        $php7_types = array('string', 'int', 'bool', 'float');
+        if($php7 = PHP_MAJOR_VERSION === 7){
+            switch (PHP_MINOR_VERSION){
+                case 0:
+                    $php7_types = array('string', 'int', 'bool', 'float');
+                    break;
+                case 1:
+                    $php7_types = array('string', 'int', 'bool', 'float', 'void');
+                    break;
+                case 2:
+                default:
+                    $php7_types = array('string', 'int', 'bool', 'float', 'void', 'object');
+            }
+        }
+
         $ns = $this->getNamespaceName();
         $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
 
@@ -212,9 +226,14 @@ class ReflectionClosure extends ReflectionFunction
                             $state = 'id_name';
                             $lastState = 'return';
                             break 2;
-                        default:
-                            $i--;//reprocess
+                        case '{':
+                            $code .= '{';
                             $state = 'closure';
+                            $open++;
+                            break;
+                        default:
+                            $code .= is_array($token) ? $token[1] : $token;
+                            break;
                     }
                     break;
                 case 'closure':
