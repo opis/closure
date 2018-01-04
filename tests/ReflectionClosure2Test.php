@@ -40,6 +40,7 @@ class ReflectionClosure2Test extends \PHPUnit_Framework_TestCase
         $f5 = function (array $p, string $x){};
         $e5 = 'function (array $p, string $x){}';
 
+
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
@@ -72,7 +73,6 @@ class ReflectionClosure2Test extends \PHPUnit_Framework_TestCase
 
         $f8 = function (): string{};
         $e8 = 'function (): string{}';
-
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
