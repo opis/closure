@@ -1,5 +1,11 @@
 CHANGELOG
 ---------
+### v3.0.9, 2018.01.04
+
+* Fixed a bug where the return type was not properly resolved. 
+See [issue 17](https://github.com/opis/closure/issues/17)
+* Added more tests
+
 ### v3.0.8, 2017.12.18
 
 * Fixed a bug. See [issue 16](https://github.com/opis/closure/issues/16)
