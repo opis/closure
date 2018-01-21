@@ -336,19 +336,25 @@ class SerializableClosure implements Serializable
                 return;
             }
             $instance = $data;
-            $reflection = new ReflectionObject($data);
+            $reflection = new ReflectionObject($instance);
             $storage[$instance] = $data = $reflection->newInstanceWithoutConstructor();
-            foreach ($reflection->getProperties() as $property){
-                if($property->isStatic()){
-                    continue;
+
+            do{
+                if(!$reflection->isUserDefined()){
+                    break;
                 }
-                $property->setAccessible(true);
-                $value = $property->getValue($instance);
-                if(is_array($value) || is_object($value)){
-                    static::wrapClosures($value, $storage);
-                }
-                $property->setValue($data, $value);
-            }
+                foreach ($reflection->getProperties() as $property){
+                    if($property->isStatic()){
+                        continue;
+                    }
+                    $property->setAccessible(true);
+                    $value = $property->getValue($instance);
+                    if(is_array($value) || is_object($value)){
+                        static::wrapClosures($value, $storage);
+                    }
+                    $property->setValue($data, $value);
+                };
+            } while($reflection = $reflection->getParentClass());
         }
 
         static::exitContext();
@@ -394,17 +400,23 @@ class SerializableClosure implements Serializable
             }
             $storage[$data] = true;
             $reflection = new ReflectionObject($data);
-            foreach ($reflection->getProperties() as $property){
-                if($property->isStatic()){
-                    continue;
+
+            do{
+                if(!$reflection->isUserDefined()){
+                    break;
                 }
-                $property->setAccessible(true);
-                $value = $property->getValue($data);
-                if(is_array($value) || is_object($value)){
-                    static::unwrapClosures($value, $storage);
-                    $property->setValue($data, $value);
-                }
-            }
+                foreach ($reflection->getProperties() as $property){
+                    if($property->isStatic()){
+                        continue;
+                    }
+                    $property->setAccessible(true);
+                    $value = $property->getValue($data);
+                    if(is_array($value) || is_object($value)){
+                        static::unwrapClosures($value, $storage);
+                        $property->setValue($data, $value);
+                    }
+                };
+            } while($reflection = $reflection->getParentClass());
         }
     }
 
@@ -455,23 +467,28 @@ class SerializableClosure implements Serializable
             }
             $scope[$data] = true;
             $reflection = new ReflectionObject($data);
-            foreach ($reflection->getProperties() as $property){
-                if($property->isStatic()){
-                    continue;
+            do{
+                if(!$reflection->isUserDefined()){
+                    break;
                 }
-                $property->setAccessible(true);
-                $item = $property->getValue($data);
-                if ($item instanceof SerializableClosure || ($item instanceof SelfReference && $item->hash === $this->code['self'])) {
-                    $this->code['objects'][] = array(
-                        'instance' => $data,
-                        'property' => $property,
-                        'object' => $item instanceof SelfReference ? $this : $item,
-                    );
-                } elseif (is_array($item) || is_object($item)) {
-                    $this->mapPointers($item);
-                    $property->setValue($data, $item);
+                foreach ($reflection->getProperties() as $property){
+                    if($property->isStatic()){
+                        continue;
+                    }
+                    $property->setAccessible(true);
+                    $item = $property->getValue($data);
+                    if ($item instanceof SerializableClosure || ($item instanceof SelfReference && $item->hash === $this->code['self'])) {
+                        $this->code['objects'][] = array(
+                            'instance' => $data,
+                            'property' => $property,
+                            'object' => $item instanceof SelfReference ? $this : $item,
+                        );
+                    } elseif (is_array($item) || is_object($item)) {
+                        $this->mapPointers($item);
+                        $property->setValue($data, $item);
+                    }
                 }
-            }
+            } while($reflection = $reflection->getParentClass());
         }
     }
 
@@ -536,7 +553,11 @@ class SerializableClosure implements Serializable
             $instance = $data;
             $reflection = new ReflectionObject($data);
             $this->scope[$instance] = $data = $reflection->newInstanceWithoutConstructor();
-            do {
+
+            do{
+                if(!$reflection->isUserDefined()){
+                    break;
+                }
                 foreach ($reflection->getProperties() as $property){
                     if($property->isStatic()){
                         continue;
@@ -548,7 +569,8 @@ class SerializableClosure implements Serializable
                     }
                     $property->setValue($data, $value);
                 }
-            } while ($reflection = $reflection->getParentClass());
+            } while($reflection = $reflection->getParentClass());
         }
     }
+
 }
