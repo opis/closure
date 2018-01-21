@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.11, 2018.01.22
+
+* Bugfix. See [issue 18](https://github.com/opis/closure/issues/18)
+
 ### v3.0.10, 2018.01.04
 
 * Improved support for PHP 7.1 & 7.2
