@@ -163,6 +163,18 @@ class SerializeTest extends \PHPUnit\Framework\TestCase
         $c = $u->closure;
         $this->assertTrue($c($u));
     }
+
+    public function testPrivatePropertyInParentClass()
+    {
+        $instance = new ChildClass;
+
+        $closure = function () use ($instance) {
+            return $instance->getFoobar();
+        };
+
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($closure));
+        $this->assertSame(['test'], $u());
+    }
 }
 
 class Abc
@@ -200,7 +212,20 @@ class Clone1
     }
 }
 
-class Entity {
+class Entity
+{
     public $parent;
     public $children = [];
 }
+
+class ParentClass
+{
+    private $foobar = ['test'];
+
+    public function getFoobar()
+    {
+        return $this->foobar;
+    }
+}
+
+class ChildClass extends ParentClass { }

@@ -536,17 +536,19 @@ class SerializableClosure implements Serializable
             $instance = $data;
             $reflection = new ReflectionObject($data);
             $this->scope[$instance] = $data = $reflection->newInstanceWithoutConstructor();
-            foreach ($reflection->getProperties() as $property){
-                if($property->isStatic()){
-                    continue;
+            do {
+                foreach ($reflection->getProperties() as $property){
+                    if($property->isStatic()){
+                        continue;
+                    }
+                    $property->setAccessible(true);
+                    $value = $property->getValue($instance);
+                    if(is_array($value) || is_object($value)){
+                        $this->mapByReference($value);
+                    }
+                    $property->setValue($data, $value);
                 }
-                $property->setAccessible(true);
-                $value = $property->getValue($instance);
-                if(is_array($value) || is_object($value)){
-                    $this->mapByReference($value);
-                }
-                $property->setValue($data, $value);
-            }
+            } while ($reflection = $reflection->getParentClass());
         }
     }
 }
