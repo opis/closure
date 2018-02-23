@@ -175,6 +175,33 @@ class SerializeTest extends \PHPUnit\Framework\TestCase
         $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($closure));
         $this->assertSame(['test'], $u());
     }
+
+    public function testInternalClass1()
+    {
+        $date = new \DateTime();
+        $date->setDate(2018, 2, 23);
+
+        $closure = function () use($date){
+            return $date->format('Y-m-d');
+        };
+
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($closure));
+        $this->assertEquals('2018-02-23', $u());
+    }
+
+    public function testInternalClass2()
+    {
+        $date = new \DateTime();
+        $date->setDate(2018, 2, 23);
+        $instance = (object)['date' => $date];
+        $closure = function () use($instance){
+            return $instance->date->format('Y-m-d');
+        };
+
+        $u = \Opis\Closure\unserialize(\Opis\Closure\serialize($closure));
+        $this->assertEquals('2018-02-23', $u());
+    }
+
 }
 
 class Abc

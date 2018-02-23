@@ -337,6 +337,10 @@ class SerializableClosure implements Serializable
             }
             $instance = $data;
             $reflection = new ReflectionObject($instance);
+            if(!$reflection->isUserDefined()){
+                $storage[$instance] = $data;
+                return;
+            }
             $storage[$instance] = $data = $reflection->newInstanceWithoutConstructor();
 
             do{
@@ -552,6 +556,10 @@ class SerializableClosure implements Serializable
 
             $instance = $data;
             $reflection = new ReflectionObject($data);
+            if(!$reflection->isUserDefined()){
+                $this->scope[$instance] = $data;
+                return;
+            }
             $this->scope[$instance] = $data = $reflection->newInstanceWithoutConstructor();
 
             do{
