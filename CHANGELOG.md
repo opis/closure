@@ -1,5 +1,9 @@
 CHANGELOG
 ---------
+### v3.0.12, 2018.02.23
+
+* Bugfix. See [issue 20](https://github.com/opis/closure/issues/20)
+
 ### v3.0.11, 2018.01.22
 
 * Bugfix. See [issue 18](https://github.com/opis/closure/issues/18)
