@@ -143,7 +143,7 @@ class SerializableClosure implements Serializable
 
         $this->scope[$this->closure] = $this;
 
-        $use = $reflector->getUseVariables();
+        $use = $this->transformUseVariables($reflector->getUseVariables());
         $code = $reflector->getCode();
 
         $this->mapByReference($use);
@@ -165,6 +165,17 @@ class SerializableClosure implements Serializable
         }
 
         return $ret;
+    }
+
+    /**
+     * Transform the use variables before serialization.
+     *
+     * @param  array  $data The Closure's use variables
+     * @return array
+     */
+    protected function transformUseVariables($data)
+    {
+        return $data;
     }
 
     /**
@@ -198,6 +209,7 @@ class SerializableClosure implements Serializable
 
         if ($this->code['use']) {
             $this->scope = new ClosureScope();
+            $this->code['use'] = $this->resolveUseVariables($this->code['use']);
             $this->mapPointers($this->code['use']);
             extract($this->code['use'], EXTR_OVERWRITE | EXTR_REFS);
             $this->scope = null;
@@ -220,6 +232,17 @@ class SerializableClosure implements Serializable
         }
 
         $this->code = $this->code['function'];
+    }
+
+    /**
+     * Resolve the use variables after unserialization.
+     *
+     * @param  array  $data The Closure's transformed use variables
+     * @return array
+     */
+    protected function resolveUseVariables($data)
+    {
+        return $data;
     }
 
     /**

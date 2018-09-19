@@ -38,6 +38,18 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($u(), $a);
     }
 
+    public function testClosureUseTransformation()
+    {
+        $a = 100;
+
+        $c = unserialize(serialize(new TransformingSerializableClosure(function () use ($a)
+        {
+            return $a;
+        })));
+
+        $this->assertEquals(100, $c());
+    }
+
     public function testClosureUseReturnClosure()
     {
         $a = function($p){
@@ -385,5 +397,27 @@ class A2
 class ObjSelf
 {
     public $o;
+}
+
+
+class TransformingSerializableClosure extends SerializableClosure
+{
+    protected function transformUseVariables($data)
+    {
+        foreach ($data as $key => $value) {
+            $data[$key] = $value * 2;
+        }
+
+        return $data;
+    }
+
+    protected function resolveUseVariables($data)
+    {
+        foreach ($data as $key => $value) {
+            $data[$key] = $value / 2;
+        }
+
+        return $data;
+    }
 }
 
