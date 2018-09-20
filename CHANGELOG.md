@@ -1,5 +1,15 @@
 CHANGELOG
 ---------
+
+### v3.1.0, 2018.09.20
+
+* Added `transformUseVariables` and `resolveUseVariables` to
+`Opis\Closure\SerializableClosure` class.
+* Added `removeSecurityProvider` static method to 
+`Opis\Closure\SerializableClosure` class. 
+* Fixed some security related issues where a user was able to unserialize an unsigned
+closure, even when a security provider was in use.
+
 ### v3.0.12, 2018.02.23
 
 * Bugfix. See [issue 20](https://github.com/opis/closure/issues/20)
