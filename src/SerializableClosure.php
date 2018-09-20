@@ -188,16 +188,24 @@ class SerializableClosure implements Serializable
     {
         ClosureStream::register();
 
-        if($data[0] === '@'){
-            $data = json_decode(substr($data, 1), true);
-            if(static::$securityProvider !== null){
-                if(!static::$securityProvider->verify($data)){
-                    throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized." .
-                        "Make sure you are using the same security provider, with the same settings, " .
-                        "both for serialization and unserialization.");
-                }
+        if (static::$securityProvider !== null) {
+            if ($data[0] !== '@') {
+                throw new SecurityException("The serialized closure is not signed. ".
+                    "Make sure you use a security provider for both serialization and unserialization.");
             }
+
+            $data = json_decode(substr($data, 1), true);
+
+            if (!is_array($data) || !static::$securityProvider->verify($data)) {
+                throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized. " .
+                    "Make sure you use the same security provider, with the same settings, " .
+                    "both for serialization and unserialization.");
+            }
+
             $data = $data['closure'];
+        } elseif ($data[0] === '@') {
+            throw new SecurityException("The serialized closure is signed. ".
+                "Make sure you use a security provider for both serialization and unserialization.");
         }
 
         $this->code = \unserialize($data);
@@ -304,6 +312,14 @@ class SerializableClosure implements Serializable
     public static function addSecurityProvider(ISecurityProvider $securityProvider)
     {
         static::$securityProvider = $securityProvider;
+    }
+
+    /**
+     * Remove security provider
+     */
+    public static function removeSecurityProvider()
+    {
+        static::$securityProvider = null;
     }
 
     /**
