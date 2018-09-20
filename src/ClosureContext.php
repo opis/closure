@@ -7,8 +7,6 @@
 
 namespace Opis\Closure;
 
-use SplObjectStorage;
-
 /**
  * Closure context class
  */

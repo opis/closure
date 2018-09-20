@@ -11,7 +11,6 @@ use Closure;
 use Serializable;
 use SplObjectStorage;
 use ReflectionObject;
-use ReflectionProperty;
 
 /**
  * Provides a wrapper for serialization of closures
