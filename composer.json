@@ -8,10 +8,14 @@
         {
             "name": "Marius Sarca",
             "email": "marius.sarca@gmail.com"
+        },
+        {
+            "name": "Sorin Sarca",
+            "email": "sarca_sorin@hotmail.com"
         }
     ],
     "require": {
-        "php": ">=5.4.0"
+        "php": "^5.4 || ^7.0"
     },
     "require-dev": {
         "jeremeamia/superclosure": "^2.0",
