@@ -322,6 +322,10 @@ class ReflectionClosure extends ReflectionFunction
                             $lastState = 'closure';
                             $state = 'ignore_next';
                             break;
+                        case T_FUNCTION:
+                            $code .= $token[1];
+                            $state = 'closure_args';
+                            break;
                         default:
                             if ($hasTraitSupport && $token[0] == T_TRAIT_C) {
                                 if ($_trait === null) {
