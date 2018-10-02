@@ -427,7 +427,7 @@ class ReflectionClosure extends ReflectionFunction
                         case T_VARIABLE:
                         case T_DOUBLE_COLON:
                             if($id_start !== '\\') {
-                                if($id_start_ci === 'self' || $id_start_ci === 'static'){
+                                if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
                                     $isUsingScope = true;
                                 } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
                                     if ($classes === null) {
@@ -447,7 +447,7 @@ class ReflectionClosure extends ReflectionFunction
                         default:
                             if($id_start !== '\\'){
                                 if($context === 'instanceof' || $context === 'args' || $context === 'return_type'){
-                                    if($id_start_ci === 'self' || $id_start_ci === 'static'){
+                                    if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
                                         $isUsingScope = true;
                                     } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
                                         if($classes === null){

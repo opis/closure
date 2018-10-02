@@ -122,4 +122,40 @@ class ReflectionClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e5, $this->c($f5));
         $this->assertEquals($e6, $this->c($f6));
     }
+
+    public function testStaticInsideClosure()
+    {
+        $f1 = function() { return static::foo(); };
+        $e1 = 'function() { return static::foo(); }';
+
+        $f2 = function ($a) { return $a instanceof static; };
+        $e2 = 'function ($a) { return $a instanceof static; }';
+
+        $this->assertEquals($e1, $this->c($f1));
+        $this->assertEquals($e2, $this->c($f2));
+    }
+
+    public function testSelfInsideClosure()
+    {
+        $f1 = function() { return self::foo(); };
+        $e1 = 'function() { return self::foo(); }';
+
+        $f2 = function ($a) { return $a instanceof self; };
+        $e2 = 'function ($a) { return $a instanceof self; }';
+
+        $this->assertEquals($e1, $this->c($f1));
+        $this->assertEquals($e2, $this->c($f2));
+    }
+
+    public function testParentInsideClosure()
+    {
+        $f1 = function() { return parent::foo(); };
+        $e1 = 'function() { return parent::foo(); }';
+
+        $f2 = function ($a) { return $a instanceof parent; };
+        $e2 = 'function ($a) { return $a instanceof parent; }';
+
+        $this->assertEquals($e1, $this->c($f1));
+        $this->assertEquals($e2, $this->c($f2));
+    }
 }
