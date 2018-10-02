@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+### v3.x
+
+* Fixed a bug where `parent` keyword was treated like a class-name and scope was not added to the
+serialized closure
+* Fixed a bug where return type was not properly handled for nested closures
+
 ### v3.1.0, 2018.09.20
 
 * Added `transformUseVariables` and `resolveUseVariables` to
