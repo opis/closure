@@ -96,4 +96,20 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
     }
+
+    public function testAnonymousInsideClosure()
+    {
+        $f1 = function() { return new class extends A {}; };
+        $e1 = 'function() { return new class extends \Opis\Closure\Test\A {}; }';
+
+        $f2 = function() { return new class extends A implements B {}; };
+        $e2 = 'function() { return new class extends \Opis\Closure\Test\A implements \Opis\Closure\Test\B {}; }';
+
+        $f3 = function() { return new class { function x(A $a): B {} }; };
+        $e3 = 'function() { return new class { function x(\Opis\Closure\Test\A $a): \Opis\Closure\Test\B {} }; }';
+
+        $this->assertEquals($e1, $this->c($f1));
+        $this->assertEquals($e2, $this->c($f2));
+        $this->assertEquals($e3, $this->c($f3));
+    }
 }

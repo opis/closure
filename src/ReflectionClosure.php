@@ -116,7 +116,6 @@ class ReflectionClosure extends ReflectionFunction
         $isUsingScope = false;
         $isUsingThisObject = false;
 
-
         for($i = 0, $l = count($tokens); $i < $l; $i++) {
             $token = $tokens[$i];
             switch ($state) {
@@ -388,6 +387,10 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $token[1];
                             $state = $lastState;
                             break;
+                        case T_CLASS:
+                            $code .= $token[1];
+                            $state = 'anonymous';
+                            break;
                         default:
                             $i--;//reprocess last
                             $state = 'id_name';
@@ -450,7 +453,7 @@ class ReflectionClosure extends ReflectionFunction
                             break;
                         default:
                             if($id_start !== '\\'){
-                                if($context === 'instanceof' || $context === 'args' || $context === 'return_type'){
+                                if($context === 'instanceof' || $context === 'args' || $context === 'return_type' || $context === 'extends'){
                                     if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
                                         $isUsingScope = true;
                                     } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
@@ -476,6 +479,25 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $id_start . $id_name;
                             $state = $lastState;
                             $i--;//reprocess last token
+                    }
+                    break;
+                case 'anonymous':
+                    switch ($token[0]) {
+                        case T_NS_SEPARATOR:
+                        case T_STRING:
+                            $id_start = $token[1];
+                            $id_start_ci = strtolower($id_start);
+                            $id_name = '';
+                            $state = 'id_name';
+                            $context = 'extends';
+                            $lastState = 'anonymous';
+                        break;
+                        case '{':
+                            $state = 'closure';
+                            $i--;
+                            break;
+                        default:
+                            $code .= is_array($token) ? $token[1] : $token;
                     }
                     break;
             }
