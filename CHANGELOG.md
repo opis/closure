@@ -1,11 +1,12 @@
 CHANGELOG
 ---------
 
-### v3.x
+### v3.1.1, 2018.10.02
 
 * Fixed a bug where `parent` keyword was treated like a class-name and scope was not added to the
 serialized closure
 * Fixed a bug where return type was not properly handled for nested closures
+* Support for anonymous classes was improved
 
 ### v3.1.0, 2018.09.20
 
