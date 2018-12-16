@@ -775,6 +775,9 @@ class ReflectionClosure extends ReflectionFunction
                                 $state = 'alias';
                                 break;
                         }
+                    } elseif ($token[0] === '}') {
+                        $name = '';
+                        $state = 'start';
                     } else {
                         if ($name[0] !== '\\' && $prefix === '') {
                             $name = '\\' . $name;
@@ -792,7 +795,7 @@ class ReflectionClosure extends ReflectionFunction
                                 $classes[strtolower($alias)] = $prefix . $name;
                             }
                             $name = '';
-                            $state = $token == ',' ? 'use' : 'start';
+                            $state = 'use';
                         }
                     }
                     break;
