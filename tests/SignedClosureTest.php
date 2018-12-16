@@ -11,10 +11,11 @@ use Opis\Closure\SerializableClosure;
 
 class SignedClosureTest extends ClosureTest
 {
+    /**
+     * @expectedException \Opis\Closure\SecurityException
+     */
     public function testSecureClosureIntegrityFail()
     {
-        $this->setExpectedException('Opis\Closure\SecurityException');
-
         $closure = function(){
             /*x*/
         };
@@ -26,10 +27,11 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
+    /**
+     * @expectedException \Opis\Closure\SecurityException
+     */
     public function testUnsecuredClosureWithSecurityProvider()
     {
-        $this->setExpectedException('Opis\Closure\SecurityException');
-
         SerializableClosure::removeSecurityProvider();
 
         $closure = function(){
@@ -41,10 +43,11 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
+    /**
+     * @expectedException \Opis\Closure\SecurityException
+     */
     public function testSecuredClosureWithoutSecuriyProvider()
     {
-        $this->setExpectedException('Opis\Closure\SecurityException');
-
         SerializableClosure::setSecretKey('secret');
 
         $closure = function(){
