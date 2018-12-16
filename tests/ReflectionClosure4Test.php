@@ -9,7 +9,9 @@ namespace Opis\Closure\Test;
 
 use Closure;
 use Opis\Closure\ReflectionClosure;
-
+use Foo\{
+    Bar as Baz,
+};
 
 class ReflectionClosure4Test extends \PHPUnit\Framework\TestCase
 {
@@ -32,6 +34,14 @@ class ReflectionClosure4Test extends \PHPUnit\Framework\TestCase
         $f1 = function (): object{};
         $e1 = 'function (): object{}';
 
+
+        $this->assertEquals($e1, $this->c($f1));
+    }
+
+    public function testTrailingComma()
+    {
+        $f1 = function (): Baz {};
+        $e1 = 'function (): \Foo\Bar {}';
 
         $this->assertEquals($e1, $this->c($f1));
     }
