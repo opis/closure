@@ -775,8 +775,7 @@ class ReflectionClosure extends ReflectionFunction
                                 $state = 'alias';
                                 break;
                         }
-                    } elseif ($token[0] === '}') {
-                        $name = '';
+                    } elseif ($name === '') {
                         $state = 'start';
                     } else {
                         if ($name[0] !== '\\' && $prefix === '') {
