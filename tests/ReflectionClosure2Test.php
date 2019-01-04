@@ -11,6 +11,10 @@ use Closure;
 use Opis\Closure\ReflectionClosure;
 
 // Fake
+use Some\Test\Any\Custom\Other\Fake;
+// For bug reproducing
+is_a(Fake::class, Fake::class);
+
 use Foo\{Bar, Baz as Qux};
 use function Foo\f1;
 use function Bar\{b1, b2 as b3};
@@ -37,8 +41,11 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $f4 = function (Qux\Test $p){};
         $e4 = 'function (\Foo\Baz\Test $p){}';
 
-        $f5 = function (array $p, string $x){};
-        $e5 = 'function (array $p, string $x){}';
+        $f5 = function (array $p, Fake $x){};
+        $e5 = 'function (array $p, \Some\Test\Any\Custom\Other\Fake $x){}';
+
+        $f6 = function (array $p, string $x){};
+        $e6 = 'function (array $p, string $x){}';
 
 
         $this->assertEquals($e1, $this->c($f1));
@@ -46,6 +53,8 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e3, $this->c($f3));
         $this->assertEquals($e4, $this->c($f4));
         $this->assertEquals($e5, $this->c($f5));
+        $this->assertEquals($e5, $this->c($f5));
+        $this->assertEquals($e6, $this->c($f6));
     }
 
     public function testResolveReturnType()
@@ -68,11 +77,14 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $f6 = function (): Foo{};
         $e6 = 'function (): \\' . __NAMESPACE__. '\Foo{}';
 
-        $f7 = function (): array{};
-        $e7 = 'function (): array{}';
+        $f7 = function (): Fake{};
+        $e7 = 'function (): \Some\Test\Any\Custom\Other\Fake{}';
 
-        $f8 = function (): string{};
-        $e8 = 'function (): string{}';
+        $f8 = function (): array{};
+        $e8 = 'function (): array{}';
+
+        $f9 = function (): string{};
+        $e9 = 'function (): string{}';
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
@@ -82,6 +94,7 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e6, $this->c($f6));
         $this->assertEquals($e7, $this->c($f7));
         $this->assertEquals($e8, $this->c($f8));
+        $this->assertEquals($e9, $this->c($f9));
     }
 
     public function testClosureInsideClosure()

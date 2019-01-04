@@ -790,7 +790,7 @@ class ReflectionClosure extends ReflectionFunction
                                 $functions[strtolower($alias)] = $prefix . $name;
                             } elseif ($isConst){
                                 $constants[$alias] = $prefix . $name;
-                            } else {
+                            } else if (!isset($classes[strtolower($alias)])) {
                                 $classes[strtolower($alias)] = $prefix . $name;
                             }
                             $name = '';
