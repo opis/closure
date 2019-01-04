@@ -112,4 +112,32 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
     }
+
+    public function testClosureResolveTraitsNamesInAnonymousClasses()
+    {
+        $f1 = function () { new class { use Bar; }; };
+        $e1 = 'function () { new class { use \Foo\Bar; }; }';
+
+        $f2 = function () { new class { use Bar\Test; }; };
+        $e2 = 'function () { new class { use \Foo\Bar\Test; }; }';
+
+        $f3 = function () { new class { use Qux; }; };
+        $e3 = 'function () { new class { use \Foo\Baz; }; }';
+
+        $f4 = function () { new class { use Qux\Test; }; };
+        $e4 = 'function () { new class { use \Foo\Baz\Test; }; }';
+
+        $f5 = function () { new class { use \Foo; }; };
+        $e5 = 'function () { new class { use \Foo; }; }';
+
+        $f6 = function () { new class { use Foo; }; };
+        $e6 = 'function () { new class { use \\' . __NAMESPACE__ . '\Foo; }; }';
+
+        $this->assertEquals($e1, $this->c($f1));
+        $this->assertEquals($e2, $this->c($f2));
+        $this->assertEquals($e3, $this->c($f3));
+        $this->assertEquals($e4, $this->c($f4));
+        $this->assertEquals($e5, $this->c($f5));
+        $this->assertEquals($e6, $this->c($f6));
+    }
 }
