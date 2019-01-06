@@ -107,6 +107,8 @@ class ReflectionClosure extends ReflectionFunction
         $hasTraitSupport = defined('T_TRAIT_C');
         $tokens = $this->getTokens();
         $state = $lastState = 'start';
+        $inside_anonymous = false;
+        $anonymous_mark = 0;
         $open = 0;
         $code = '';
         $id_start = $id_start_ci = $id_name = $context = '';
@@ -248,6 +250,8 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= '}';
                             if(--$open === 0){
                                 break 3;
+                            } elseif ($inside_anonymous) {
+                                $inside_anonymous = !($open === $anonymous_mark);
                             }
                             break;
                         case T_LINE:
@@ -285,7 +289,7 @@ class ReflectionClosure extends ReflectionFunction
                             }
                             break;
                         case T_VARIABLE:
-                            if($token[1] == '$this'){
+                            if($token[1] == '$this' && !$inside_anonymous){
                                 $isUsingThisObject = true;
                             }
                             $code .= $token[1];
@@ -505,6 +509,10 @@ class ReflectionClosure extends ReflectionFunction
                         break;
                         case '{':
                             $state = 'closure';
+                            if (!$inside_anonymous) {
+                                $inside_anonymous = true;
+                                $anonymous_mark = $open;
+                            }
                             $i--;
                             break;
                         default:

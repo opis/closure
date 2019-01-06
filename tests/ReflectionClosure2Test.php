@@ -145,4 +145,51 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e6, $this->c($f6));
         $this->assertEquals($e7, $this->c($f7));
     }
+
+    public function testThisInsideAnonymousClass()
+    {
+        $f1 = function() {
+            return new class {
+                function a(){
+                    $self = $this;
+                }
+            };
+        };
+
+        $f2 = function () {
+            return new class {
+                function a(){
+                    $self = $this;
+                    return new class {
+                        function a(){
+                            $self = $this;
+                        }
+                    };
+                }
+            };
+        };
+
+        $f3 = function () {
+            $self = $this;
+            return new class {
+                function a(){
+                    $self = $this;
+                }
+            };
+        };
+
+        $f4 = function () {
+            return new class {
+                function a(){
+                    $self = $this;
+                }
+            };
+            $self = $this;
+        };
+
+        $this->assertFalse((new ReflectionClosure($f1))->isBindingRequired());
+        $this->assertFalse((new ReflectionClosure($f2))->isBindingRequired());
+        $this->assertTrue((new ReflectionClosure($f3))->isBindingRequired());
+        $this->assertTrue((new ReflectionClosure($f4))->isBindingRequired());
+    }
 }
