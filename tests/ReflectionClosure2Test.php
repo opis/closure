@@ -133,11 +133,16 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $f6 = function () { new class { use Foo; }; };
         $e6 = 'function () { new class { use \\' . __NAMESPACE__ . '\Foo; }; }';
 
+        $f7 = function () { new class { use Bar; }; function a(Qux $q): Bar { f1(); $a = new class extends Bar {}; } };
+        $e7 = 'function () { new class { use \Foo\Bar; }; function a(\Foo\Baz $q): \Foo\Bar '
+            . '{ \Foo\f1(); $a = new class extends \Foo\Bar {}; } }';
+
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
         $this->assertEquals($e4, $this->c($f4));
         $this->assertEquals($e5, $this->c($f5));
         $this->assertEquals($e6, $this->c($f6));
+        $this->assertEquals($e7, $this->c($f7));
     }
 }
