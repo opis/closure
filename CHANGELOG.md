@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+### v3.1.3, 2019.01.07
+
+- Fixed a bug that prevented traits to be correctly resolved when used by an
+anonymous class
+- Fixed a bug that occurred when `$this` keyword was used inside an anonymous class
+
 ### v3.1.2, 2018.12.16
 
 * Fixed a bug regarding comma trail in group-use statements. See [issue 23](https://github.com/opis/closure/issues/23)
