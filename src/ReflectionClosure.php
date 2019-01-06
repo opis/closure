@@ -309,6 +309,12 @@ class ReflectionClosure extends ReflectionFunction
                             $state = 'id_start';
                             $lastState = 'closure';
                             break 2;
+                        case T_USE:
+                            $code .= $token[1];
+                            $context = 'use';
+                            $state = 'id_start';
+                            $lastState = 'closure';
+                            break;
                         case T_INSTANCEOF:
                             $code .= $token[1];
                             $context = 'instanceof';
@@ -453,7 +459,12 @@ class ReflectionClosure extends ReflectionFunction
                             break;
                         default:
                             if($id_start !== '\\'){
-                                if($context === 'instanceof' || $context === 'args' || $context === 'return_type' || $context === 'extends'){
+                                if($context === 'use' ||
+                                    $context === 'instanceof' ||
+                                    $context === 'args' ||
+                                    $context === 'return_type' ||
+                                    $context === 'extends'
+                                ){
                                     if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
                                         $isUsingScope = true;
                                     } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
