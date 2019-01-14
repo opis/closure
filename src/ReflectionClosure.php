@@ -365,14 +365,25 @@ class ReflectionClosure extends ReflectionFunction
                     break;
                 case 'ignore_next':
                     switch ($token[0]){
-                        case T_NEW:
                         case T_WHITESPACE:
                             $code .= $token[1];
                             break;
                         case T_CLASS:
+                        case T_NEW:
                         case T_STATIC:
                         case T_VARIABLE:
                         case T_STRING:
+                        case T_CLASS_C:
+                        case T_FILE:
+                        case T_DIR:
+                        case T_METHOD_C:
+                        case T_FUNC_C:
+                        case T_FUNCTION:
+                        case T_INSTANCEOF:
+                        case T_LINE:
+                        case T_NS_C:
+                        case T_TRAIT_C:
+                        case T_USE:
                             $code .= $token[1];
                             $state = $lastState;
                             break;
