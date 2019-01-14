@@ -740,6 +740,7 @@ class ReflectionClosure extends ReflectionFunction
 
         $open = 0;
         $state = 'start';
+        $lastState = '';
         $prefix = '';
         $name = '';
         $alias = '';
@@ -749,114 +750,130 @@ class ReflectionClosure extends ReflectionFunction
         $structType = $structName = '';
         $structIgnore = false;
 
-        $hasTraitSupport = defined('T_TRAIT');
-
         foreach ($tokens as $token) {
-            $is_array = is_array($token);
 
             switch ($state) {
                 case 'start':
-                    if ($is_array) {
-                        switch ($token[0]) {
-                            case T_CLASS:
-                            case T_INTERFACE:
-                                $state = 'before_structure';
-                                $startLine = $token[2];
-                                $structType = $token[0] == T_CLASS ? 'class' : 'interface';
-                                break;
-                            case T_USE:
-                                $state = 'use';
-                                $prefix = $name = $alias = '';
-                                $isFunc = $isConst = false;
-                                break;
-                            case T_FUNCTION:
-                                $state = 'structure';
-                                $structIgnore = true;
-                                break;
-                            default:
-                                if ($hasTraitSupport && $token[0] == T_TRAIT) {
-                                    $state = 'before_structure';
-                                    $startLine = $token[2];
-                                    $structType = 'trait';
-                                }
-                                break;
-                        }
+                    switch ($token[0]) {
+                        case T_CLASS:
+                        case T_INTERFACE:
+                        case T_TRAIT:
+                            $state = 'before_structure';
+                            $startLine = $token[2];
+                            $structType = $token[0] == T_CLASS
+                                                    ? 'class'
+                                                    : ($token[0] == T_INTERFACE ? 'interface' : 'trait');
+                            break;
+                        case T_USE:
+                            $state = 'use';
+                            $prefix = $name = $alias = '';
+                            $isFunc = $isConst = false;
+                            break;
+                        case T_FUNCTION:
+                            $state = 'structure';
+                            $structIgnore = true;
+                            break;
                     }
                     break;
                 case 'use':
-                    if ($is_array) {
-                        switch ($token[0]) {
-                            case T_FUNCTION:
-                                $isFunc = true;
-                                break;
-                            case T_CONST:
-                                $isConst = true;
-                                break;
-                            case T_NS_SEPARATOR:
-                                $name .= $token[1];
-                                break;
-                            case T_STRING:
-                                $name .= $token[1];
-                                $alias = $token[1];
-                                break;
-                            case T_AS:
-                                if ($name[0] !== '\\' && $prefix === '') {
-                                    $name = '\\' . $name;
-                                }
-                                $state = 'alias';
-                                break;
-                        }
-                    } elseif ($name === '') {
-                        $state = 'start';
-                    } else {
-                        if ($name[0] !== '\\' && $prefix === '') {
-                            $name = '\\' . $name;
-                        }
-
-                        if($token == '{') {
+                    switch ($token[0]) {
+                        case T_FUNCTION:
+                            $isFunc = true;
+                            break;
+                        case T_CONST:
+                            $isConst = true;
+                            break;
+                        case T_NS_SEPARATOR:
+                            $name .= $token[1];
+                            break;
+                        case T_STRING:
+                            $name .= $token[1];
+                            $alias = $token[1];
+                            break;
+                        case T_AS:
+                            $lastState = 'use';
+                            $state = 'alias';
+                            break;
+                        case '{':
                             $prefix = $name;
-                            $name = '';
-                        } else {
-                            if($isFunc){
-                                $functions[strtolower($alias)] = $prefix . $name;
-                            } elseif ($isConst){
-                                $constants[$alias] = $prefix . $name;
-                            } else {
-                                $classes[strtolower($alias)] = $prefix . $name;
+                            $name = $alias = '';
+                            $state = 'use-group';
+                            break;
+                        case ',':
+                        case ';':
+                            if ($name === '' || $name[0] !== '\\') {
+                                $name = '\\' . $name;
                             }
-                            $name = '';
-                            $state = 'use';
-                        }
+
+                            if ($alias !== '') {
+                                if ($isFunc) {
+                                    $functions[strtolower($alias)] = $name;
+                                } elseif ($isConst) {
+                                    $constants[$alias] = $name;
+                                } else {
+                                    $classes[strtolower($alias)] = $name;
+                                }
+                            }
+                            $name = $alias = '';
+                            $state = $token === ';' ? 'start' : 'use';
+                            break;
+                    }
+                    break;
+                case 'use-group':
+                    switch ($token[0]) {
+                        case T_NS_SEPARATOR:
+                            $name .= $token[1];
+                            break;
+                        case T_STRING:
+                            $name .= $token[1];
+                            $alias = $token[1];
+                            break;
+                        case T_AS:
+                            $lastState = 'use-group';
+                            $state = 'alias';
+                            break;
+                        case ',':
+                        case '}':
+
+                            if ($prefix === '' || $prefix[0] !== '\\') {
+                                $prefix = '\\' . $prefix;
+                            }
+
+                            if ($alias !== '') {
+                                if ($isFunc) {
+                                    $functions[strtolower($alias)] = $prefix . $name;
+                                } elseif ($isConst) {
+                                    $constants[$alias] = $prefix . $name;
+                                } else {
+                                    $classes[strtolower($alias)] = $prefix . $name;
+                                }
+                            }
+                            $name = $alias = '';
+                            $state = $token === '}' ? 'use' : 'use-group';
+                            break;
                     }
                     break;
                 case 'alias':
-                    if ($is_array) {
-                        if($token[0] == T_STRING){
-                            $alias = $token[1];
-                        }
-                    } else {
-                        if($isFunc){
-                            $functions[strtolower($alias)] = $prefix . $name;
-                        } elseif ($isConst){
-                            $constants[$alias] = $prefix . $name;
-                        } else {
-                            $classes[strtolower($alias)] = $prefix . $name;
-                        }
-                        $name = '';
-                        $state = $token == ',' ? 'use' : 'start';
+                    if ($token[0] === T_STRING) {
+                        $alias = $token[1];
+                        $state = $lastState;
                     }
                     break;
                 case 'before_structure':
-                    if ($is_array && $token[0] == T_STRING) {
+                    if ($token[0] == T_STRING) {
                         $structName = $token[1];
                         $state = 'structure';
                     }
                     break;
                 case 'structure':
-                    if (!$is_array) {
-                        if ($token === '{') {
+                    switch ($token[0]) {
+                        case '{':
+                        case T_CURLY_OPEN:
+                        case T_DOLLAR_OPEN_CURLY_BRACES:
+                        case T_STRING_VARNAME:
                             $open++;
-                        } elseif ($token === '}') {
+                            break;
+                        case '}':
                             if (--$open == 0) {
                                 if(!$structIgnore){
                                     $structures[] = array(
@@ -869,14 +886,11 @@ class ReflectionClosure extends ReflectionFunction
                                 $structIgnore = false;
                                 $state = 'start';
                             }
-                        }
-                    } else {
-                        if($token[0] === T_CURLY_OPEN ||
-                            $token[0] === T_DOLLAR_OPEN_CURLY_BRACES ||
-                            $token[0] === T_STRING_VARNAME){
-                            $open++;
-                        }
-                        $endLine = $token[2];
+                            break;
+                        default:
+                            if (is_array($token)) {
+                                $endLine = $token[2];
+                            }
                     }
                     break;
             }
@@ -887,5 +901,4 @@ class ReflectionClosure extends ReflectionFunction
         static::$constants[$key] = $constants;
         static::$structures[$key] = $structures;
     }
-
 }
