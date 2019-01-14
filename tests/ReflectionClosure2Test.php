@@ -146,6 +146,14 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e7, $this->c($f7));
     }
 
+    public function testStaticMethodNewUsage()
+    {
+        $f1 = function () { Bar::new(); };
+        $e1 = 'function () { \Foo\Bar::new(); }';
+
+        $this->assertEquals($e1, $this->c($f1));
+    }
+
     public function testThisInsideAnonymousClass()
     {
         $f1 = function() {
