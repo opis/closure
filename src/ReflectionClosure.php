@@ -875,7 +875,7 @@ class ReflectionClosure extends ReflectionFunction
                         case T_WHITESPACE:
                         case T_COMMENT:
                         case T_DOC_COMMENT:
-                            continue 2;
+                            break 2;
                         case T_CLASS:
                             $state = 'structure';
                             $structIgnore = true;
@@ -889,7 +889,7 @@ class ReflectionClosure extends ReflectionFunction
                         case T_WHITESPACE:
                         case T_COMMENT:
                         case T_DOC_COMMENT:
-                            continue 2;
+                            break 2;
                         default:
                             $state = 'start';
                     }
