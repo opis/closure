@@ -771,6 +771,13 @@ class ReflectionClosure extends ReflectionFunction
                             $state = 'structure';
                             $structIgnore = true;
                             break;
+                        case T_NEW:
+                            $state = 'new';
+                            break;
+                        case T_OBJECT_OPERATOR:
+                        case T_DOUBLE_COLON:
+                            $state = 'invoke';
+                            break;
                     }
                     break;
                 case 'use':
@@ -855,6 +862,21 @@ class ReflectionClosure extends ReflectionFunction
                     if ($token[0] === T_STRING) {
                         $alias = $token[1];
                         $state = $lastState;
+                    }
+                    break;
+                case 'new':
+                    if ($token[0] !== T_WHITESPACE) {
+                        if ($token[0] === T_CLASS) {
+                            $state = 'struct';
+                            $structIgnore = true;
+                        } else {
+                            $state = 'start';
+                        }
+                    }
+                    break;
+                case 'invoke':
+                    if ($token[0] !== T_WHITESPACE) {
+                        $state = 'start';
                     }
                     break;
                 case 'before_structure':
