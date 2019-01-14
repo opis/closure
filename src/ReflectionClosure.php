@@ -104,7 +104,6 @@ class ReflectionClosure extends ReflectionFunction
         $_method = var_export($_method, true);
         $_trait = null;
 
-        $hasTraitSupport = defined('T_TRAIT_C');
         $tokens = $this->getTokens();
         $state = $lastState = 'start';
         $inside_anonymous = false;
@@ -335,32 +334,31 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $token[1];
                             $state = 'closure_args';
                             break;
-                        default:
-                            if ($hasTraitSupport && $token[0] == T_TRAIT_C) {
-                                if ($_trait === null) {
-                                    $startLine = $this->getStartLine();
-                                    $endLine = $this->getEndLine();
-                                    $structures = $this->getStructures();
+                        case T_TRAIT_C:
+                            if ($_trait === null) {
+                                $startLine = $this->getStartLine();
+                                $endLine = $this->getEndLine();
+                                $structures = $this->getStructures();
 
-                                    $_trait = '';
+                                $_trait = '';
 
-                                    foreach ($structures as &$struct) {
-                                        if ($struct['type'] === 'trait' &&
-                                            $struct['start'] <= $startLine &&
-                                            $struct['end'] >= $endLine
-                                        ) {
-                                            $_trait = ($ns == '' ? '' : $ns . '\\') . $struct['name'];
-                                            break;
-                                        }
+                                foreach ($structures as &$struct) {
+                                    if ($struct['type'] === 'trait' &&
+                                        $struct['start'] <= $startLine &&
+                                        $struct['end'] >= $endLine
+                                    ) {
+                                        $_trait = ($ns == '' ? '' : $ns . '\\') . $struct['name'];
+                                        break;
                                     }
-
-                                    $_trait = var_export($_trait, true);
                                 }
 
-                                $token[1] = $_trait;
-                            } else {
-                                $code .= is_array($token) ? $token[1] : $token;
+                                $_trait = var_export($_trait, true);
                             }
+
+                            $code .= $_trait;
+                            break;
+                        default:
+                            $code .= is_array($token) ? $token[1] : $token;
                     }
                     break;
                 case 'ignore_next':
