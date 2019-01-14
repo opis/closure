@@ -364,6 +364,8 @@ class ReflectionClosure extends ReflectionFunction
                 case 'ignore_next':
                     switch ($token[0]){
                         case T_WHITESPACE:
+                        case T_COMMENT:
+                        case T_DOC_COMMENT:
                             $code .= $token[1];
                             break;
                         case T_CLASS:
@@ -393,6 +395,8 @@ class ReflectionClosure extends ReflectionFunction
                 case 'id_start':
                     switch ($token[0]){
                         case T_WHITESPACE:
+                        case T_COMMENT:
+                        case T_DOC_COMMENT:
                             $code .= $token[1];
                             break;
                         case T_NS_SEPARATOR:
@@ -423,6 +427,8 @@ class ReflectionClosure extends ReflectionFunction
                             $id_name .= $token[1];
                             break;
                         case T_WHITESPACE:
+                        case T_COMMENT:
+                        case T_DOC_COMMENT:
                             $id_name .= $token[1];
                             break;
                         case '(':
@@ -865,18 +871,27 @@ class ReflectionClosure extends ReflectionFunction
                     }
                     break;
                 case 'new':
-                    if ($token[0] !== T_WHITESPACE) {
-                        if ($token[0] === T_CLASS) {
-                            $state = 'struct';
+                    switch ($token[0]) {
+                        case T_WHITESPACE:
+                        case T_COMMENT:
+                        case T_DOC_COMMENT:
+                            continue;
+                        case T_CLASS:
+                            $state = 'structure';
                             $structIgnore = true;
-                        } else {
+                            break;
+                        default:
                             $state = 'start';
-                        }
                     }
                     break;
                 case 'invoke':
-                    if ($token[0] !== T_WHITESPACE) {
-                        $state = 'start';
+                    switch ($token[0]) {
+                        case T_WHITESPACE:
+                        case T_COMMENT:
+                        case T_DOC_COMMENT:
+                            continue;
+                        default:
+                            $state = 'start';
                     }
                     break;
                 case 'before_structure':
