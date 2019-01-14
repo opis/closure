@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v3.1.5, 2019.01.14
+
+- Improved parser
+
 ### v3.1.4, 2019.01.14
 
 - Added support for static methods that are named using PHP keywords or magic constants.
