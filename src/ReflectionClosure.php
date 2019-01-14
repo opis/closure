@@ -365,6 +365,7 @@ class ReflectionClosure extends ReflectionFunction
                     break;
                 case 'ignore_next':
                     switch ($token[0]){
+                        case T_NEW:
                         case T_WHITESPACE:
                             $code .= $token[1];
                             break;
