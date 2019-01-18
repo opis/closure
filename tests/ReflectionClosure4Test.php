@@ -10,7 +10,7 @@ namespace Opis\Closure\Test;
 use Closure;
 use Opis\Closure\ReflectionClosure;
 use Foo\{
-    Bar as Baz,
+    Bar as Baz
 };
 
 class ReflectionClosure4Test extends \PHPUnit\Framework\TestCase
