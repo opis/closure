@@ -1,6 +1,11 @@
 CHANGELOG
 ---------
 
+### v3.1.6, 2019.02.22
+
+- Fixed a bug that occurred when trying to set properties of classes that were not defined in user-land.
+Those properties are now ignored.
+
 ### v3.1.5, 2019.01.14
 
 - Improved parser
