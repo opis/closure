@@ -387,7 +387,7 @@ class SerializableClosure implements Serializable
                     break;
                 }
                 foreach ($reflection->getProperties() as $property){
-                    if($property->isStatic()){
+                    if($property->isStatic() || !$property->getDeclaringClass()->isUserDefined()){
                         continue;
                     }
                     $property->setAccessible(true);
@@ -450,7 +450,7 @@ class SerializableClosure implements Serializable
                     break;
                 }
                 foreach ($reflection->getProperties() as $property){
-                    if($property->isStatic()){
+                    if($property->isStatic() || !$property->getDeclaringClass()->isUserDefined()){
                         continue;
                     }
                     $property->setAccessible(true);
@@ -517,7 +517,7 @@ class SerializableClosure implements Serializable
                     break;
                 }
                 foreach ($reflection->getProperties() as $property){
-                    if($property->isStatic()){
+                    if($property->isStatic() || !$property->getDeclaringClass()->isUserDefined()){
                         continue;
                     }
                     $property->setAccessible(true);
@@ -609,7 +609,7 @@ class SerializableClosure implements Serializable
                     break;
                 }
                 foreach ($reflection->getProperties() as $property){
-                    if($property->isStatic()){
+                    if($property->isStatic() || !$property->getDeclaringClass()->isUserDefined()){
                         continue;
                     }
                     $property->setAccessible(true);
