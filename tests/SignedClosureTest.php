@@ -43,9 +43,6 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testSecuredClosureWithoutSecuriyProvider()
     {
         SerializableClosure::setSecretKey('secret');
@@ -55,6 +52,24 @@ class SignedClosureTest extends ClosureTest
         };
 
         $value = serialize(new SerializableClosure($closure));
+        SerializableClosure::removeSecurityProvider();
+        $value = unserialize($value);
+        $this->assertInstanceOf('Opis\\Closure\\SerializableClosure', $value);
+    }
+
+    /**
+     * @expectedException \Opis\Closure\SecurityException
+     */
+    public function testInvalidSecuredClosureWithoutSecuriyProvider()
+    {
+        SerializableClosure::setSecretKey('secret');
+
+        $closure = function(){
+            /*x*/
+        };
+
+        $value = serialize(new SerializableClosure($closure));
+        $value = str_replace('hash', 'hash1', $value);
         SerializableClosure::removeSecurityProvider();
         unserialize($value);
     }
