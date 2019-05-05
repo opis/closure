@@ -1,10 +1,10 @@
 CHANGELOG
 ---------
 
-### v3.2.0, 2019.05.04
+### v3.2.0, 2019.05.05
 
 - Since an unsigned closure can be unserialized when no security provider is set, 
-there is no reason to treat differently a signed closure, in the same situation.
+there is no reason to treat differently a signed closure in the same situation.
 Therefore, the `Opis\Closure\SecurityException` exception  is no longer thrown when 
 unserializing a signed closure, if no security provider is set.
 
