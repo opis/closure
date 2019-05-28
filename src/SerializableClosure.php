@@ -147,13 +147,13 @@ class SerializableClosure implements Serializable
 
         $this->mapByReference($use);
 
-        $ret = \serialize(array(
+        $ret = \utf8_encode(\serialize(array(
             'use' => $use,
             'function' => $code,
             'scope' => $scope,
             'this' => $object,
             'self' => $this->reference,
-        ));
+        )));
 
         if(static::$securityProvider !== null){
             $ret =  '@' . json_encode(static::$securityProvider->sign($ret));
@@ -212,7 +212,7 @@ class SerializableClosure implements Serializable
             $data = $data['closure'];
         }
 
-        $this->code = \unserialize($data);
+        $this->code = \unserialize(utf8_decode($data));
 
         // unset data
         unset($data);

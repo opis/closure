@@ -27,6 +27,22 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
+    public function testSecureInvalidUtf8Data()
+    {
+        $a = utf8_decode("Düsseldorf");
+        $closure = function() use($a)
+        {
+            return $a;
+        };
+
+        SerializableClosure::setSecretKey('secret');
+
+        $value = serialize(new SerializableClosure($closure));
+        $u = unserialize($value);
+
+        $this->assertEquals($a, $u->getClosure()());
+    }
+
     /**
      * @expectedException \Opis\Closure\SecurityException
      */
