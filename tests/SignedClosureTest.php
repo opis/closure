@@ -40,7 +40,8 @@ class SignedClosureTest extends ClosureTest
         $value = serialize(new SerializableClosure($closure));
         $u = unserialize($value);
 
-        $this->assertEquals($a, $u->getClosure()());
+        $c = $u->getClosure();
+        $this->assertEquals($a, $c());
     }
 
     /**
