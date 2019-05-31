@@ -1,6 +1,13 @@
 CHANGELOG
 ---------
 
+### v3.3.0, 2019.05.31
+
+- Fixed a bug that prevented signed closures to properly work when the serialized string
+contains invalid UTF-8 chars. Starting with this version `json_encode` is no longer used
+when signing a closure. Backward compatibility is maintained and all closures that were 
+previously signed using the old method will continue to work.
+
 ### v3.2.0, 2019.05.05
 
 - Since an unsigned closure can be unserialized when no security provider is set, 
