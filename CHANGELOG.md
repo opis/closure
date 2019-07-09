@@ -29,7 +29,7 @@ Those properties are now ignored.
 - Added support for static methods that are named using PHP keywords or magic constants.
 Ex: `A::new()`, `A::use()`, `A::if()`, `A::function()`, `A::__DIR__()`, etc.
 - Used `@internal` to mark classes & methods that are for internal use only and
-backward compatibility might be broken at some point.
+backward compatibility is not guaranteed.
 
 ### v3.1.3, 2019.01.07
 
