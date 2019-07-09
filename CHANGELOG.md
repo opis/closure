@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v3.3.1, 2019.07.10
+
+- Use `sha1` instead of `md5` for hashing file names in `Opis\Closure\ReflectionClosure` class
+
 ### v3.3.0, 2019.05.31
 
 - Fixed a bug that prevented signed closures to properly work when the serialized string
