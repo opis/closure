@@ -626,7 +626,7 @@ class ReflectionClosure extends ReflectionFunction
      */
     protected function getFileTokens()
     {
-        if (stripos($this->getFileName(), "eval()'d code") > 0) {
+        if (stripos($this->getFileName(), "eval()'d code") !== false) {
             // In this use case the code is not in a file, it is loaded from the database and eval()'d, so no filename, no tokens.
             return null;
         }
