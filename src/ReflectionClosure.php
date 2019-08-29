@@ -628,7 +628,7 @@ class ReflectionClosure extends ReflectionFunction
     {
         if (stripos($this->getFileName(), "eval()'d code") > 0) {
             // In this use case the code is not in a file, it is loaded from the database and eval()'d, so no filename, no tokens.
-            return NULL;
+            return null;
         }
         $key = $this->getHashedFileName();
 
@@ -647,7 +647,7 @@ class ReflectionClosure extends ReflectionFunction
         if ($this->tokens === null) {
             $tokens = $this->getFileTokens();
             if ($tokens === null) {
-              return NULL;
+              return null;
             }
             $startLine = $this->getStartLine();
             $endLine = $this->getEndLine();
