@@ -626,6 +626,10 @@ class ReflectionClosure extends ReflectionFunction
      */
     protected function getFileTokens()
     {
+        if (!file_exists($this->getFileName())) {
+            // In this use case the code is not in a file, it is loaded from the database, no tokens.
+            return null;
+        }
         $key = $this->getHashedFileName();
 
         if (!isset(static::$files[$key])) {
@@ -642,6 +646,9 @@ class ReflectionClosure extends ReflectionFunction
     {
         if ($this->tokens === null) {
             $tokens = $this->getFileTokens();
+            if ($tokens === null) {
+              return null;
+            }
             $startLine = $this->getStartLine();
             $endLine = $this->getEndLine();
             $results = array();
