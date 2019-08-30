@@ -116,8 +116,9 @@ class ReflectionClosure extends ReflectionFunction
         $lineAdd = 0;
         $isUsingScope = false;
         $isUsingThisObject = false;
+        $lcnt = ($tokens === null ? 0 : count($tokens));
 
-        for($i = 0, $l = count($tokens); $i < $l; $i++) {
+        for($i = 0, $l = $lcnt; $i < $l; $i++) {
             $token = $tokens[$i];
             switch ($state) {
                 case 'start':
