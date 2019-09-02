@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+### v3.4.0, 2019.09.03
+
+- Added `createClosure` static method in `Opis\Closure\SerializableClosure`.
+This method creates a new closure from arbitrary code, emulating `create_function`,
+but without using eval
+
 ### v3.3.1, 2019.07.10
 
 - Use `sha1` instead of `md5` for hashing file names in `Opis\Closure\ReflectionClosure` class
