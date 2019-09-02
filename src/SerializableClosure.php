@@ -497,6 +497,20 @@ class SerializableClosure implements Serializable
     }
 
     /**
+     * Creates a new closure from arbitrary code,
+     * emulating create_function, but without using eval
+     *
+     * @param string$args
+     * @param string $code
+     * @return Closure
+     */
+    public static function createClosure($args, $code)
+    {
+        ClosureStream::register();
+        return include(ClosureStream::STREAM_PROTO . '://function(' . $args. '){' . $code . '};');
+    }
+
+    /**
      * Internal method used to map closure pointers
      * @internal
      * @param $data

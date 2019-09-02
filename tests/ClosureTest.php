@@ -313,6 +313,21 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($rc->isStatic());
     }
 
+    public function testCreateClosure()
+    {
+        $closure = SerializableClosure::createClosure('$a, $b', 'return $a + $b;');
+
+        $this->assertNotNull($closure);
+        $this->assertTrue($closure instanceof Closure);
+        $this->assertEquals(17, $closure(7, 10));
+
+        $closure = $this->s($closure);
+
+        $this->assertNotNull($closure);
+        $this->assertTrue($closure instanceof Closure);
+        $this->assertEquals(11, $closure(5, 6));
+    }
+
 }
 
 class ObjnObj implements Serializable {
