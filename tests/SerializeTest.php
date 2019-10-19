@@ -212,6 +212,16 @@ class SerializeTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('2018-02-23', $u->date->format('Y-m-d'));
     }
 
+
+    public function testObjectReserialization()
+    {
+        $o = (object)['foo'=>'bar'];
+        $s1 = \Opis\Closure\serialize($o);
+        $o = \Opis\Closure\unserialize($s1);
+        $s2 = \Opis\Closure\serialize($o);
+
+        $this->assertEquals($s1, $s2);
+    }
 }
 
 class Abc
