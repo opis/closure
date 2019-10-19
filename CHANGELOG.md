@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v3.4.1, 2019.10.19
+
+- Fixed a [bug](https://github.com/opis/closure/issues/40) that prevented serialization to work correctly.
+
 ### v3.4.0, 2019.09.03
 
 - Added `createClosure` static method in `Opis\Closure\SerializableClosure`.
