@@ -79,9 +79,33 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         $f3 = fn(Baz $a) : int => (function (Qux $x) {})();
         $e3 = 'fn(\Foo\Bar $a) : int => (function (\Foo\Baz\Qux $x) {})();';
 
+        $f4 = fn() => new Qux();
+        $e4 = 'fn() => new \Foo\Baz\Qux();';
+
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
+        $this->assertEquals($e4, $this->c($f4));
+    }
+
+    public function testFunctionInsideExpressionsAndArrays()
+    {
+        $f1 = (fn () => 1);
+        $e1 = 'fn () => 1;';
+
+        $f2 = [fn () => 1];
+        $e2 = 'fn () => 1;';
+
+        $f3 = [fn () => 1, 0];
+        $e3 = 'fn () => 1;';
+
+        $f4 = fn () => ($a === true) && (!empty([0,1,]));
+        $e4 = 'fn () => ($a === true) && (!empty([0,1,]));';
+
+        $this->assertEquals($e1, $this->c($f1));
+        $this->assertEquals($e2, $this->c($f2[0]));
+        $this->assertEquals($e3, $this->c($f3[0]));
+        $this->assertEquals($e4, $this->c($f4));
     }
 
     public function testSerialize()

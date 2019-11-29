@@ -497,6 +497,9 @@ class ReflectionClosure extends ReflectionFunction
                             $id_name .= $token[1];
                             break;
                         case '(':
+                            if ($isShortClosure) {
+                                $open++;
+                            }
                             if($context === 'new' || false !== strpos($id_name, '\\')){
                                 if($id_start !== '\\'){
                                     if ($classes === null) {
