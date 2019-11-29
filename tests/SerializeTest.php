@@ -7,6 +7,7 @@
 
 namespace Opis\Closure\Test;
 
+use Opis\Closure\ReflectionClosure;
 use stdClass;
 use Closure;
 
@@ -221,6 +222,13 @@ class SerializeTest extends \PHPUnit\Framework\TestCase
         $s2 = \Opis\Closure\serialize($o);
 
         $this->assertEquals($s1, $s2);
+    }
+
+    public function testIsShortClosure()
+    {
+        $f = function () { };
+
+        $this->assertFalse((new ReflectionClosure($f))->isShortClosure());
     }
 }
 

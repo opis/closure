@@ -23,9 +23,25 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         return $r->getCode();
     }
 
+    protected function r(Closure $closure)
+    {
+        return new ReflectionClosure($closure);
+    }
+
     protected function s(Closure $closure)
     {
         return unserialize(serialize(new SerializableClosure($closure)))->getClosure();
+    }
+
+    public function testIsShortClosure()
+    {
+        $f1 = fn() => 1;
+        $f2 = static fn() => 1;
+        $f3 = function () { fn() => 1; };
+
+        $this->assertTrue($this->r($f1)->isShortClosure());
+        $this->assertTrue($this->r($f2)->isShortClosure());
+        $this->assertFalse($this->r($f3)->isShortClosure());
     }
 
     public function testBasicShortClosure()
@@ -60,8 +76,12 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         $f2 = fn(Baz $a) : Qux => "hello";
         $e2 = 'fn(\Foo\Bar $a) : \Foo\Baz\Qux => "hello";';
 
+        $f3 = fn(Baz $a) : int => (function (Qux $x) {})();
+        $e3 = 'fn(\Foo\Bar $a) : int => (function (\Foo\Baz\Qux $x) {})();';
+
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
+        $this->assertEquals($e3, $this->c($f3));
     }
 
     public function testSerialize()
