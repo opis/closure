@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v3.5.1, 2019.11.30
+
+- Bugfix. See #47
+
 ### v3.5.0, 2019.11.29
 
 - Added support for short closures (arrow functions)
