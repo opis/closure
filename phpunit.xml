@@ -24,5 +24,8 @@
         <testsuite name="ReflectionClosure4">
             <file phpVersion="7.2.0" phpVersionOperator=">=">./tests/ReflectionClosure4Test.php</file>
         </testsuite>
+        <testsuite name="ReflectionClosure5">
+            <file phpVersion="7.4" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
+        </testsuite>
     </testsuites>
 </phpunit>
