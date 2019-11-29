@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v3.4.2, 2019.11.29
+
+- Added `stream_set_option()`
+
 ### v3.4.1, 2019.10.19
 
 - Fixed a [bug](https://github.com/opis/closure/issues/40) that prevented serialization to work correctly.
