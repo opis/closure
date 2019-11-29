@@ -1,6 +1,11 @@
 CHANGELOG
 ---------
 
+### v3.5.0, 2019.11.29
+
+- Added support for short closures (arrow functions)
+- Added `isShortClosure` method to `Opis\Closure\ReflectionClosure`
+
 ### v3.4.2, 2019.11.29
 
 - Added `stream_set_option()`
