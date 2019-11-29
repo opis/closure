@@ -303,13 +303,13 @@ class ReflectionClosure extends ReflectionFunction
                             break;
                         case ')':
                         case ']':
+                            $code .= $token[0];
                             if ($isShortClosure) {
                                 if ($open === 0) {
                                     break 3;
                                 }
                                 --$open;
                             }
-                            $code .= $token[0];
                             break;
                         case ',':
                         case ';':

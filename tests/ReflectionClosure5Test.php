@@ -84,6 +84,13 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e3, $this->c($f3));
     }
 
+    public function testReturnedObject()
+    {
+        $f = fn() => new \Foo\Bar();
+        $e = 'fn() => new \Foo\Bar();';
+        $this->assertEquals($e, $this->c($f));
+    }
+
     public function testSerialize()
     {
         $f1 = fn() => 'hello';
