@@ -8,11 +8,8 @@
 namespace Opis\Closure\Test;
 
 use Closure;
+use Foo\{Bar as Baz, Baz\Qux};
 use Opis\Closure\ReflectionClosure;
-use Foo\{
-    Bar as Baz,
-    Baz\Qux
-};
 use Opis\Closure\SerializableClosure;
 
 class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
@@ -93,11 +90,11 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         $f1 = (fn () => 1);
         $e1 = 'fn () => 1;';
 
-        $f2 = [fn () => 1];
-        $e2 = 'fn () => 1;';
+        $f2 = [fn () => 2];
+        $e2 = 'fn () => 2';
 
-        $f3 = [fn () => 1, 0];
-        $e3 = 'fn () => 1;';
+        $f3 = [fn () => 3, 0];
+        $e3 = 'fn () => 3';
 
         $f4 = fn () => ($a === true) && (!empty([0,1,]));
         $e4 = 'fn () => ($a === true) && (!empty([0,1,]));';

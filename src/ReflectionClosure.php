@@ -134,6 +134,7 @@ class ReflectionClosure extends ReflectionFunction
         $isUsingScope = false;
         $isUsingThisObject = false;
 
+        $semicolonNeeded = false;
         for($i = 0, $l = count($tokens); $i < $l; $i++) {
             $token = $tokens[$i];
             switch ($state) {
@@ -305,6 +306,7 @@ class ReflectionClosure extends ReflectionFunction
                         case ']':
                             if ($isShortClosure) {
                                 if ($open === 0) {
+                                    $semicolonNeeded = $token[0] === ')' && $tokens[$i+1] === ';';
                                     break 3;
                                 }
                                 --$open;
@@ -314,6 +316,7 @@ class ReflectionClosure extends ReflectionFunction
                         case ',':
                         case ';':
                             if ($isShortClosure && $open === 0) {
+                                $semicolonNeeded = $token[0] === ';';
                                 break 3;
                             }
                             $code .= $token[0];
@@ -340,7 +343,7 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $_method;
                             break;
                         case T_COMMENT:
-                            if (substr($token[1], 0, 8) === '#trackme') {
+                            if (strpos($token[1], '#trackme') === 0) {
                                 $timestamp = time();
                                 $code .= '/**' . PHP_EOL;
                                 $code .= '* Date      : ' . date(DATE_W3C, $timestamp) . PHP_EOL;
@@ -353,7 +356,7 @@ class ReflectionClosure extends ReflectionFunction
                             }
                             break;
                         case T_VARIABLE:
-                            if($token[1] == '$this' && !$inside_anonymous){
+                            if ($token[1] === '$this' && !$inside_anonymous){
                                 $isUsingThisObject = true;
                             }
                             $code .= $token[1];
@@ -607,7 +610,9 @@ class ReflectionClosure extends ReflectionFunction
         }
 
         if ($isShortClosure) {
-            $code .= ';';
+            if ($semicolonNeeded) {
+                $code .= ';';
+            }
             $this->useVariables = $this->getStaticVariables();
         } else {
             $this->useVariables = empty($use) ? $use : array_intersect_key($this->getStaticVariables(), array_flip($use));
