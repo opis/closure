@@ -47,19 +47,19 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
     public function testBasicShortClosure()
     {
         $f1 = fn() => "hello";
-        $e1 = 'fn() => "hello";';
+        $e1 = 'fn() => "hello"';
 
         $f2 = fn&() => "hello";
-        $e2 = 'fn&() => "hello";';
+        $e2 = 'fn&() => "hello"';
 
         $f3 = fn($a) => "hello";
-        $e3 = 'fn($a) => "hello";';
+        $e3 = 'fn($a) => "hello"';
 
         $f4 = fn(&$a) => "hello";
-        $e4 = 'fn(&$a) => "hello";';
+        $e4 = 'fn(&$a) => "hello"';
 
         $f5 = fn(&$a) : string => "hello";
-        $e5 = 'fn(&$a) : string => "hello";';
+        $e5 = 'fn(&$a) : string => "hello"';
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
@@ -71,16 +71,16 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
     public function testResolveTypes()
     {
         $f1 = fn(Baz $a) => "hello";
-        $e1 = 'fn(\Foo\Bar $a) => "hello";';
+        $e1 = 'fn(\Foo\Bar $a) => "hello"';
 
         $f2 = fn(Baz $a) : Qux => "hello";
-        $e2 = 'fn(\Foo\Bar $a) : \Foo\Baz\Qux => "hello";';
+        $e2 = 'fn(\Foo\Bar $a) : \Foo\Baz\Qux => "hello"';
 
         $f3 = fn(Baz $a) : int => (function (Qux $x) {})();
-        $e3 = 'fn(\Foo\Bar $a) : int => (function (\Foo\Baz\Qux $x) {})();';
+        $e3 = 'fn(\Foo\Bar $a) : int => (function (\Foo\Baz\Qux $x) {})()';
 
         $f4 = fn() => new Qux();
-        $e4 = 'fn() => new \Foo\Baz\Qux();';
+        $e4 = 'fn() => new \Foo\Baz\Qux()';
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
@@ -91,16 +91,16 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
     public function testFunctionInsideExpressionsAndArrays()
     {
         $f1 = (fn () => 1);
-        $e1 = 'fn () => 1;';
+        $e1 = 'fn () => 1';
 
         $f2 = [fn () => 1];
-        $e2 = 'fn () => 1;';
+        $e2 = 'fn () => 1';
 
         $f3 = [fn () => 1, 0];
-        $e3 = 'fn () => 1;';
+        $e3 = 'fn () => 1';
 
         $f4 = fn () => ($a === true) && (!empty([0,1,]));
-        $e4 = 'fn () => ($a === true) && (!empty([0,1,]));';
+        $e4 = 'fn () => ($a === true) && (!empty([0,1,]))';
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2[0]));
