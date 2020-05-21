@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v3.5.2, 2020.05.21
+
+- Removed extra semicolon in short closures, since is not part of the closure's body.
+
 ### v3.5.1, 2019.11.30
 
 - Bugfix. See #47
