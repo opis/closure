@@ -49,9 +49,13 @@ class SerializeTest extends TestCase
                 48,
                 [4, 6],
             ],
+            [
+                Closure::fromCallable('\str_replace'),
+                'x1x2x3',
+                ['a', 'x', 'a1a2a3'],
+            ],
         ];
     }
-
 
     protected function applyTest(Closure $closure, $expected, ?array $args, int $times, ?string $message = null)
     {

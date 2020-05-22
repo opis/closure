@@ -1,19 +1,7 @@
 <phpunit bootstrap="./tests/bootstrap.php">
     <testsuites>
         <testsuite name="ReflectionClosure">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure2">
-            <file phpVersion="7.0.0" phpVersionOperator=">=">./tests/ReflectionClosure2Test.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure3">
-            <file phpVersion="7.1.0" phpVersionOperator=">=">./tests/ReflectionClosure3Test.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure4">
-            <file phpVersion="7.2.0" phpVersionOperator=">=">./tests/ReflectionClosure4Test.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure5">
-            <file phpVersion="7.4" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
+            <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

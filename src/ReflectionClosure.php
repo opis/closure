@@ -120,7 +120,11 @@ class ReflectionClosure extends ReflectionFunction
             $className = '\\' . trim($className->getName(), '\\');
         }
 
-        $php_types = ['string', 'int', 'float', 'bool', 'void', 'array', 'object', 'callable', 'iterable', 'self'];
+        // new self(); new static(); new parent();
+        $class_keywords = ['self', 'static', 'parent'];
+
+        $php_types = ['string', 'int', 'float', 'bool', 'array', 'object', 'callable', 'iterable', 'void', 'self'];
+
 
         $ns = $this->getNamespaceName();
         $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
@@ -517,7 +521,7 @@ class ReflectionClosure extends ReflectionFunction
                                 $open++;
                             }
                             if($context === 'new' || false !== strpos($id_name, '\\')){
-                                if($id_start !== '\\'){
+                                if($id_start !== '\\' && !in_array($id_start_ci, $class_keywords)){
                                     if ($classes === null) {
                                         $classes = $this->getClasses();
                                     }
