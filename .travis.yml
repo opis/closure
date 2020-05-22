@@ -4,6 +4,8 @@ matrix:
   include:
     - php: 7.4
       dist: bionic
+      before_install:
+        - pecl install ffi
 
 install: travis_retry composer install
 
