@@ -120,7 +120,7 @@ class ReflectionClosure extends ReflectionFunction
             $className = '\\' . trim($className->getName(), '\\');
         }
 
-        $php_types = ['string', 'int', 'float', 'bool', 'void', 'array', 'object', 'callable', 'iterable'];
+        $php_types = ['string', 'int', 'float', 'bool', 'void', 'array', 'object', 'callable', 'iterable', 'self'];
 
         $ns = $this->getNamespaceName();
         $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
