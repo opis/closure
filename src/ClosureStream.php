@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright (c) 2018-2019 Zindex Software
+ * Copyright (c) 2018-2020 Zindex Software
  *
  * Licensed under the MIT License
  * =========================================================================== */
@@ -14,19 +14,44 @@ class ClosureStream
 {
     const STREAM_PROTO = 'closure';
 
-    protected static $isRegistered = false;
+    protected static array $map = [];
 
-    protected $content;
+    protected static bool $isRegistered = false;
 
-    protected $length;
+    protected ?string $content;
 
-    protected $pointer = 0;
+    protected int $length = 0;
+
+    protected int $pointer = 0;
+
+    public static function url(string $code): string
+    {
+        $key = \md5($code);
+        if (!isset(self::$map[$key])) {
+            self::$map[$key] = "<?php\nreturn " . $code . ";";
+        }
+        return self::STREAM_PROTO . '://' . $key;
+    }
 
     function stream_open($path, $mode, $options, &$opened_path)
     {
-        $this->content = "<?php\nreturn " . substr($path, strlen(static::STREAM_PROTO . '://')) . ";";
+        $path = substr($path, strlen(self::STREAM_PROTO . '://'));
+
+        if (!isset(self::$map[$path])) {
+            return false;
+        }
+
+        $this->content = &self::$map[$path];
         $this->length = strlen($this->content);
+
         return true;
+    }
+
+    public function stream_close()
+    {
+        unset($this->content);
+        $this->length = 0;
+        $this->pointer = 0;
     }
 
     public function stream_read($count)
@@ -96,4 +121,16 @@ class ClosureStream
         }
     }
 
+    public static function eval(string $______code______, ?array $______vars______ = null): \Closure
+    {
+        $______code______ = self::url($______code______);
+
+        if ($______vars______) {
+            extract($______vars______, EXTR_OVERWRITE | EXTR_REFS);
+        } else {
+            unset($______vars______);
+        }
+
+        return include($______code______);
+    }
 }

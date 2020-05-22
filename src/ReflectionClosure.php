@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright (c) 2018-2019 Zindex Software
+ * Copyright (c) 2018-2020 Zindex Software
  *
  * Licensed under the MIT License
  * =========================================================================== */
@@ -12,20 +12,20 @@ use ReflectionFunction;
 
 class ReflectionClosure extends ReflectionFunction
 {
-    protected $code;
-    protected $tokens;
-    protected $hashedName;
-    protected $useVariables;
-    protected $isStaticClosure;
-    protected $isScopeRequired;
-    protected $isBindingRequired;
-    protected $isShortClosure;
+    protected ?string $code = null;
+    protected ?array $tokens = null;
+    protected ?string $hashedName = null;
+    protected ?array $useVariables = null;
+    protected ?bool $isStaticClosure = null;
+    protected ?bool $isScopeRequired = null;
+    protected ?bool $isBindingRequired = null;
+    protected ?bool $isShortClosure = null;
 
-    protected static $files = array();
-    protected static $classes = array();
-    protected static $functions = array();
-    protected static $constants = array();
-    protected static $structures = array();
+    protected static array $files = [];
+    protected static array $classes = [];
+    protected static array $functions = [];
+    protected static array $constants = [];
+    protected static array $structures = [];
 
 
     /**
@@ -34,7 +34,7 @@ class ReflectionClosure extends ReflectionFunction
      * @param string|null $code
      * @throws \ReflectionException
      */
-    public function __construct(Closure $closure, $code = null)
+    public function __construct(Closure $closure, ?string $code = null)
     {
         $this->code = $code;
         parent::__construct($closure);
@@ -43,7 +43,32 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return bool
      */
-    public function isStatic()
+    public function isFromCallable(): bool
+    {
+        return $this->getShortName() !== '{closure}';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isClassMethod(): bool
+    {
+        if (!$this->isFromCallable()) {
+            return false;
+        }
+
+        if ($this->getNamespaceName()) {
+            // We have a namespace, so it is a function
+            return false;
+        }
+
+        return $this->getClosureScopeClass() !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatic(): bool
     {
         if ($this->isStaticClosure === null) {
             $this->isStaticClosure = strtolower(substr($this->getCode(), 0, 6)) === 'static';
@@ -52,8 +77,12 @@ class ReflectionClosure extends ReflectionFunction
         return $this->isStaticClosure;
     }
 
-    public function isShortClosure()
+    public function isShortClosure(): bool
     {
+        if ($this->isInternal()) {
+            return false;
+        }
+
         if ($this->isShortClosure === null) {
             $code = $this->getCode();
             if ($this->isStatic()) {
@@ -68,8 +97,12 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return string
      */
-    public function getCode()
+    public function getCode(): ?string
     {
+        if ($this->isInternal()) {
+            return null;
+        }
+
         if($this->code !== null){
             return $this->code;
         }
@@ -77,20 +110,19 @@ class ReflectionClosure extends ReflectionFunction
         $fileName = $this->getFileName();
         $line = $this->getStartLine() - 1;
 
+        /*
         $match = ClosureStream::STREAM_PROTO . '://';
 
         if ($line === 1 && substr($fileName, 0, strlen($match)) === $match) {
             return $this->code = substr($fileName, strlen($match));
-        }
+        }*/
 
         $className = null;
         $fn = false;
 
-
         if (null !== $className = $this->getClosureScopeClass()) {
             $className = '\\' . trim($className->getName(), '\\');
         }
-
 
         if($php7 = PHP_MAJOR_VERSION === 7){
             switch (PHP_MINOR_VERSION){
@@ -121,6 +153,7 @@ class ReflectionClosure extends ReflectionFunction
         $_trait = null;
 
         $tokens = $this->getTokens();
+
         $state = $lastState = 'start';
         $inside_anonymous = false;
         $isShortClosure = false;
@@ -129,7 +162,7 @@ class ReflectionClosure extends ReflectionFunction
         $code = '';
         $id_start = $id_start_ci = $id_name = $context = '';
         $classes = $functions = $constants = null;
-        $use = array();
+        $use = [];
         $lineAdd = 0;
         $isUsingScope = false;
         $isUsingThisObject = false;
@@ -623,14 +656,19 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    public function getUseVariables()
+    public function getUseVariables(): array
     {
+        if ($this->isInternal()) {
+            return [];
+        }
+
         if($this->useVariables !== null){
             return $this->useVariables;
         }
 
         $tokens = $this->getTokens();
-        $use = array();
+
+        $use = [];
         $state = 'start';
 
         foreach ($tokens as &$token) {
@@ -662,31 +700,40 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * return bool
      */
-    public function isBindingRequired()
+    public function isBindingRequired(): bool
     {
+        if ($this->isInternal()) {
+            // TODO:
+            return false;
+        }
+
         if($this->isBindingRequired === null){
             $this->getCode();
         }
 
-        return $this->isBindingRequired;
+        return $this->isBindingRequired ?? false;
     }
 
     /**
      * return bool
      */
-    public function isScopeRequired()
+    public function isScopeRequired(): bool
     {
+        if ($this->isInternal()) {
+            return false;
+        }
+
         if($this->isScopeRequired === null){
             $this->getCode();
         }
 
-        return $this->isScopeRequired;
+        return $this->isScopeRequired ?? false;
     }
 
     /**
      * @return string
      */
-    protected function getHashedFileName()
+    protected function getHashedFileName(): string
     {
         if ($this->hashedName === null) {
             $this->hashedName = sha1($this->getFileName());
@@ -698,7 +745,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    protected function getFileTokens()
+    protected function getFileTokens(): array
     {
         $key = $this->getHashedFileName();
 
@@ -712,16 +759,16 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    protected function getTokens()
+    protected function getTokens(): array
     {
         if ($this->tokens === null) {
             $tokens = $this->getFileTokens();
             $startLine = $this->getStartLine();
             $endLine = $this->getEndLine();
-            $results = array();
+            $results = [];
             $start = false;
 
-            foreach ($tokens as &$token) {
+            foreach ($tokens as $token) {
                 if (!is_array($token)) {
                     if ($start) {
                         $results[] = $token;
@@ -753,7 +800,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    protected function getClasses()
+    protected function getClasses(): array
     {
         $key = $this->getHashedFileName();
 
@@ -767,7 +814,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    protected function getFunctions()
+    protected function getFunctions(): array
     {
         $key = $this->getHashedFileName();
 
@@ -781,7 +828,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    protected function getConstants()
+    protected function getConstants(): array
     {
         $key = $this->getHashedFileName();
 
@@ -795,7 +842,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return array
      */
-    protected function getStructures()
+    protected function getStructures(): array
     {
         $key = $this->getHashedFileName();
 
@@ -806,7 +853,7 @@ class ReflectionClosure extends ReflectionFunction
         return static::$structures[$key];
     }
 
-    protected function fetchItems()
+    protected function fetchItems(): void
     {
         $key = $this->getHashedFileName();
 

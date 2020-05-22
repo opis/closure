@@ -30,7 +30,7 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
 
     protected function s(Closure $closure)
     {
-        return unserialize(serialize(new SerializableClosure($closure)))->getClosure();
+        return unserialize(serialize($closure));
     }
 
     public function testIsShortClosure()

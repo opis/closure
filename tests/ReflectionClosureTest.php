@@ -22,6 +22,22 @@ class ReflectionClosureTest extends \PHPUnit\Framework\TestCase
         return $r->getCode();
     }
 
+    public function testClosureStatic()
+    {
+        $f = static function(){};
+        $rc = new ReflectionClosure($f);
+        $this->assertTrue($rc->isStatic());
+    }
+
+    public function testClosureStaticFail()
+    {
+        $f = static
+            // This will not work
+        function(){};
+        $rc = new ReflectionClosure($f);
+        $this->assertFalse($rc->isStatic());
+    }
+
     public function testNewInstance()
     {
         $f = function (){ $c = '\A'; new $c;};

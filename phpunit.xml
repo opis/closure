@@ -1,17 +1,5 @@
-<phpunit bootstrap="./vendor/autoload.php">
+<phpunit bootstrap="./tests/bootstrap.php">
     <testsuites>
-        <testsuite name="Main">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ClosureTest.php</file>
-        </testsuite>
-        <testsuite name="Serialize">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SerializeTest.php</file>
-        </testsuite>
-        <testsuite name="Recursive">
-            <file phpVersion="7.1.0" phpVersionOperator="&lt;">./tests/RecursiveArrayTest.php</file>
-        </testsuite>
-        <testsuite name="Signed">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SignedClosureTest.php</file>
-        </testsuite>
         <testsuite name="ReflectionClosure">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>
         </testsuite>

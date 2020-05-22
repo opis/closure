@@ -1,18 +1,12 @@
 <?php
 /* ===========================================================================
- * Copyright (c) 2018-2019 Zindex Software
+ * Copyright (c) 2020 Zindex Software
  *
  * Licensed under the MIT License
  * =========================================================================== */
 
-namespace Opis\Closure;
+require_once './vendor/autoload.php';
 
-use Exception;
+use function Opis\Closure\init;
 
-/**
- * Security exception class
- */
-class SecurityException extends Exception
-{
-
-}
+init();
