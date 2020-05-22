@@ -5,7 +5,7 @@ matrix:
     - php: 7.4
       dist: bionic
       before_install:
-        - pecl install ffi
+        - sudo apt-get -y -q=2 --no-install-recommends --no-install-suggests install libffi-dev php-ffi
 
 install: travis_retry composer install
 
