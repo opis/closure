@@ -26,12 +26,13 @@ function serialize($data)
  * Unserialize
  *
  * @param $data
+ * @param $options
  * @return mixed
  */
-function unserialize($data)
+function unserialize($data, array $options = null)
 {
     SerializableClosure::enterContext();
-    $data = \unserialize($data);
+    $data = \unserialize($data, $options);
     SerializableClosure::unwrapClosures($data);
     SerializableClosure::exitContext();
     return $data;
