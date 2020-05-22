@@ -88,6 +88,24 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e4, $this->c($f4));
     }
 
+    public function testClassKeywordsInstantiation()
+    {
+        $this->assertEquals(
+            'function () { return new self(); }',
+            $this->c(function () { return new self(); })
+        );
+
+        $this->assertEquals(
+            'function () { return new static(); }',
+            $this->c(function () { return new static(); })
+        );
+
+        $this->assertEquals(
+            'function () { return new parent(); }',
+            $this->c(function () { return new parent(); })
+        );
+    }
+
     public function testFunctionInsideExpressionsAndArrays()
     {
         $f1 = (fn () => 1);
