@@ -155,6 +155,7 @@ class SerializableClosureHandler
             $op_array->refcount[0] = $op_array->refcount[0] + 1;
             if (!FFI::isNull($op_array->static_variables)) {
                 $op_array->static_variables->gc->refcount++;
+                $op_array->static_variables_ptr = FFI::addr($op_array->static_variables);
             }
 
             unset($op_array);
