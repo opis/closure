@@ -52,32 +52,46 @@ class ReflectionClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e, $this->c($f));
     }
 
-    public function testClosureResolveArguments()
+    /**
+     * @dataProvider closureArgumentsDataProvider
+     */
+    public function testClosureResolveArguments(Closure $closure, string $code)
     {
-        $f1 = function (Bar $p){};
-        $e1 = 'function (\Foo\Bar $p){}';
+        $this->assertEquals($code, $this->c($closure));
+    }
 
-        $f2 = function (Bar\Test $p){};
-        $e2 = 'function (\Foo\Bar\Test $p){}';
-
-        $f3 = function (Qux $p){};
-        $e3 = 'function (\Foo\Baz $p){}';
-
-        $f4 = function (Qux\Test $p){};
-        $e4 = 'function (\Foo\Baz\Test $p){}';
-
-        $f5 = function (\Foo $p){};
-        $e5 = 'function (\Foo $p){}';
-
-        $f6 = function (Foo $p){};
-        $e6 = 'function (\\' . __NAMESPACE__ . '\Foo $p){}';
-
-        $this->assertEquals($e1, $this->c($f1));
-        $this->assertEquals($e2, $this->c($f2));
-        $this->assertEquals($e3, $this->c($f3));
-        $this->assertEquals($e4, $this->c($f4));
-        $this->assertEquals($e5, $this->c($f5));
-        $this->assertEquals($e6, $this->c($f6));
+    public function closureArgumentsDataProvider()
+    {
+        return [
+            [
+                function (Bar $p){},
+                'function (\Foo\Bar $p){}',
+            ],
+            [
+                function (Bar\Test $p){},
+                'function (\Foo\Bar\Test $p){}',
+            ],
+            [
+                function (Qux $p){},
+                'function (\Foo\Baz $p){}',
+            ],
+            [
+                function (Qux\Test $p){},
+                'function (\Foo\Baz\Test $p){}',
+            ],
+            [
+                function (\Foo $p){},
+                'function (\Foo $p){}',
+            ],
+            [
+                function (Foo $p){},
+                'function (\\' . __NAMESPACE__ . '\Foo $p){}',
+            ],
+            [
+                function (iterable $a){},
+                'function (iterable $a){}'
+            ]
+        ];
     }
 
     public function testCloureResolveInBody()

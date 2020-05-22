@@ -71,12 +71,16 @@ class ReflectionClosure extends ReflectionFunction
     public function isStatic(): bool
     {
         if ($this->isStaticClosure === null) {
+            // TODO: only check if has a $this bound
             $this->isStaticClosure = strtolower(substr($this->getCode(), 0, 6)) === 'static';
         }
 
         return $this->isStaticClosure;
     }
 
+    /**
+     * @return bool
+     */
     public function isShortClosure(): bool
     {
         if ($this->isInternal()) {
@@ -88,14 +92,14 @@ class ReflectionClosure extends ReflectionFunction
             if ($this->isStatic()) {
                 $code = substr($code, 6);
             }
-            $this->isShortClosure = strtolower(substr(trim($code), 0, 2)) === 'fn';
+            $this->isShortClosure = strtolower(substr(ltrim($code), 0, 2)) === 'fn';
         }
 
         return $this->isShortClosure;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getCode(): ?string
     {
@@ -110,34 +114,13 @@ class ReflectionClosure extends ReflectionFunction
         $fileName = $this->getFileName();
         $line = $this->getStartLine() - 1;
 
-        /*
-        $match = ClosureStream::STREAM_PROTO . '://';
-
-        if ($line === 1 && substr($fileName, 0, strlen($match)) === $match) {
-            return $this->code = substr($fileName, strlen($match));
-        }*/
-
         $className = null;
-        $fn = false;
 
-        if (null !== $className = $this->getClosureScopeClass()) {
+        if ((null !== $className = $this->getClosureScopeClass()) && !$className->isInternal()) {
             $className = '\\' . trim($className->getName(), '\\');
         }
 
-        if($php7 = PHP_MAJOR_VERSION === 7){
-            switch (PHP_MINOR_VERSION){
-                case 0:
-                    $php7_types = array('string', 'int', 'bool', 'float');
-                    break;
-                case 1:
-                    $php7_types = array('string', 'int', 'bool', 'float', 'void');
-                    break;
-                case 2:
-                default:
-                    $php7_types = array('string', 'int', 'bool', 'float', 'void', 'object');
-            }
-            $fn = PHP_MINOR_VERSION === 4;
-        }
+        $php_types = ['string', 'int', 'float', 'bool', 'void', 'array', 'object', 'callable', 'iterable'];
 
         $ns = $this->getNamespaceName();
         $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
@@ -174,7 +157,7 @@ class ReflectionClosure extends ReflectionFunction
                     if ($token[0] === T_FUNCTION || $token[0] === T_STATIC) {
                         $code .= $token[1];
                         $state = $token[0] === T_FUNCTION ? 'function' : 'static';
-                    } elseif ($fn && $token[0] === T_FN) {
+                    } elseif ($token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -186,7 +169,7 @@ class ReflectionClosure extends ReflectionFunction
                         if ($token[0] === T_FUNCTION) {
                             $state = 'function';
                         }
-                    } elseif ($fn && $token[0] === T_FN) {
+                    } elseif ($token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -213,7 +196,7 @@ class ReflectionClosure extends ReflectionFunction
                     if($token[0] === T_FUNCTION || $token[0] === T_STATIC){
                         $code = $token[1];
                         $state = $token[0] === T_FUNCTION ? 'function' : 'static';
-                    } elseif ($fn && $token[0] === T_FN) {
+                    } elseif ($token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -563,7 +546,7 @@ class ReflectionClosure extends ReflectionFunction
                             if($id_start !== '\\') {
                                 if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
                                     $isUsingScope = true;
-                                } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
+                                } elseif (!in_array($id_start_ci, $php_types)){
                                     if ($classes === null) {
                                         $classes = $this->getClasses();
                                     }
@@ -588,7 +571,7 @@ class ReflectionClosure extends ReflectionFunction
                                 ){
                                     if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
                                         $isUsingScope = true;
-                                    } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
+                                    } elseif (!in_array($id_start_ci, $php_types)){
                                         if($classes === null){
                                             $classes = $this->getClasses();
                                         }
@@ -703,7 +686,6 @@ class ReflectionClosure extends ReflectionFunction
     public function isBindingRequired(): bool
     {
         if ($this->isInternal()) {
-            // TODO:
             return false;
         }
 
