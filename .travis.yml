@@ -1,12 +1,9 @@
-language: php
+services: docker
 
 matrix:
   include:
-    - php: 7.4
-      dist: bionic
-      before_install:
-        - sudo apt-get -y -q=2 --no-install-recommends --no-install-suggests install libffi-dev php-ffi
+    - language: php
+      name: "7.4"
 
-install: travis_retry composer install
-
-script: vendor/bin/phpunit
+before_script: docker build --build-arg PHP_VERSION=${TRAVIS_JOB_NAME} -t opis-closure .
+script: docker run opis-closure /usr/src/opis-closure/vendor/bin/phpunit
