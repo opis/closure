@@ -32,7 +32,11 @@ function serialize($data)
 function unserialize($data, array $options = null)
 {
     SerializableClosure::enterContext();
-    $data = \unserialize($data, $options);
+    if ($options === null || PHP_MAJOR_VERSION < 7) {
+        $data = \unserialize($data);
+    } else {
+        $data = \unserialize($data, $options);
+    }
     SerializableClosure::unwrapClosures($data);
     SerializableClosure::exitContext();
     return $data;
