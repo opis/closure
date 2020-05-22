@@ -439,12 +439,18 @@ class ClosureSourceCodeTest extends AbstractClosureSourceCodeTestCase
                 fn ($a) => ($a === true) && (!empty([0,1,])),
                 'fn ($a) => ($a === true) && (!empty([0,1,]))',
             ],
-            // TODO: fix code
-            /*
             [
                 fn(Bar $a) : Qux => new self(),
                 'fn(\Foo\Bar $a) : \Foo\Baz => new self()',
-            ],*/
+            ],
+            [
+                fn(Bar $a) : Qux => new static(),
+                'fn(\Foo\Bar $a) : \Foo\Baz => new static()',
+            ],
+            [
+                fn(Bar $a) : Qux => new parent(),
+                'fn(\Foo\Bar $a) : \Foo\Baz => new parent()',
+            ],
         ], __FUNCTION__);
     }
 }

@@ -1,6 +1,6 @@
 <phpunit bootstrap="./tests/bootstrap.php">
     <testsuites>
-        <testsuite name="ReflectionClosure">
+        <testsuite name="SerializableClosure">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
