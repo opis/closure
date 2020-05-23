@@ -8,60 +8,48 @@
 namespace Opis\Closure;
 
 use FFI, Closure;
-use FFI\{CData, CType, Exception as FFIException};
+use FFI\{CData, CType};
 
 class SerializableClosureHandler
 {
     /**
-     * @var SerializableClosureHandler|null
+     * @var static|null
      */
     protected static ?SerializableClosureHandler $instance = null;
 
     /**
-     * FFI SCOPE
+     * @var FFI
      */
-    protected const SCOPE_NAME = 'OpisClosure';
+    protected $lib;
 
     /**
-     * WIN detector
+     * @var CData
      */
-    protected const IS_WIN = \DIRECTORY_SEPARATOR === '\\';
+    protected CData $executor;
 
     /**
-     * Preprocess regex
+     * @var int
      */
-    protected const PREPROCESS_REGEX = '/^\s*#(?<if>ifn?def)\s+(?<cond>.+?)\s*(?<then>^.+?)(?:^\s*#else\s*(?<else>^.+?))?^\s*#endif\s*/sm';
+    protected int $callFrameSlotSize;
 
     /**
-     * @var null|FFI
+     * @param FFI $lib
      */
-    protected ?FFI $lib = null;
-
-    /**
-     * @var CData|null
-     */
-    protected ?CData $executor = null;
-
-    /**
-     * @var int|null
-     */
-    protected ?int $slotSize = null;
-
-    /**
-     * SerializableClosureHandler constructor.
-     * @param bool $preload
-     */
-    final protected function __construct(bool $preload)
+    final protected function __construct(FFI $lib)
     {
-        // Load php library
-        try {
-            $this->lib = FFI::scope(self::SCOPE_NAME);
-        } catch (FFIException $ex) {
-            $this->lib = $this->load($preload);
-        }
+        // Set lib
+        $this->lib = $lib;
 
-        // Apply patch
-        $this->patch();
+        // Calculate call frame slot size
+        $this->callFrameSlotSize = $this->getCallFrameSlotSize();
+
+        // Get executor
+        $this->executor = $this->getExecutor();
+
+        // Apply patch only if needed
+        if (!class_parents(Closure::class)) {
+            $this->patch();
+        }
     }
 
     /**
@@ -185,57 +173,15 @@ class SerializableClosureHandler
     }
 
     /**
-     * @return CData zend_executor_globals*
-     */
-    protected function executor(): CData
-    {
-        if ($this->executor !== null) {
-            return $this->executor;
-        }
-
-        if (!\ZEND_THREAD_SAFE) {
-            return $this->executor = $this->lib->executor_globals;
-        }
-
-        $lib = $this->lib;
-
-        $executor = $lib->cast('char*', $lib->tsrm_get_ls_cache()) + $lib->executor_globals_offset;
-
-        return $this->executor = $lib->cast('zend_executor_globals*', $executor);
-    }
-
-    /**
-     * @param $data
-     * @return CData zval
-     */
-    protected function val($data): CData
-    {
-        return ($this->lib->cast('zval*', $this->executor()->current_execute_data) + $this->callFrameSlot())[0];
-    }
-
-    /**
-     * @param Closure $closure
-     * @return CData zend_closure
-     */
-    protected function closure(Closure $closure): CData
-    {
-        return $this->lib->cast('zend_closure*', $this->val($closure)->value->obj)[0];
-    }
-
-    /**
      * ZEND_CALL_FRAME_SLOT
      * @return int
      */
-    protected function callFrameSlot(): int
+    protected function getCallFrameSlotSize(): int
     {
-        if ($this->slotSize === null) {
-            $lib = $this->lib;
-            $zed = $this->alignedSize(FFI::sizeof($lib->type('zend_execute_data')));
-            $zval = $this->alignedSize(FFI::sizeof($lib->type('zval')));
-            $this->slotSize = intdiv($zed + $zval - 1, $zval);
-        }
+        $zed = $this->alignedSize(FFI::sizeof($this->lib->type('zend_execute_data')));
+        $zval = $this->alignedSize(FFI::sizeof($this->lib->type('zval')));
 
-        return $this->slotSize;
+        return intdiv($zed + $zval - 1, $zval);
     }
 
     /**
@@ -250,6 +196,40 @@ class SerializableClosureHandler
     }
 
     /**
+     * @return CData zend_executor_globals*
+     */
+    protected function getExecutor(): CData
+    {
+        if (!\ZEND_THREAD_SAFE) {
+            return $this->lib->executor_globals;
+        }
+
+        $lib = $this->lib;
+
+        $executor = $lib->cast('char*', $lib->tsrm_get_ls_cache()) + $lib->executor_globals_offset;
+
+        return $lib->cast('zend_executor_globals*', $executor);
+    }
+
+    /**
+     * @param $data
+     * @return CData zval
+     */
+    protected function val($data): CData
+    {
+        return ($this->lib->cast('zval*', $this->executor->current_execute_data) + $this->callFrameSlotSize)[0];
+    }
+
+    /**
+     * @param Closure $closure
+     * @return CData zend_closure
+     */
+    protected function closure(Closure $closure): CData
+    {
+        return $this->lib->cast('zend_closure*', $this->val($closure)->value->obj)[0];
+    }
+
+    /**
      * @param string|null $class_name
      */
     protected function patch(?string $class_name = null): void
@@ -261,7 +241,7 @@ class SerializableClosureHandler
         }
 
         // Get internal class table
-        $class_table = $this->executor()->class_table;
+        $class_table = $this->executor->class_table;
 
         $lib = $this->lib;
 
@@ -288,110 +268,6 @@ class SerializableClosureHandler
     }
 
     /**
-     * @return string Location to header file
-     */
-    protected function headerFile(): string
-    {
-        return __DIR__ . '/../include/headers.h';
-    }
-
-    /**
-     * @return string
-     */
-    protected function libName(): string
-    {
-        if (self::IS_WIN) {
-            return 'php' . \PHP_MAJOR_VERSION . (\PHP_ZTS ? 'ts' : '') . (\PHP_DEBUG ? '_debug' : '') . '.dll';
-        }
-
-        return '';
-    }
-
-    /**
-     * @return array Definitions
-     */
-    protected function defs(): array
-    {
-        $defs = [
-            'ZEND_API' => '__declspec(dllimport)',
-            'ZEND_FASTCALL' => self::IS_WIN ? '__vectorcall' : '',
-            'ZEND_MAX_RESERVED_RESOURCES' => 6,
-        ];
-
-        if (\ZEND_THREAD_SAFE) {
-            $defs['ZTS'] = 1;
-        }
-
-        if (self::IS_WIN) {
-            $defs['ZEND_WIN32'] = 1;
-        }
-
-        if (\PHP_INT_SIZE === 8) {
-            $defs['PLATFORM_64'] = 1;
-        } else {
-            $defs['PLATFORM_32'] = 1;
-        }
-
-        return $defs;
-    }
-
-    /**
-     * @param string $data Unprocessed content
-     * @param array $defs Definitions
-     * @return string Processed content
-     */
-    private function preprocess(string $data, array $defs = []): string
-    {
-        $data = preg_replace_callback(self::PREPROCESS_REGEX, function (array $m) use (&$defs) {
-            $ok = array_key_exists($m['cond'], $defs);
-            if ($m['if'] === 'ifndef') {
-                $ok = !$ok;
-            }
-            if ($ok) {
-                return $m['then'];
-            }
-            return $m['else'] ?? '';
-        }, $data);
-
-        $data = strtr($data, $defs);
-
-        return $data;
-    }
-
-    /**
-     * @param bool $preload
-     * @return FFI
-     */
-    private function load(bool $preload): FFI
-    {
-        $lib = $this->libName();
-
-        $data = file_get_contents($this->headerFile());
-        $data = $this->preprocess($data, $this->defs() + [
-                'FFI_SCOPE_NAME' => self::SCOPE_NAME,
-                'FFI_LIB_NAME' => $lib,
-            ]);
-
-        if ($preload) {
-            $file = tempnam(sys_get_temp_dir(), 'opis_closure_ffi_');
-            file_put_contents($file, $data);
-            unset($data);
-
-            $ffi = FFI::load($file);
-
-            unlink($file);
-
-            return $ffi;
-        }
-
-        if ($lib) {
-            return FFI::cdef($data, $lib);
-        }
-
-        return FFI::cdef($data);
-    }
-
-    /**
      * @return static|null
      */
     public static function instance(): ?self
@@ -401,15 +277,16 @@ class SerializableClosureHandler
     }
 
     /**
-     * @param bool $preload
+     * @param FFI $lib
      * @return static
      */
-    public static function init(bool $preload = false): self
+    public static function init(FFI $lib): self
     {
         if (!self::$instance) {
+            // Register stream
             ClosureStream::register();
             // Create instance
-            self::$instance = new static($preload);
+            self::$instance = new static($lib);
         }
 
         return self::$instance;

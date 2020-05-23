@@ -12,7 +12,7 @@ class SerializableClosure
     /**
      * @return array
      */
-    final public function __serialize(): array
+    final public function __serialize()
     {
         return SerializableClosureHandler::instance()->serializeClosure($this);
     }
@@ -20,7 +20,7 @@ class SerializableClosure
     /**
      * @param array $data
      */
-    final public function __unserialize(array $data): void
+    final public function __unserialize(array $data)
     {
         SerializableClosureHandler::instance()->unserializeClosure($this, $data);
     }
