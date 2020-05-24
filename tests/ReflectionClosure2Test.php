@@ -42,12 +42,24 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $f5 = function (array $p, string $x){};
         $e5 = 'function (array $p, string $x){}';
 
+        $f6 = function ($a = self::VALUE){};
+        $e6 = 'function ($a = self::VALUE){}';
+
+        $f7 = function ($a = parent::VALUE){};
+        $e7 = 'function ($a = parent::VALUE){}';
+
+        $f8 = function ($a = [self::VALUE, parent::VALUE]){};
+        $e8 = 'function ($a = [self::VALUE, parent::VALUE]){}';
+
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
         $this->assertEquals($e4, $this->c($f4));
         $this->assertEquals($e5, $this->c($f5));
+        $this->assertEquals($e6, $this->c($f6));
+        $this->assertEquals($e7, $this->c($f7));
+        $this->assertEquals($e8, $this->c($f8));
     }
 
     public function testResolveReturnType()
@@ -76,6 +88,9 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $f8 = function (): string{};
         $e8 = 'function (): string{}';
 
+        $f9 = function (){ return Relative\CONST_X + 1;};
+        $e9 = 'function (){ return \\' . __NAMESPACE__. '\Relative\CONST_X + 1;}';
+
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
@@ -84,6 +99,7 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e6, $this->c($f6));
         $this->assertEquals($e7, $this->c($f7));
         $this->assertEquals($e8, $this->c($f8));
+        $this->assertEquals($e9, $this->c($f9));
     }
 
     public function testClosureInsideClosure()
