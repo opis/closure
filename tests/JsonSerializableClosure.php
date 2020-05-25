@@ -40,7 +40,7 @@ class JsonSerializableClosure extends SerializableClosure
             if($scope = $reflector->getClosureScopeClass()){
                 $scope = $scope->name;
             }
-        } elseif($reflector->isScopeRequired()) {
+        } else {
             if($scope = $reflector->getClosureScopeClass()){
                 $scope = $scope->name;
             }

@@ -132,7 +132,7 @@ class SerializableClosure implements Serializable
             if($scope = $reflector->getClosureScopeClass()){
                 $scope = $scope->name;
             }
-        } elseif($reflector->isScopeRequired()) {
+        } else {
             if($scope = $reflector->getClosureScopeClass()){
                 $scope = $scope->name;
             }
@@ -260,9 +260,7 @@ class SerializableClosure implements Serializable
             $this->code['this'] = null;
         }
 
-        if ($this->code['scope'] !== null || $this->code['this'] !== null) {
-            $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
-        }
+        $this->closure = $this->closure->bindTo($this->code['this'], $this->code['scope']);
 
         if(!empty($this->code['objects'])){
             foreach ($this->code['objects'] as $item){

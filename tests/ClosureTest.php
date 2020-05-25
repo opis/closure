@@ -15,11 +15,11 @@ use Opis\Closure\SerializableClosure;
 
 class ClosureTest extends \PHPUnit\Framework\TestCase
 {
-    protected function s($closure, $bindThis = false)
+    protected function s($closure)
     {
         if($closure instanceof Closure)
         {
-            $closure = new SerializableClosure($closure, $bindThis);
+            $closure = new SerializableClosure($closure);
         }
 
         return unserialize(serialize($closure))->getClosure();
@@ -326,6 +326,29 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertNotNull($closure);
         $this->assertTrue($closure instanceof Closure);
         $this->assertEquals(11, $closure(5, 6));
+    }
+
+    public function testClosureScopeRemainsTheSame()
+    {
+        $f = function () { static $i = 0;};
+        $o = $this->s($f);
+
+        $rf = new ReflectionClosure($f);
+        $ro = new ReflectionClosure($o);
+
+        $this->assertNotNull($rf->getClosureScopeClass());
+        $this->assertNotNull($ro->getClosureScopeClass());
+        $this->assertEquals($rf->getClosureScopeClass()->name, $ro->getClosureScopeClass()->name);
+        $this->assertEquals($rf->getClosureScopeClass()->name, $ro->getClosureScopeClass()->name);
+        $this->assertEquals(__CLASS__, $ro->getClosureScopeClass()->name);
+
+        $f = $f->bindTo(null, null);
+        $o = $this->s($f);
+        $rf = new ReflectionClosure($f);
+        $ro = new ReflectionClosure($o);
+
+        $this->assertNull($rf->getClosureScopeClass());
+        $this->assertNull($ro->getClosureScopeClass());
     }
 
 }
