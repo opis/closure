@@ -6,4 +6,4 @@ matrix:
       name: "7.4"
 
 before_script: docker build --build-arg PHP_VERSION=${TRAVIS_JOB_NAME} -t opis-closure .
-script: docker run opis-closure /usr/src/opis-closure/vendor/bin/phpunit
+script: docker run opis-closure /source/vendor/bin/phpunit
