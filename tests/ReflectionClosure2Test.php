@@ -25,6 +25,10 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         return $r->getCode();
     }
 
+    protected function r(Closure $closure) {
+        return new ReflectionClosure($closure);
+    }
+
     public function testResolveArguments()
     {
         $f1 = function (Bar $p){};
@@ -250,5 +254,31 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertFalse((new ReflectionClosure($f2))->isBindingRequired());
         $this->assertTrue((new ReflectionClosure($f3))->isBindingRequired());
         $this->assertTrue((new ReflectionClosure($f4))->isBindingRequired());
+    }
+
+    public function testIsScopeRequired() {
+        $f1 = function () { static::test();};
+        $f2 = function ($x = self::CONST_X) {};
+        $f3 = function ($x = parent::CONST_X) {};
+        $f4 = function () { static $i = 1;};
+        $f5 = function () {
+            return function() {
+                static $i = 0;
+            };
+        };
+        $f6 = function () {
+            return function() {
+                static::test();
+            };
+        };
+        $f7 = $f6();
+
+        $this->assertTrue($this->r($f1)->isScopeRequired());
+        $this->assertTrue($this->r($f2)->isScopeRequired());
+        $this->assertTrue($this->r($f3)->isScopeRequired());
+        $this->assertFalse($this->r($f4)->isScopeRequired());
+        $this->assertFalse($this->r($f5)->isScopeRequired());
+        $this->assertFalse($this->r($f6)->isScopeRequired());
+        $this->assertTrue($this->r($f7)->isScopeRequired());
     }
 }
