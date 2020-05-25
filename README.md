@@ -78,7 +78,7 @@ of **Opis Closure**. Otherwise, assuming you are not using one of the removed/re
 
 ### Arbitrary object serialization
 
-We've added this feature in order to be able to support the serialization of the closure's bound object. 
+We've added this feature in order to be able to support the serialization of a closure's bound object. 
 The implementation is far from being perfect, and it's really hard to make it work flawless. 
 We will try to improve this, but we can't guarantee anything. 
 So our advice regarding the `Opis\Closure\serialize|unserialize` functions is to use them with caution.
