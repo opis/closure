@@ -1,5 +1,10 @@
 CHANGELOG
 ---------
+### v3.5.3, 2020.05.25
+
+- Improved parser
+- The class scope optimisation is no longer used. We always bind now to the closure's original class scope.
+If the class scope was `null`, then the optimisation didn't work as expected and kept the `SerializableClosure` scope.
 
 ### v3.5.2, 2020.05.21
 
