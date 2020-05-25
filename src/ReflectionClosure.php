@@ -500,7 +500,11 @@ class ReflectionClosure extends ReflectionFunction
                                 $open++;
                             }
                             if($context === 'new' || false !== strpos($id_name, '\\')){
-                                if($id_start !== '\\' && !in_array($id_start_ci, $class_keywords)){
+                                if($id_start_ci === 'self' || $id_start_ci === 'static') {
+                                    if (!$inside_structure) {
+                                        $isUsingScope = true;
+                                    }
+                                } elseif ($id_start !== '\\' && !in_array($id_start_ci, $class_keywords)) {
                                     if ($classes === null) {
                                         $classes = $this->getClasses();
                                     }

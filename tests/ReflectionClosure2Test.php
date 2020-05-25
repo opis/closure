@@ -273,6 +273,8 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         };
         $f7 = $f5();
         $f8 = $f6();
+        $f9 = function () { new static(); };
+        $f10 = function () { new self(); };
 
         $this->assertTrue($this->r($f1)->isScopeRequired());
         $this->assertTrue($this->r($f2)->isScopeRequired());
@@ -282,5 +284,7 @@ class ReflectionClosure2Test extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->r($f6)->isScopeRequired());
         $this->assertFalse($this->r($f7)->isScopeRequired());
         $this->assertTrue($this->r($f8)->isScopeRequired());
+        $this->assertTrue($this->r($f9)->isScopeRequired(), 'new static()');
+        $this->assertTrue($this->r($f10)->isScopeRequired());
     }
 }
