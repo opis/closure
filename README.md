@@ -9,7 +9,7 @@ Serializable closures
 ---------------------
 > Opis Closure 4.x is still in development and we do not recommend using it in production yet.
 
-**Opis Closure** is a PHP library that makes all closures serializable. 
+**Opis Closure** is a PHP library that will allow you to serialize closures without breaking a sweat. 
 All you have to do is to add a single line of code, and you are good to go.
 
 ```php
@@ -32,7 +32,7 @@ so please test it rigorously and report any errors you have encountered. Feedbac
 
 ### License
 
-**Opis Closure** is licensed under the [MIT License (MIT)][license].
+**Opis Closure** is licensed under the [Apache License, Version 2.0][license].
 
 ### Requirements
 
@@ -60,7 +60,7 @@ Or you could directly reference it into your `composer.json` file as a dependenc
 
 
 [documentation]: https://www.opis.io/closure "Opis Closure"
-[license]: http://opensource.org/licenses/MIT "MIT License"
+[license]: https://www.apache.org/licenses/LICENSE-2.0 "Apache License"
 [Packagist]: https://packagist.org/packages/opis/closure "Packagist"
 [Composer]: https://getcomposer.org "Composer"
 [CHANGELOG]: https://github.com/opis/closure/blob/master/CHANGELOG.md "Changelog"

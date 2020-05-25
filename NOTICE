@@ -1,8 +1,12 @@
 Opis Closure
-Copyright 2018-2019 Zindex Software
+Copyright 2018-2020 Zindex Software
 
 This product includes software developed at
 Zindex Software (http://zindex.software).
+
+The `include/headers.h` file contains code released under The PHP License, version 3.01,
+that was copied and/or adapted from The PHP Interpreter (https://github.com/php/php-src),
+Copyright (c) 1999 - 2019 The PHP Group.
 
 This software was originally developed by Marius Sarca and Sorin Sarca
 (Copyright 2014-2018). The copyright info was changed with the permission
