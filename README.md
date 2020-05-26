@@ -1,6 +1,6 @@
 Opis Closure
 ====================
-[![Tests]](https://github.com/opis/closure/workflows/.github/workflows/tests.yml/badge.svg?branch=4.x)
+![](https://github.com/opis/closure/workflows/Tests/badge.svg?branch=4.x)
 [![Latest Stable Version](https://poser.pugx.org/opis/closure/v/stable.png)](https://packagist.org/packages/opis/closure)
 [![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
