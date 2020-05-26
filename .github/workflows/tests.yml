@@ -1,5 +1,11 @@
 name: "Opis Closure Tests"
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
 jobs:
   tests:
     runs-on: ubuntu-latest
