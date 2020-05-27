@@ -14,9 +14,12 @@ function init(bool $preload = false) {
             opcache_compile_file(__DIR__ . '/src/' . $file);
         }, [
             'ClosureStream.php',
+            'CodeWrapper.php',
             'ReflectionClosure.php',
+            'ReflectionFunctionInfo.php',
             'SerializableClosure.php',
             'SerializableClosureHandler.php',
+            'TokenizedFileInfo.php',
         ]);
     } else {
         SerializableClosureHandler::init(HeaderFile::load());

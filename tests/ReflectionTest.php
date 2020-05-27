@@ -1,4 +1,19 @@
 <?php
+/* ===========================================================================
+ * Copyright 2020 Zindex Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ============================================================================ */
 
 namespace Opis\Closure\Test;
 
@@ -6,84 +21,88 @@ use Closure;
 use Opis\Closure\ReflectionClosure;
 use PHPUnit\Framework\TestCase;
 
-// Fake
-use Foo\{
-    Bar as Baz,
-    Baz\Qux
-};
+// Used for test
+function testFunc () {}
 
 class ReflectionTest extends TestCase
 {
+
     /**
-     * @dataProvider isBindingRequiredDataProvider
+     * @dataProvider closureDataProvider
      */
-    public function testThisInsideAnonymousClass(Closure $closure, bool $expect)
+    public function testReflection(Closure $closure, bool $short, bool $static, array $use)
     {
-        $this->assertEquals($expect, (new ReflectionClosure($closure))->isBindingRequired());
+        $reflector = new ReflectionClosure($closure);
+
+        $this->assertEquals($short, $reflector->isShort());
+        $this->assertEquals($static, $reflector->isStatic());
+        $this->assertEquals($use, $reflector->getUseVariableNames());
     }
 
-    public function isBindingRequiredDataProvider(): iterable
+    public function closureDataProvider(): array
     {
+        $v1 = $v2 = 1;
+
         return [
             [
-                function() {
-                    return new class {
-                        function a(){
-                            $self = $this;
-                        }
-                    };
-                },
-                false,
+                function () {},
+                false, false, [],
             ],
             [
-                function () {
-                    return new class {
-                        function a(){
-                            $self = $this;
-                            return new class {
-                                function a(){
-                                    $self = $this;
-                                }
-                            };
-                        }
-                    };
-                },
-                false,
+                static function () {},
+                false, true, [],
             ],
             [
-                function () {
-                    $self = $this;
-                    return new class {
-                        function a(){
-                            $self = $this;
-                        }
-                    };
-                },
-                true,
+                function () use ($v1, $v2) {},
+                false, false, ['v1', 'v2'],
             ],
             [
-                function () {
-                    return new class {
-                        function a(){
-                            $self = $this;
-                        }
-                    };
-                    $self = $this;
-                },
-                true,
+                fn () => 1 + 2,
+                true, false, [],
+            ],
+            [
+                static fn () => 1 + 2,
+                true, true, [],
+            ],
+            [
+                fn () => $v1 + $v2,
+                true, false, ['v1', 'v2'],
             ],
         ];
     }
 
-
-    public function testIsShortClosure()
+    /**
+     * @dataProvider sourceDataProvider
+     */
+    public function testSource(Closure $closure, bool $callable, bool $method, bool $function, bool $internal)
     {
-        $f1 = fn() => 1;
-        $f2 = static fn() => 1;
-        $f3 = function () { fn() => 1; };
+        $reflector = new ReflectionClosure($closure);
 
-        $this->assertTrue((new ReflectionClosure($f1))->isShortClosure());
-        $this->assertTrue((new ReflectionClosure($f2))->isShortClosure());
-        $this->assertFalse((new ReflectionClosure($f3))->isShortClosure());
+        $this->assertEquals($callable, $reflector->isFromCallable());
+        $this->assertEquals($method, $reflector->isClassMethod());
+        $this->assertEquals($function, $reflector->isFunction());
+        $this->assertEquals($internal, $reflector->isInternal());
+    }
+
+    public function sourceDataProvider(): array
+    {
+        return [
+            [
+                function () {},
+                false, false, false, false,
+            ],
+            [
+                Closure::fromCallable([$this, __FUNCTION__]),
+                true, true, false, false,
+            ],
+            [
+                Closure::fromCallable(__NAMESPACE__ . '\\testFunc'),
+                true, false, true, false,
+            ],
+            [
+                Closure::fromCallable('str_replace'),
+                true, false, true, true,
+            ],
+        ];
     }
 }

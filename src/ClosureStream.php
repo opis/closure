@@ -1,11 +1,23 @@
 <?php
 /* ===========================================================================
- * Copyright (c) 2018-2020 Zindex Software
+ * Copyright 2018-2020 Zindex Software
  *
- * Licensed under the MIT License
- * =========================================================================== */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ============================================================================ */
 
 namespace Opis\Closure;
+
+use Closure;
 
 /**
  * @internal
@@ -14,24 +26,24 @@ class ClosureStream
 {
     const STREAM_PROTO = 'closure';
 
+    /**
+     * @var CodeWrapper[]
+     */
     protected static array $map = [];
 
     protected static bool $isRegistered = false;
+
+    protected static ?string $evalFile = null;
+
+    protected static ?array $evalVars = null;
+
+    protected static ?Closure $evalRet = null;
 
     protected ?string $content;
 
     protected int $length = 0;
 
     protected int $pointer = 0;
-
-    public static function url(string $code): string
-    {
-        $key = \md5($code);
-        if (!isset(self::$map[$key])) {
-            self::$map[$key] = "<?php\nreturn " . $code . ";";
-        }
-        return self::STREAM_PROTO . '://' . $key;
-    }
 
     function stream_open($path, $mode, $options, &$opened_path)
     {
@@ -41,7 +53,7 @@ class ClosureStream
             return false;
         }
 
-        $this->content = &self::$map[$path];
+        $this->content = self::$map[$path]->value();
         $this->length = strlen($this->content);
 
         return true;
@@ -121,16 +133,46 @@ class ClosureStream
         }
     }
 
-    public static function eval(string $______code______, ?array $______vars______ = null): \Closure
+    public static function url(CodeWrapper $code): string
     {
-        $______code______ = self::url($______code______);
+        $key = $code->key();
+        if (!isset(self::$map[$key])) {
+            self::$map[$key] = $code;
+        }
+        return self::STREAM_PROTO . '://' . $key;
+    }
 
-        if ($______vars______) {
-            extract($______vars______, EXTR_OVERWRITE | EXTR_REFS);
+    public static function eval(CodeWrapper $code, ?array $vars = null): Closure
+    {
+        // Use static class methods to avoid name collision and side-effects
+
+        self::$evalFile = self::url($code);
+        unset($code);
+
+        if ($vars) {
+            // Extract variables
+            self::$evalVars = &$vars;
+            unset($vars);
+            extract(self::$evalVars, EXTR_OVERWRITE | EXTR_REFS);
+            // Quickly cleanup
+            self::$evalVars = null;
         } else {
-            unset($______vars______);
+            unset($vars);
         }
 
-        return include($______code______);
+        // we can use $evalRet as temporary
+        self::$evalRet = include(self::$evalFile);
+
+        // Remove possible reference
+        unset($_____);
+
+        // Get value
+        $_____ = self::$evalRet;
+
+        // Cleanup
+        self::$evalFile = self::$evalRet = null;
+
+        // Return closure
+        return $_____;
     }
 }

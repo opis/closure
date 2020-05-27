@@ -3,7 +3,7 @@
     "description": "A library that can be used to serialize closures (anonymous functions) and arbitrary objects.",
     "keywords": ["closure", "serialization", "function", "serializable", "serialize", "anonymous functions"],
     "homepage": "https://opis.io/closure",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Marius Sarca",

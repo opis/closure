@@ -17,7 +17,7 @@ All you have to do is to add a single line of code, and you are good to go.
 ```
 
 If you are using this library in a server environment, and you have preload enabled (which you should), then 
-pass `true` as an argument to the `init` function. 
+pass `true` as an argument to the `init` function in your preload file. 
 
 ```php
 # preload.php

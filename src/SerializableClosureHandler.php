@@ -1,14 +1,23 @@
 <?php
 /* ===========================================================================
- * Copyright (c) 2020 Zindex Software
+ * Copyright 2020 Zindex Software
  *
- * Licensed under the MIT License
- * =========================================================================== */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ============================================================================ */
 
 namespace Opis\Closure;
 
-use FFI, Closure;
-use FFI\{CData, CType};
+use Closure, FFI, FFI\CData;
 
 class SerializableClosureHandler
 {
@@ -20,7 +29,7 @@ class SerializableClosureHandler
     /**
      * @var FFI
      */
-    protected $lib;
+    protected FFI $lib;
 
     /**
      * @var CData
@@ -71,21 +80,13 @@ class SerializableClosureHandler
         }
 
         $ret = [];
-        $scope = $object = null;
 
-        $ret['code'] = $reflector->getCode();
+        $ret['code'] = $reflector->getCodeWrapper();
 
         if ($use = $reflector->getUseVariables()) {
             $ret['use'] = $use;
         }
 
-        /*
-        if ($reflector->isBindingRequired()) {
-            $object = $reflector->getClosureThis();
-            $scope = $reflector->getClosureScopeClass();
-        } elseif ($reflector->isScopeRequired()) {
-            $scope = $reflector->getClosureScopeClass();
-        }*/
         $object = $reflector->getClosureThis();
         $scope = $reflector->getClosureScopeClass();
 
@@ -212,7 +213,7 @@ class SerializableClosureHandler
     }
 
     /**
-     * @param $data
+     * @param mixed $data This must be kept!
      * @return CData zval
      */
     protected function val($data): CData
