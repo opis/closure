@@ -278,7 +278,6 @@ class ReflectionClosure extends ReflectionFunction
                     switch ($token[0]){
                         case T_CURLY_OPEN:
                         case T_DOLLAR_OPEN_CURLY_BRACES:
-                        case T_STRING_VARNAME:
                         case '{':
                             $code .= '{';
                             $open++;
@@ -990,7 +989,6 @@ class ReflectionClosure extends ReflectionFunction
                         case '{':
                         case T_CURLY_OPEN:
                         case T_DOLLAR_OPEN_CURLY_BRACES:
-                        case T_STRING_VARNAME:
                             $open++;
                             break;
                         case '}':
