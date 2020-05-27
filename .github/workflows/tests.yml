@@ -8,13 +8,21 @@ on:
       - '**.md'
 jobs:
   tests:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         php: [7.4]
+        zts: [ts, nts]
+        exclude:
+          - os: ubuntu-latest
+            zts: ts
+          - os: macos-latest
+            zts: ts
 
-    name: PHP ${{ matrix.php }}
+    runs-on: ${{ matrix.os }}
+
+    name: PHP ${{ matrix.php }} on ${{ matrix.os }} with ${{ matrix.zts }}
 
     steps:
       - name: Checkout code
@@ -32,6 +40,8 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: ffi
           coverage: none
+        env:
+          phpts: ${{ matrix.zts }}
 
       - name: Install dependencies
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
