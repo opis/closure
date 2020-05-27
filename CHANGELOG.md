@@ -1,5 +1,11 @@
 CHANGELOG
 ---------
+
+### v3.5.4, 2020.06.07
+
+- Fixed a false-positive when using `Opis\Closure\ReflectionClosure::isScopeRequired` method
+- Fixed a bug related to `T_STRING_VARNAME`
+
 ### v3.5.3, 2020.05.25
 
 - Improved parser
