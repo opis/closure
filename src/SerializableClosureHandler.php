@@ -42,6 +42,11 @@ class SerializableClosureHandler
     protected int $callFrameSlotSize;
 
     /**
+     * @var CData|null
+     */
+    protected ?CData $patchedClosureClassEntry = null;
+
+    /**
      * @param FFI $lib
      */
     final protected function __construct(FFI $lib)
@@ -55,10 +60,8 @@ class SerializableClosureHandler
         // Get executor
         $this->executor = $this->getExecutor();
 
-        // Apply patch only if needed
-        if (!class_parents(Closure::class)) {
-            $this->patch();
-        }
+        // Apply patch
+        $this->patch();
     }
 
     /**
@@ -230,13 +233,16 @@ class SerializableClosureHandler
         return $this->lib->cast('zend_closure*', $this->val($closure)->value->obj)[0];
     }
 
-    /**
-     * @param string|null $class_name
-     */
-    protected function patch(?string $class_name = null): void
+    protected function patch(): void
     {
-        $class_name = $class_name ?? SerializableClosure::class;
+        if (class_parents(Closure::class)) {
+            // Patch already applied
+            return;
+        }
 
+        $class_name = SerializableClosure::class;
+
+        // Autoload class
         if (!class_exists($class_name, true)) {
             throw new \RuntimeException("Class not found: {$class_name}");
         }
@@ -266,6 +272,32 @@ class SerializableClosureHandler
         // Restore ctor
         $closure_class_ce->create_object = $create_object;
         $closure_class_ce->constructor = $constructor;
+
+        // Check if preloaded (ZEND_ACC_PRELOADED = 1 << 10)
+        if (!($parent_class->value->ce->ce_flags & (1 << 10))) {
+            $this->patchedClosureClassEntry = $closure_class_ce;
+        }
+    }
+
+    /**
+     * Destructor
+     */
+    public function __destruct()
+    {
+        if (is_null($this->patchedClosureClassEntry)) {
+            return;
+        }
+
+        // We need to remove non-internal methods added by our patch()
+
+        $lib = $this->lib;
+        $ft = FFI::addr($this->patchedClosureClassEntry->function_table);
+
+        foreach (get_class_methods(SerializableClosure::class) as $method) {
+            $lib->zend_hash_str_del($ft, $method, strlen($method));
+        }
+
+        $this->patchedClosureClassEntry = null;
     }
 
     /**
