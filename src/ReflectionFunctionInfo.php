@@ -331,12 +331,20 @@ final class ReflectionFunctionInfo
                     break;
                 case ']':
                     $open_square--;
+                    if ($open_square < 0) {
+                        // Stop
+                        break 2;
+                    }
                     break;
                 case '(':
                     $open_round++;
                     break;
                 case ')':
                     $open_round--;
+                    if ($open_round < 0) {
+                        // Stop
+                        break 2;
+                    }
                     break;
 
                 // Delimiters
