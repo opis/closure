@@ -274,7 +274,12 @@ class SerializableClosureHandler
         $closure_class_ce->constructor = $constructor;
 
         // Check if preloaded (ZEND_ACC_PRELOADED = 1 << 10)
-        if (!($parent_class->value->ce->ce_flags & (1 << 10))) {
+//        if (!($parent_class->value->ce->ce_flags & (1 << 10))) {
+//            $this->patchedClosureClassEntry = $closure_class_ce;
+//        }
+
+        // Check if cli mode
+        if (PHP_SAPI === 'cli') {
             $this->patchedClosureClassEntry = $closure_class_ce;
         }
     }
