@@ -499,7 +499,7 @@ final class ReflectionFunctionInfo
             return '';
         }
 
-        return $prefix . implode("\n" . str_repeat(' ', strlen($prefix)), $items) . ";\n";
+        return $prefix . implode(",\n" . str_repeat(' ', strlen($prefix)), $items) . ";\n";
     }
 
     /**
