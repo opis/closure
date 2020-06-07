@@ -7,12 +7,18 @@
 
 namespace Opis\Closure;
 
-function init(bool $preload = false) {
+function init(bool $preload = false): void {
+    static $init = false;
+
+    if ($init) {
+        return;
+    }
+
+    $init = true;
+
     if ($preload) {
         HeaderFile::preload();
-        array_map(function (string $file) {
-            opcache_compile_file(__DIR__ . '/src/' . $file);
-        }, [
+        array_map(fn (string $file) => opcache_compile_file(__DIR__ . '/src/' . $file), [
             'ClosureStream.php',
             'CodeWrapper.php',
             'ReflectionClosure.php',
