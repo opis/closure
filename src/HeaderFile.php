@@ -124,6 +124,10 @@ class HeaderFile
             $defs['PLATFORM_32'] = 1;
         }
 
+        if ($defs['FFI_LIB_NAME']) {
+            $defs['HAVE_FFI_LIB_NAME'] = 1;
+        }
+
         return $defs;
     }
 

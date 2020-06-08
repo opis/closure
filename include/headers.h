@@ -1,5 +1,8 @@
 #define FFI_SCOPE "FFI_SCOPE_NAME"
+
+#ifdef HAVE_FFI_LIB_NAME
 #define FFI_LIB "FFI_LIB_NAME"
+#endif
 
 typedef int ts_rsrc_id;
 typedef int32_t zend_long;
