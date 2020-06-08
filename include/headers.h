@@ -1,6 +1,6 @@
 #define FFI_SCOPE "FFI_SCOPE_NAME"
 
-#ifdef HAVE_FFI_LIB_NAME
+#ifdef FFI_LIB_NAME
 #define FFI_LIB "FFI_LIB_NAME"
 #endif
 

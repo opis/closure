@@ -103,12 +103,15 @@ class HeaderFile
     {
         $defs = [
             'FFI_SCOPE_NAME' => self::SCOPE_NAME,
-            'FFI_LIB_NAME' => self::LIB_NAME,
 
             'ZEND_API' => '__declspec(dllimport)',
             'ZEND_FASTCALL' => self::IS_WIN ? '__vectorcall' : '',
             'ZEND_MAX_RESERVED_RESOURCES' => 6,
         ];
+
+        if (self::LIB_NAME) {
+            $defs['FFI_LIB_NAME'] = self::LIB_NAME;
+        }
 
         if (\ZEND_THREAD_SAFE) {
             $defs['ZTS'] = 1;
@@ -122,10 +125,6 @@ class HeaderFile
             $defs['PLATFORM_64'] = 1;
         } else {
             $defs['PLATFORM_32'] = 1;
-        }
-
-        if ($defs['FFI_LIB_NAME']) {
-            $defs['HAVE_FFI_LIB_NAME'] = 1;
         }
 
         return $defs;
