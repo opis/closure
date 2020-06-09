@@ -9,7 +9,7 @@ Serializable closures
 ---------------------
 > **Note:** Opis Closure 4.x is still in development and we do not recommend using it in production yet.
 
-**Opis Closure** is a PHP library that will allow you to serialize closures without breaking a sweat. 
+**Opis Closure** is a PHP library that allows you to serialize closures without breaking a sweat. 
 All you have to do is to add a single line of code, and you are good to go.
 
 ```php
