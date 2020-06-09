@@ -30,11 +30,11 @@ The library use [FFI] to make closures serializable and you no longer need to wr
 We would like to release a stable version as soon as possible, 
 so please test it rigorously and report any errors you have encountered. Feedback is welcome.
 
-### License
+## License
 
 **Opis Closure** is licensed under the [Apache License, Version 2.0][license].
 
-### Requirements
+## Requirements
 
 * PHP ^7.4
 * FFI
