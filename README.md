@@ -24,7 +24,7 @@ pass `true` as an argument to the `init` function in your preload file.
 \Opis\Closure\init(true);
 ```
 
-Now you can serialize/unserialize closures the same way you serialize/unserialize any other data structure.
+Now you can serialize/unserialize closures the same way you would serialize/unserialize any other data structure.
 
 ```php
 $f = fn() => 'Hello';
