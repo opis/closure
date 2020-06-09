@@ -24,6 +24,15 @@ pass `true` as an argument to the `init` function in your preload file.
 \Opis\Closure\init(true);
 ```
 
+Now you can serialize/unserialize closures the same way you serialize/unserialize any other data structure.
+
+```php
+$f = fn() => 'Hello';
+$data = serialize($f);
+$g = unserialize($data);
+echo $g(); //> Hello
+```
+
 This version of **Opis Closure** is a full rebuild of the library and is not compatible with the previous versions.
 The library use [FFI] to make closures serializable and you no longer need to wrap them as it was the case in the past.
 
