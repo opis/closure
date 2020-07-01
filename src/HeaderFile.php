@@ -88,7 +88,11 @@ class HeaderFile
     public static function content(array $defs = [], ?string $file = null): string
     {
         if ($file === null) {
-            $file = __DIR__ . '/../include/headers_' . \PHP_MAJOR_VERSION . '.h';
+            $file = __DIR__ . '/../include/' . \PHP_MAJOR_VERSION . '.' . \PHP_MINOR_VERSION . '.h';
+        }
+
+        if (!is_file($file)) {
+            throw new \RuntimeException("File not found: {$file}");
         }
 
         $defs += static::defs();
