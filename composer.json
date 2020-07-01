@@ -21,6 +21,11 @@
     "require-dev": {
         "phpunit/phpunit": "^9.0"
     },
+    "config": {
+        "platform": {
+            "php": "7.4.0"
+        }
+    },
     "autoload": {
         "psr-4": {
             "Opis\\Closure\\": "src/"
