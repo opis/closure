@@ -88,7 +88,7 @@ class HeaderFile
     public static function content(array $defs = [], ?string $file = null): string
     {
         if ($file === null) {
-            $file = __DIR__ . '/../include/headers.h';
+            $file = __DIR__ . '/../include/headers_' . \PHP_MAJOR_VERSION . '.h';
         }
 
         $defs += static::defs();
@@ -126,6 +126,9 @@ class HeaderFile
         } else {
             $defs['PLATFORM_32'] = 1;
         }
+
+        $defs['PHP_MAJOR_VERSION_' . \PHP_MAJOR_VERSION] = 1;
+        $defs['PHP_VERSION_' . \PHP_MAJOR_VERSION . '_' . \PHP_MINOR_VERSION] = 1;
 
         return $defs;
     }
