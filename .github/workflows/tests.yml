@@ -39,6 +39,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: ffi
+          ini-values: opcache.jit_buffer_size=256M, opcache.jit=1235, pcre.jit=1
           coverage: none
         env:
           phpts: ${{ matrix.zts }}
