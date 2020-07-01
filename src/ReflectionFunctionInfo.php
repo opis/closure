@@ -34,11 +34,18 @@ final class ReflectionFunctionInfo
     /**
      * List of builtin php types
      */
-    private const BUILTIN = [
-        'array', 'string', 'int', 'float', 'bool',
-        'callable', 'iterable', 'object', 'void',
-        'self', 'parent', 'static',
-    ];
+    private const BUILTIN = \PHP_MAJOR_VERSION === 8
+        ? [
+            'bool', 'int', 'float', 'string', 'array',
+            'object', 'iterable', 'callable', 'void', 'mixed',
+            'self', 'parent', 'static',
+            'false', 'null',
+        ]
+        : [
+            'bool', 'int', 'float', 'string', 'array',
+            'object', 'iterable', 'callable', 'void',
+            'self', 'parent', 'static',
+        ];
 
     private ReflectionFunction $reflector;
 
