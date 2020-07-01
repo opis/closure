@@ -44,6 +44,9 @@ jobs:
         env:
           phpts: ${{ matrix.zts }}
 
+      - name: Update composer
+        run: composer self-update
+
       - name: Install dependencies
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
