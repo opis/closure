@@ -19,19 +19,41 @@ namespace Opis\Closure;
 
 class SerializableClosure
 {
+    private static bool $init = false;
+
     /**
-     * @return array
+     * Preload files and ffi
      */
-    final public function __serialize()
+    public static function preload(): void
     {
-        return SerializableClosureHandler::instance()->serializeClosure($this);
+        if (self::$init) {
+            return;
+        }
+        self::$init = true;
+
+        HeaderFile::preload();
+
+        array_map(static fn (string $file) => opcache_compile_file(__DIR__ . '/' . $file), [
+            'BaseClosure.php',
+            'ClosureStream.php',
+            'CodeWrapper.php',
+            'ReflectionClosure.php',
+            'ReflectionFunctionInfo.php',
+            'SerializableClosureHandler.php',
+            'TokenizedFileInfo.php',
+        ]);
     }
 
     /**
-     * @param array $data
+     * Init serializable closures
      */
-    final public function __unserialize($data)
+    public static function init(): void
     {
-        SerializableClosureHandler::instance()->unserializeClosure($this, $data);
+        if (self::$init) {
+            return;
+        }
+        self::$init = true;
+
+        SerializableClosureHandler::init(HeaderFile::load());
     }
 }
