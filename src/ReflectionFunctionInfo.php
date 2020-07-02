@@ -19,6 +19,9 @@ namespace Opis\Closure;
 
 use ReflectionFunction;
 
+/**
+ * @internal
+ */
 final class ReflectionFunctionInfo
 {
     /**

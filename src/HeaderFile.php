@@ -17,31 +17,37 @@
 
 namespace Opis\Closure;
 
-use FFI, FFI\Exception as FFIException;
+use FFI, FFI\Exception as FFIException, RuntimeException;
+use const PHP_DEBUG, PHP_ZTS;
+use const DIRECTORY_SEPARATOR, ZEND_THREAD_SAFE;
+use const PHP_INT_SIZE, PHP_MAJOR_VERSION, PHP_MINOR_VERSION;
 
-class HeaderFile
+/**
+ * @internal
+ */
+final class HeaderFile
 {
     /**
      * FFI_SCOPE_NAME
      */
-    protected const SCOPE_NAME = 'OpisClosure';
+    private const SCOPE_NAME = 'OpisClosure';
 
     /**
      * WIN detector
      */
-    protected const IS_WIN = \DIRECTORY_SEPARATOR === '\\';
+    private const IS_WIN = DIRECTORY_SEPARATOR === '\\';
 
     /**
      * FFI_LIB_NAME
      */
-    protected const LIB_NAME = self::IS_WIN
-        ? 'php' . \PHP_MAJOR_VERSION . (\PHP_ZTS ? 'ts' : '') . (\PHP_DEBUG ? '_debug' : '') . '.dll'
+    private const LIB_NAME = self::IS_WIN
+        ? 'php' . PHP_MAJOR_VERSION . (PHP_ZTS ? 'ts' : '') . (PHP_DEBUG ? '_debug' : '') . '.dll'
         : '';
 
     /**
      * Preprocess regex
      */
-    protected const PREPROCESS_REGEX = '/^\s*#(?<if>ifn?def)\s+(?<cond>.+?)\s*(?<then>^.+?)(?:^\s*#else\s*(?<else>^.+?))?^\s*#endif\s*/sm';
+    private const PREPROCESS_REGEX = '/^\s*#(?<if>ifn?def)\s+(?<cond>.+?)\s*(?<then>^.+?)(?:^\s*#else\s*(?<else>^.+?))?^\s*#endif\s*/sm';
 
     /**
      * @param array $defs
@@ -54,7 +60,7 @@ class HeaderFile
             return FFI::scope(self::SCOPE_NAME);
         } catch (FFIException $e) {}
 
-        $data = static::content($defs, $file);
+        $data = self::content($defs, $file);
 
         if (self::LIB_NAME) {
             return FFI::cdef($data, self::LIB_NAME);
@@ -71,7 +77,7 @@ class HeaderFile
     public static function preload(array $defs = [], ?string $file = null): FFI
     {
         $tmp = tempnam(sys_get_temp_dir(), 'opis_closure_ffi_');
-        file_put_contents($tmp, static::content($defs, $file));
+        file_put_contents($tmp, self::content($defs, $file));
 
         try {
             return FFI::load($tmp);
@@ -85,25 +91,25 @@ class HeaderFile
      * @param string|null $file
      * @return string
      */
-    public static function content(array $defs = [], ?string $file = null): string
+    private static function content(array $defs = [], ?string $file = null): string
     {
         if ($file === null) {
-            $file = __DIR__ . '/../include/' . \PHP_MAJOR_VERSION . '.' . \PHP_MINOR_VERSION . '.h';
+            $file = __DIR__ . '/../include/' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.h';
         }
 
         if (!is_file($file)) {
-            throw new \RuntimeException("File not found: {$file}");
+            throw new RuntimeException("File not found: {$file}");
         }
 
-        $defs += static::defs();
+        $defs += self::defs();
 
-        return self::preprocess(file_get_contents($file), $defs + static::defs());
+        return self::preprocess(file_get_contents($file), $defs + self::defs());
     }
 
     /**
      * @return array Definitions
      */
-    public static function defs(): array
+    private static function defs(): array
     {
         $defs = [
             'FFI_SCOPE_NAME' => self::SCOPE_NAME,
@@ -117,7 +123,7 @@ class HeaderFile
             $defs['FFI_LIB_NAME'] = self::LIB_NAME;
         }
 
-        if (\ZEND_THREAD_SAFE) {
+        if (ZEND_THREAD_SAFE) {
             $defs['ZTS'] = 1;
         }
 
@@ -125,14 +131,14 @@ class HeaderFile
             $defs['ZEND_WIN32'] = 1;
         }
 
-        if (\PHP_INT_SIZE === 8) {
+        if (PHP_INT_SIZE === 8) {
             $defs['PLATFORM_64'] = 1;
         } else {
             $defs['PLATFORM_32'] = 1;
         }
 
-        $defs['PHP_MAJOR_VERSION_' . \PHP_MAJOR_VERSION] = 1;
-        $defs['PHP_VERSION_' . \PHP_MAJOR_VERSION . '_' . \PHP_MINOR_VERSION] = 1;
+        // $defs['PHP_MAJOR_VERSION_' . PHP_MAJOR_VERSION] = 1;
+        // $defs['PHP_VERSION_' . PHP_MAJOR_VERSION . '_' . PHP_MINOR_VERSION] = 1;
 
         return $defs;
     }
@@ -142,7 +148,7 @@ class HeaderFile
      * @param array $defs Definitions
      * @return string Processed content
      */
-    public static function preprocess(string $data, array $defs = []): string
+    private static function preprocess(string $data, array $defs = []): string
     {
         $data = preg_replace_callback(self::PREPROCESS_REGEX, function (array $m) use (&$defs) {
             $ok = array_key_exists($m['cond'], $defs);

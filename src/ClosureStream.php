@@ -22,28 +22,28 @@ use Closure;
 /**
  * @internal
  */
-class ClosureStream
+final class ClosureStream
 {
     const STREAM_PROTO = 'closure';
 
     /**
      * @var CodeWrapper[]
      */
-    protected static array $map = [];
+    private static array $map = [];
 
-    protected static bool $isRegistered = false;
+    private static bool $isRegistered = false;
 
-    protected static ?string $evalFile = null;
+    private static ?string $evalFile = null;
 
-    protected static ?array $evalVars = null;
+    private static ?array $evalVars = null;
 
-    protected static ?Closure $evalRet = null;
+    private static ?Closure $evalRet = null;
 
-    protected ?string $content;
+    private ?string $content;
 
-    protected int $length = 0;
+    private int $length = 0;
 
-    protected int $pointer = 0;
+    private int $pointer = 0;
 
     function stream_open($path, $mode, $options, &$opened_path)
     {
@@ -128,8 +128,8 @@ class ClosureStream
 
     public static function register()
     {
-        if (!static::$isRegistered) {
-            static::$isRegistered = stream_wrapper_register(static::STREAM_PROTO, __CLASS__);
+        if (!self::$isRegistered) {
+            self::$isRegistered = stream_wrapper_register(self::STREAM_PROTO, __CLASS__);
         }
     }
 

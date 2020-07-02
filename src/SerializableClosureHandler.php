@@ -17,39 +17,43 @@
 
 namespace Opis\Closure;
 
-use Closure, FFI, FFI\CData;
+use Closure, FFI, FFI\CData, RuntimeException;
+use const ZEND_THREAD_SAFE;
 
-class SerializableClosureHandler
+/**
+ * @internal
+ */
+final class SerializableClosureHandler
 {
     /**
      * @var static|null
      */
-    protected static ?SerializableClosureHandler $instance = null;
+    private static ?SerializableClosureHandler $instance = null;
 
     /**
      * @var FFI
      */
-    protected FFI $lib;
+    private FFI $lib;
 
     /**
      * @var CData
      */
-    protected CData $executor;
+    private CData $executor;
 
     /**
      * @var int
      */
-    protected int $callFrameSlotSize;
+    private int $callFrameSlotSize;
 
     /**
      * @var CData|null
      */
-    protected ?CData $patchedClosureClassEntry = null;
+    private ?CData $patchedClosureClassEntry = null;
 
     /**
      * @param FFI $lib
      */
-    final protected function __construct(FFI $lib)
+    private function __construct(FFI $lib)
     {
         // Set lib
         $this->lib = $lib;
@@ -67,7 +71,6 @@ class SerializableClosureHandler
     /**
      * @param Closure $closure
      * @return array
-     * @throws \ReflectionException
      */
     public function serializeClosure(Closure $closure): array
     {
@@ -111,7 +114,7 @@ class SerializableClosureHandler
     public function unserializeClosure(Closure $closure, array $data): void
     {
         if (!$data) {
-            throw new \RuntimeException("Invalid data");
+            throw new RuntimeException("Invalid data");
         }
 
         if (isset($data['func'])) {
@@ -180,10 +183,13 @@ class SerializableClosureHandler
      * ZEND_CALL_FRAME_SLOT
      * @return int
      */
-    protected function getCallFrameSlotSize(): int
+    private function getCallFrameSlotSize(): int
     {
-        $zed = $this->alignedSize(FFI::sizeof($this->lib->type('zend_execute_data')));
-        $zval = $this->alignedSize(FFI::sizeof($this->lib->type('zval')));
+        $zed_type = $this->lib->type('zend_execute_data');
+        $zed = $this->alignedSize(FFI::sizeof($zed_type));
+
+        $zval_type = $this->lib->type('zval');
+        $zval = $this->alignedSize(FFI::sizeof($zval_type));
 
         return intdiv($zed + $zval - 1, $zval);
     }
@@ -194,7 +200,7 @@ class SerializableClosureHandler
      * @param int $align
      * @return int
      */
-    protected function alignedSize(int $size, int $align = 8): int
+    private function alignedSize(int $size, int $align = 8): int
     {
         return (($size + $align - 1) & (~($align - 1)));
     }
@@ -202,9 +208,9 @@ class SerializableClosureHandler
     /**
      * @return CData zend_executor_globals*
      */
-    protected function getExecutor(): CData
+    private function getExecutor(): CData
     {
-        if (!\ZEND_THREAD_SAFE) {
+        if (!ZEND_THREAD_SAFE) {
             return $this->lib->executor_globals;
         }
 
@@ -218,8 +224,9 @@ class SerializableClosureHandler
     /**
      * @param mixed $data This must be kept!
      * @return CData zval
+     * @noinspection PhpUnusedParameterInspection
      */
-    protected function val($data): CData
+    private function val($data): CData
     {
         return ($this->lib->cast('zval*', $this->executor->current_execute_data) + $this->callFrameSlotSize)[0];
     }
@@ -228,12 +235,12 @@ class SerializableClosureHandler
      * @param Closure $closure
      * @return CData zend_closure
      */
-    protected function closure(Closure $closure): CData
+    private function closure(Closure $closure): CData
     {
         return $this->lib->cast('zend_closure*', $this->val($closure)->value->obj)[0];
     }
 
-    protected function patch(): void
+    private function patch(): void
     {
         if (class_parents(Closure::class)) {
             // Patch already applied
@@ -244,7 +251,7 @@ class SerializableClosureHandler
 
         // Autoload class
         if (!class_exists($class_name, true)) {
-            throw new \RuntimeException("Class not found: {$class_name}");
+            throw new RuntimeException("Class not found: {$class_name}");
         }
 
         // Get internal class table
@@ -256,7 +263,7 @@ class SerializableClosureHandler
         $parent_class = $lib->zend_hash_str_find($class_table, strtolower($class_name), strlen($class_name));
 
         if ($parent_class === null) {
-            throw new \RuntimeException("Class not found: {$class_name}");
+            throw new RuntimeException("Class not found: {$class_name}");
         }
 
         // Find Closure class entry
@@ -272,11 +279,6 @@ class SerializableClosureHandler
         // Restore ctor
         $closure_class_ce->create_object = $create_object;
         $closure_class_ce->constructor = $constructor;
-
-        // Check if preloaded (ZEND_ACC_PRELOADED = 1 << 10)
-//        if (!($parent_class->value->ce->ce_flags & (1 << 10))) {
-//            $this->patchedClosureClassEntry = $closure_class_ce;
-//        }
 
         // Check if cli mode
         if (PHP_SAPI === 'cli') {
@@ -306,7 +308,7 @@ class SerializableClosureHandler
     }
 
     /**
-     * @return static|null
+     * @return self|null
      */
     public static function instance(): ?self
     {
@@ -316,7 +318,7 @@ class SerializableClosureHandler
 
     /**
      * @param FFI $lib
-     * @return static
+     * @return self
      */
     public static function init(FFI $lib): self
     {
@@ -324,7 +326,7 @@ class SerializableClosureHandler
             // Register stream
             ClosureStream::register();
             // Create instance
-            self::$instance = new static($lib);
+            self::$instance = new self($lib);
         }
 
         return self::$instance;

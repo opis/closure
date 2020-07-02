@@ -19,32 +19,35 @@ namespace Opis\Closure;
 
 use Closure, ReflectionFunction;
 
-class ReflectionClosure extends ReflectionFunction
+/**
+ * @internal
+ */
+final class ReflectionClosure extends ReflectionFunction
 {
     /**
      * @var bool True if info was initialized
      */
-    protected bool $initialized = false;
+    private bool $initialized = false;
 
     /**
      * @var CodeWrapper|null Source code wrapper
      */
-    protected ?CodeWrapper $code = null;
+    private ?CodeWrapper $code = null;
 
     /**
      * @var bool True if closure has short form
      */
-    protected bool $isShort = false;
+    private bool $isShort = false;
 
     /**
      * @var bool True if closure is declared as static function or static fn
      */
-    protected bool $isStatic = false;
+    private bool $isStatic = false;
 
     /**
      * @var string[]|null
      */
-    protected ?array $use = null;
+    private ?array $use = null;
 
     /**
      * ReflectionClosure constructor.
@@ -60,7 +63,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * Initialize info
      */
-    protected function init(): self
+    private function init(): self
     {
         if ($this->initialized) {
             return $this;
