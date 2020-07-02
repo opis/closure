@@ -17,6 +17,4 @@
 
 require_once './vendor/autoload.php';
 
-use function Opis\Closure\init;
-
-init();
+\Opis\Closure\SerializableClosure::init();

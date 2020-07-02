@@ -247,7 +247,7 @@ final class SerializableClosureHandler
             return;
         }
 
-        $class_name = SerializableClosure::class;
+        $class_name = BaseClosure::class;
 
         // Autoload class
         if (!class_exists($class_name, true)) {
@@ -300,7 +300,7 @@ final class SerializableClosureHandler
         $lib = $this->lib;
         $ft = FFI::addr($this->patchedClosureClassEntry->function_table);
 
-        foreach (get_class_methods(SerializableClosure::class) as $method) {
+        foreach (get_class_methods(BaseClosure::class) as $method) {
             $lib->zend_hash_str_del($ft, $method, strlen($method));
         }
 

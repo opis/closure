@@ -13,15 +13,14 @@ Serializable closures
 All you have to do is to add a single line of code, and you are good to go.
 
 ```php
-\Opis\Closure\init();
+\Opis\Closure\SerializableClosure::init();
 ```
 
 If you are using this library in a server environment, and you have preload enabled (which you should), then 
-pass `true` as an argument to the `init` function in your preload file. 
+add the following line of code in your preload file:
 
 ```php
-# preload.php
-\Opis\Closure\init(true);
+\Opis\Closure\SerializableClosure::preload();
 ```
 
 Now you can serialize/unserialize closures the same way you would serialize/unserialize any other data structure.
@@ -45,7 +44,7 @@ so please test it rigorously and report any errors you have encountered. Feedbac
 
 ## Requirements
 
-* PHP ^7.4
+* PHP ^7.4 | ^8.0
 * FFI
 
 ## Installation
