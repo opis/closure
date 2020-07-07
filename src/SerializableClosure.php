@@ -26,11 +26,6 @@ class SerializableClosure
      */
     public static function preload(): void
     {
-        if (self::$init) {
-            return;
-        }
-        self::$init = true;
-
         HeaderFile::preload();
 
         array_map(static fn (string $file) => opcache_compile_file(__DIR__ . '/' . $file), [
@@ -46,14 +41,15 @@ class SerializableClosure
 
     /**
      * Init serializable closures
+     * @param array|null $options
      */
-    public static function init(): void
+    public static function init(?array $options = null): void
     {
         if (self::$init) {
             return;
         }
         self::$init = true;
 
-        SerializableClosureHandler::init(HeaderFile::load());
+        SerializableClosureHandler::init(HeaderFile::load(), $options);
     }
 }

@@ -51,9 +51,20 @@ final class SerializableClosureHandler
     private ?CData $patchedClosureClassEntry = null;
 
     /**
-     * @param FFI $lib
+     * @var null|callable
      */
-    private function __construct(FFI $lib)
+    private $transformUseVariables = null;
+
+    /**
+     * @var null|callable
+     */
+    private $resolveUseVariables = null;
+
+    /**
+     * @param FFI $lib
+     * @param array|null $options
+     */
+    private function __construct(FFI $lib, ?array $options = null)
     {
         // Set lib
         $this->lib = $lib;
@@ -63,6 +74,11 @@ final class SerializableClosureHandler
 
         // Get executor
         $this->executor = $this->getExecutor();
+
+        if ($options) {
+            $this->transformUseVariables = $options['transformUseVariables'] ?? null;
+            $this->resolveUseVariables = $options['resolveUseVariables'] ?? null;
+        }
 
         // Apply patch
         $this->patch();
@@ -90,7 +106,7 @@ final class SerializableClosureHandler
         $ret['code'] = $reflector->getCodeWrapper();
 
         if ($use = $reflector->getUseVariables()) {
-            $ret['use'] = $use;
+            $ret['use'] = $this->transformUseVariables ? ($this->transformUseVariables)($use) : $use;
         }
 
         $object = $reflector->getClosureThis();
@@ -125,6 +141,10 @@ final class SerializableClosureHandler
                 'scope' => null,
                 'this' => null,
             ];
+
+            if ($this->resolveUseVariables && ($data['use'] ?? false)) {
+                $data['use'] = ($this->resolveUseVariables)($data['use']);
+            }
 
             $temp = ClosureStream::eval($data['code'], $data['use'] ?? null);
 
@@ -242,16 +262,16 @@ final class SerializableClosureHandler
 
     private function patch(): void
     {
-        if (class_parents(Closure::class)) {
-            // Patch already applied
-            return;
-        }
-
         $class_name = BaseClosure::class;
 
         // Autoload class
         if (!class_exists($class_name, true)) {
             throw new RuntimeException("Class not found: {$class_name}");
+        }
+
+        if (class_parents(Closure::class)) {
+            // Patch already applied
+            return;
         }
 
         // Get internal class table
@@ -318,15 +338,16 @@ final class SerializableClosureHandler
 
     /**
      * @param FFI $lib
+     * @param array|null $options
      * @return self
      */
-    public static function init(FFI $lib): self
+    public static function init(FFI $lib, ?array $options = null): self
     {
         if (!self::$instance) {
             // Register stream
             ClosureStream::register();
             // Create instance
-            self::$instance = new self($lib);
+            self::$instance = new self($lib, $options);
         }
 
         return self::$instance;
