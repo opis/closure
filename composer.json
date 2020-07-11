@@ -36,5 +36,11 @@
         "branch-alias": {
             "dev-master": "3.5.x-dev"
         }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
     }
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
