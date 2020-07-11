@@ -100,13 +100,13 @@ class ReflectionClosure extends ReflectionFunction
             }
 
             if (version_compare(PHP_VERSION, '7.1', '<')) {
-                $scalar_types = array('string', 'int', 'bool', 'float');
+                $php_types = array('string', 'int', 'bool', 'float');
             } elseif(version_compare(PHP_VERSION, '7.2', '<')) {
-                $scalar_types = array('string', 'int', 'bool', 'float', 'void');
+                $php_types = array('string', 'int', 'bool', 'float', 'void');
             } elseif (version_compare(PHP_VERSION, '7.4', '<=')) {
-                $scalar_types = array('string', 'int', 'bool', 'float', 'void', 'object');
+                $php_types = array('string', 'int', 'bool', 'float', 'void', 'object');
             } else {
-                $scalar_types = array('string', 'int', 'bool', 'float', 'void', 'object', 'mixed');
+                $php_types = array('string', 'int', 'bool', 'float', 'void', 'object', 'mixed');
             }
         }
 
@@ -541,7 +541,7 @@ class ReflectionClosure extends ReflectionFunction
                                     if (!$inside_structure) {
                                         $isUsingScope = $token[0] === T_DOUBLE_COLON;
                                     }
-                                } elseif (!($modern_php && in_array($id_start_ci, $scalar_types))){
+                                } elseif (!($modern_php && in_array($id_start_ci, $php_types))){
                                     if ($classes === null) {
                                         $classes = $this->getClasses();
                                     }
@@ -591,7 +591,7 @@ class ReflectionClosure extends ReflectionFunction
                                         if (!$inside_structure && !$id_start_ci === 'static') {
                                             $isUsingScope = true;
                                         }
-                                    } elseif (!($modern_php && in_array($id_start_ci, $scalar_types))){
+                                    } elseif (!($modern_php && in_array($id_start_ci, $php_types))){
                                         if($classes === null){
                                             $classes = $this->getClasses();
                                         }
