@@ -636,22 +636,22 @@ class ReflectionClosure extends ReflectionFunction
     {
         // PHP 5
         if (\PHP_MAJOR_VERSION === 5) {
-            return [];
+            return ['array', 'callable'];
         }
 
         // PHP 8
         if (\PHP_MAJOR_VERSION === 8) {
-            return ['string', 'int', 'bool', 'float', 'void', 'object', 'mixed'];
+            return ['array', 'callable', 'string', 'int', 'bool', 'float', 'iterable', 'void', 'object', 'mixed'];
         }
 
         // PHP 7
         switch (\PHP_MINOR_VERSION) {
             case 0:
-                return ['string', 'int', 'bool', 'float'];
+                return ['array', 'callable', 'string', 'int', 'bool', 'float'];
             case 1:
-                return ['string', 'int', 'bool', 'float', 'void'];
+                return ['array', 'callable', 'string', 'int', 'bool', 'float', 'iterable', 'void'];
             default:
-                return ['object', 'string', 'int', 'bool', 'float', 'void'];
+                return ['array', 'callable', 'string', 'int', 'bool', 'float', 'iterable', 'void', 'object'];
         }
     }
 
