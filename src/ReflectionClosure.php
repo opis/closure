@@ -89,27 +89,7 @@ class ReflectionClosure extends ReflectionFunction
             $className = '\\' . trim($className->getName(), '\\');
         }
 
-        $fn = false;
-        $modern_php = false;
-
-        if (version_compare(PHP_VERSION, '7.0.0', '>=')) {
-            $modern_php = true;
-
-            if (version_compare(PHP_VERSION, '7.4', '>=')) {
-                $fn = true;
-            }
-
-            if (version_compare(PHP_VERSION, '7.1', '<')) {
-                $php_types = array('string', 'int', 'bool', 'float');
-            } elseif(version_compare(PHP_VERSION, '7.2', '<')) {
-                $php_types = array('string', 'int', 'bool', 'float', 'void');
-            } elseif (version_compare(PHP_VERSION, '7.4', '<=')) {
-                $php_types = array('string', 'int', 'bool', 'float', 'void', 'object');
-            } else {
-                $php_types = array('string', 'int', 'bool', 'float', 'void', 'object', 'mixed');
-            }
-        }
-
+        $builtin_types = self::getBuiltinTypes();
         $class_keywords = ['self', 'static', 'parent'];
 
         $ns = $this->getNamespaceName();
@@ -146,7 +126,7 @@ class ReflectionClosure extends ReflectionFunction
                     if ($token[0] === T_FUNCTION || $token[0] === T_STATIC) {
                         $code .= $token[1];
                         $state = $token[0] === T_FUNCTION ? 'function' : 'static';
-                    } elseif ($fn && $token[0] === T_FN) {
+                    } elseif (\PHP_VERSION_ID >= 70400 && $token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -158,7 +138,7 @@ class ReflectionClosure extends ReflectionFunction
                         if ($token[0] === T_FUNCTION) {
                             $state = 'function';
                         }
-                    } elseif ($fn && $token[0] === T_FN) {
+                    } elseif (\PHP_VERSION_ID >= 70400 && $token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -185,7 +165,7 @@ class ReflectionClosure extends ReflectionFunction
                     if($token[0] === T_FUNCTION || $token[0] === T_STATIC){
                         $code = $token[1];
                         $state = $token[0] === T_FUNCTION ? 'function' : 'static';
-                    } elseif ($fn && $token[0] === T_FN) {
+                    } elseif (\PHP_VERSION_ID >= 70400 && $token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -541,7 +521,7 @@ class ReflectionClosure extends ReflectionFunction
                                     if (!$inside_structure) {
                                         $isUsingScope = $token[0] === T_DOUBLE_COLON;
                                     }
-                                } elseif (!($modern_php && in_array($id_start_ci, $php_types))){
+                                } elseif (!(\PHP_MAJOR_VERSION >= 7 && in_array($id_start_ci, $builtin_types))){
                                     if ($classes === null) {
                                         $classes = $this->getClasses();
                                     }
@@ -591,7 +571,7 @@ class ReflectionClosure extends ReflectionFunction
                                         if (!$inside_structure && !$id_start_ci === 'static') {
                                             $isUsingScope = true;
                                         }
-                                    } elseif (!($modern_php && in_array($id_start_ci, $php_types))){
+                                    } elseif (!(\PHP_MAJOR_VERSION >= 7 && in_array($id_start_ci, $builtin_types))){
                                         if($classes === null){
                                             $classes = $this->getClasses();
                                         }
@@ -647,6 +627,32 @@ class ReflectionClosure extends ReflectionFunction
         $this->code = $code;
 
         return $this->code;
+    }
+
+    /**
+     * @return array
+     */
+    private static function getBuiltinTypes()
+    {
+        // PHP 5
+        if (\PHP_MAJOR_VERSION === 5) {
+            return [];
+        }
+
+        // PHP 8
+        if (\PHP_MAJOR_VERSION === 8) {
+            return ['string', 'int', 'bool', 'float', 'void', 'object', 'mixed'];
+        }
+
+        // PHP 7
+        switch (\PHP_MINOR_VERSION) {
+            case 0:
+                return ['string', 'int', 'bool', 'float'];
+            case 1:
+                return ['string', 'int', 'bool', 'float', 'void'];
+            default:
+                return ['object', 'string', 'int', 'bool', 'float', 'void'];
+        }
     }
 
     /**
