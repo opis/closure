@@ -10,10 +10,8 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
       matrix:
         php: [5.4, 5.5, 5.6, 7.0, 7.1, 7.2, 7.3, 7.4, 8.0]
-        stability: [prefer-stable]
 
     name: PHP ${{ matrix.php }}
 
@@ -32,12 +30,14 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
+          tools: composer:v2 
 
-      - name: Update composer
-        run: composer self-update
+      - name: Require PHPUnit ^9.3
+        run: composer require "phpunit/phpunit:^9.3" --no-update
+        if: "matrix.php == '8.0'"
 
       - name: Install dependencies
-        run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+        run: composer update --prefer-dist --no-interaction --no-progress
 
       - name: Execute tests
         run: vendor/bin/phpunit --verbose
