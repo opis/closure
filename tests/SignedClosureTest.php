@@ -18,7 +18,7 @@ class SignedClosureTest extends ClosureTest
     public function testSecureClosureIntegrityFail()
     {
         if (method_exists($this, 'expectException')) {
-            $this->expectException(SecurityException::class);
+            $this->expectException('\Opis\Closure\SecurityException');
         }
 
         $closure = function(){
@@ -38,7 +38,7 @@ class SignedClosureTest extends ClosureTest
     public function testJsonSecureClosureIntegrityFail()
     {
         if (method_exists($this, 'expectException')) {
-            $this->expectException(SecurityException::class);
+            $this->expectException('\Opis\Closure\SecurityException');
         }
 
         $closure = function(){
@@ -58,7 +58,7 @@ class SignedClosureTest extends ClosureTest
     public function testUnsecuredClosureWithSecurityProvider()
     {
         if (method_exists($this, 'expectException')) {
-            $this->expectException(SecurityException::class);
+            $this->expectException('\Opis\Closure\SecurityException');
         }
 
         SerializableClosure::removeSecurityProvider();
@@ -78,7 +78,7 @@ class SignedClosureTest extends ClosureTest
     public function testJsonUnsecuredClosureWithSecurityProvider()
     {
         if (method_exists($this, 'expectException')) {
-            $this->expectException(SecurityException::class);
+            $this->expectException('\Opis\Closure\SecurityException');
         }
 
         SerializableClosure::removeSecurityProvider();
@@ -126,7 +126,7 @@ class SignedClosureTest extends ClosureTest
     public function testInvalidSecuredClosureWithoutSecuriyProvider()
     {
         if (method_exists($this, 'expectException')) {
-            $this->expectException(SecurityException::class);
+            $this->expectException('\Opis\Closure\SecurityException');
         }
 
         SerializableClosure::setSecretKey('secret');
@@ -146,7 +146,7 @@ class SignedClosureTest extends ClosureTest
     public function testInvalidJsonSecuredClosureWithoutSecuriyProvider()
     {
         if (method_exists($this, 'expectException')) {
-            $this->expectException(SecurityException::class);
+            $this->expectException('\Opis\Closure\SecurityException');
         }
 
         SerializableClosure::setSecretKey('secret');
