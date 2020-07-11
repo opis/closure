@@ -7,15 +7,15 @@
 
 namespace Opis\Closure\Test;
 
+use Opis\Closure\SecurityException;
 use Opis\Closure\SerializableClosure;
 
 class SignedClosureTest extends ClosureTest
 {
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testSecureClosureIntegrityFail()
     {
+        $this->expectException(SecurityException::class);
+
         $closure = function(){
             /*x*/
         };
@@ -27,11 +27,10 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testJsonSecureClosureIntegrityFail()
     {
+        $this->expectException(SecurityException::class);
+
         $closure = function(){
             /*x*/
         };
@@ -43,11 +42,10 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testUnsecuredClosureWithSecurityProvider()
     {
+        $this->expectException(SecurityException::class);
+
         SerializableClosure::removeSecurityProvider();
 
         $closure = function(){
@@ -59,11 +57,10 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testJsonUnsecuredClosureWithSecurityProvider()
     {
+        $this->expectException(SecurityException::class);
+
         SerializableClosure::removeSecurityProvider();
 
         $closure = function(){
@@ -103,11 +100,10 @@ class SignedClosureTest extends ClosureTest
         $this->assertTrue($closure());
     }
 
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testInvalidSecuredClosureWithoutSecuriyProvider()
     {
+        $this->expectException(SecurityException::class);
+
         SerializableClosure::setSecretKey('secret');
         $closure = function(){
             /*x*/
@@ -119,11 +115,10 @@ class SignedClosureTest extends ClosureTest
         unserialize($value);
     }
 
-    /**
-     * @expectedException \Opis\Closure\SecurityException
-     */
     public function testInvalidJsonSecuredClosureWithoutSecuriyProvider()
     {
+        $this->expectException(SecurityException::class);
+
         SerializableClosure::setSecretKey('secret');
         $closure = function(){
             /*x*/

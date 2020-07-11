@@ -84,27 +84,30 @@ class ReflectionClosure extends ReflectionFunction
         }
 
         $className = null;
-        $fn = false;
-
 
         if (null !== $className = $this->getClosureScopeClass()) {
             $className = '\\' . trim($className->getName(), '\\');
         }
 
+        $fn = false;
+        $modern_php = false;
 
-        if($php7 = PHP_MAJOR_VERSION === 7){
-            switch (PHP_MINOR_VERSION){
-                case 0:
-                    $php7_types = array('string', 'int', 'bool', 'float');
-                    break;
-                case 1:
-                    $php7_types = array('string', 'int', 'bool', 'float', 'void');
-                    break;
-                case 2:
-                default:
-                    $php7_types = array('string', 'int', 'bool', 'float', 'void', 'object');
+        if (version_compare(PHP_VERSION, '7.0.0', '>=')) {
+            $modern_php = true;
+
+            if (version_compare(PHP_VERSION, '7.4', '>=')) {
+                $fn = true;
             }
-            $fn = PHP_MINOR_VERSION === 4;
+
+            if (version_compare(PHP_VERSION, '7.1', '<')) {
+                $scalar_types = array('string', 'int', 'bool', 'float');
+            } elseif(version_compare(PHP_VERSION, '7.2', '<')) {
+                $scalar_types = array('string', 'int', 'bool', 'float', 'void');
+            } elseif (version_compare(PHP_VERSION, '7.4', '<=')) {
+                $scalar_types = array('string', 'int', 'bool', 'float', 'void', 'object');
+            } else {
+                $scalar_types = array('string', 'int', 'bool', 'float', 'void', 'object', 'mixed');
+            }
         }
 
         $class_keywords = ['self', 'static', 'parent'];
@@ -538,7 +541,7 @@ class ReflectionClosure extends ReflectionFunction
                                     if (!$inside_structure) {
                                         $isUsingScope = $token[0] === T_DOUBLE_COLON;
                                     }
-                                } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
+                                } elseif (!($modern_php && in_array($id_start_ci, $scalar_types))){
                                     if ($classes === null) {
                                         $classes = $this->getClasses();
                                     }
@@ -588,7 +591,7 @@ class ReflectionClosure extends ReflectionFunction
                                         if (!$inside_structure && !$id_start_ci === 'static') {
                                             $isUsingScope = true;
                                         }
-                                    } elseif (!($php7 && in_array($id_start_ci, $php7_types))){
+                                    } elseif (!($modern_php && in_array($id_start_ci, $scalar_types))){
                                         if($classes === null){
                                             $classes = $this->getClasses();
                                         }
