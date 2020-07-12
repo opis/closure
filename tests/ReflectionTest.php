@@ -130,6 +130,10 @@ class ReflectionTest extends TestCase
                 'fn () =>  1',
             ],
             [
+                static fn () =>  1,
+                'static fn () =>  1',
+            ],
+            [
                 fn (Stub\Object1 $param): Object2 => new Stub\Object2(),
                 'fn (Stub\Object1 $param): Object2 => new Stub\Object2()',
             ],

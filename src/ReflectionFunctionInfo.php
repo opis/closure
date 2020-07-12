@@ -77,15 +77,9 @@ final class ReflectionFunctionInfo
             return null;
         }
 
-        $code = $this->code();
-
-        if ($this->isStatic) {
-            $code = 'static ' . $code;
-        }
-
         return [
             'static' => $this->isStatic,
-            'code' => new CodeWrapper($code),
+            'code' => new CodeWrapper($this->code()),
             'short' => $this->isShort,
             'use' => $this->use ?: [],
         ];
@@ -172,7 +166,7 @@ final class ReflectionFunctionInfo
         $count = $this->count;
         $index = &$this->index;
 
-        $code = '';
+        $code = $this->isStatic ? 'static ' : '';
 
         // Function start
 
