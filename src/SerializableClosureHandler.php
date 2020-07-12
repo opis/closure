@@ -17,7 +17,11 @@
 
 namespace Opis\Closure;
 
-use Closure, FFI, FFI\CData, RuntimeException;
+use Closure;
+use FFI;
+use FFI\CData;
+use RuntimeException;
+
 use const ZEND_THREAD_SAFE;
 
 /**
@@ -140,13 +144,14 @@ final class SerializableClosureHandler
                 'code' => null,
                 'scope' => null,
                 'this' => null,
+                'use' => [],
             ];
 
-            if ($this->resolveUseVariables && ($data['use'] ?? false)) {
+            if ($this->resolveUseVariables && (!empty($data['use']))) {
                 $data['use'] = ($this->resolveUseVariables)($data['use']);
             }
 
-            $temp = ClosureStream::eval($data['code'], $data['use'] ?? null);
+            $temp = ClosureStream::eval($data['code'], $data['use']);
 
             if ($data['this']) {
                 $temp = $temp->bindTo($data['this'], $data['scope'] ?? 'static');
@@ -157,8 +162,6 @@ final class SerializableClosureHandler
             }
         }
 
-        unset($data);
-
         $dst = $this->closure($closure);
         $src = $this->closure($temp);
 
@@ -167,7 +170,7 @@ final class SerializableClosureHandler
         if ($dst->func->type === 2) { // user function
             $op_array = $dst->func->op_array;
 
-            $op_array->refcount[0] = $op_array->refcount[0] + 1;
+            $op_array->refcount[0] += 1;
             if (!FFI::isNull($op_array->static_variables)) {
                 $op_array->static_variables->gc->refcount++;
                 $op_array->static_variables_ptr = FFI::addr($op_array->static_variables);

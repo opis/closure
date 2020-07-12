@@ -77,21 +77,17 @@ final class ReflectionFunctionInfo
             return null;
         }
 
-        $code = $this->code() . ";";
+        $code = $this->code();
 
         if ($this->isStatic) {
-            $code = 'return static ' . $code;
-        } else {
-            $code = 'return ' . $code;
+            $code = 'static ' . $code;
         }
-
-        $code = $this->imports() . $code;
 
         return [
             'static' => $this->isStatic,
             'code' => new CodeWrapper($code),
             'short' => $this->isShort,
-            'use' => $this->use ?: null,
+            'use' => $this->use ?: [],
         ];
     }
 
@@ -165,30 +161,6 @@ final class ReflectionFunctionInfo
 
             return;
         }
-    }
-
-    /**
-     * @returns string
-     */
-    private function imports(): string
-    {
-        $code = "<?php\n";
-
-        $ns = $this->reflector->getNamespaceName();
-
-        if ($ns) {
-            $code .= "namespace {$ns};\n";
-        }
-
-        if (!$this->aliases || !$this->hints) {
-            return $code;
-        }
-
-
-        $code .= self::formatImports($this->aliases, $this->hints, $ns);
-
-
-        return $code;
     }
 
     /**

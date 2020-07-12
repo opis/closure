@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /* ===========================================================================
  * Copyright 2018-2020 Zindex Software
  *
@@ -45,7 +46,7 @@ final class ClosureStream
 
     private int $pointer = 0;
 
-    function stream_open($path, $mode, $options, &$opened_path)
+    public function stream_open($path, $mode, $options, &$opened_path)
     {
         $path = substr($path, strlen(self::STREAM_PROTO . '://'));
 
@@ -142,37 +143,14 @@ final class ClosureStream
         return self::STREAM_PROTO . '://' . $key;
     }
 
-    public static function eval(CodeWrapper $code, ?array $vars = null): Closure
+    public static function eval(CodeWrapper $code, array $vars): Closure
     {
-        // Use static class methods to avoid name collision and side-effects
+        $closure = static function () {
+            extract(func_get_arg(1), EXTR_OVERWRITE | EXTR_REFS);
 
-        self::$evalFile = self::url($code);
-        unset($code);
+            return require func_get_arg(0);
+        };
 
-        if ($vars) {
-            // Extract variables
-            self::$evalVars = &$vars;
-            unset($vars);
-            extract(self::$evalVars, EXTR_OVERWRITE | EXTR_REFS);
-            // Quickly cleanup
-            self::$evalVars = null;
-        } else {
-            unset($vars);
-        }
-
-        // we can use $evalRet as temporary
-        self::$evalRet = include(self::$evalFile);
-
-        // Remove possible reference
-        unset($_____);
-
-        // Get value
-        $_____ = self::$evalRet;
-
-        // Cleanup
-        self::$evalFile = self::$evalRet = null;
-
-        // Return closure
-        return $_____;
+        return $closure(self::url($code), $vars);
     }
 }

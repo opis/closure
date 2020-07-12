@@ -19,6 +19,7 @@ namespace Opis\Closure\Test;
 
 use Closure;
 use Opis\Closure\ReflectionClosure;
+use Opis\Closure\Test\Stub\Object2;
 use PHPUnit\Framework\TestCase;
 
 // Used for test
@@ -105,4 +106,35 @@ class ReflectionTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider codeClosureProvider()
+     */
+    public function testGetCode(Closure $closure, string $expectedCode): void
+    {
+        $ref = new ReflectionClosure($closure);
+
+        $this->assertEquals($expectedCode, $ref->getCode());
+    }
+
+    public function codeClosureProvider(): array
+    {
+        // @formatter:off
+        return [
+            [
+                fn() => 1,
+                'fn() => 1',
+            ],
+            [
+                fn () =>  1,
+                'fn () =>  1',
+            ],
+            [
+                fn (Stub\Object1 $param): Object2 => new Stub\Object2(),
+                'fn (Stub\Object1 $param): Object2 => new Stub\Object2()',
+            ],
+        ];
+        // @formatter:on
+    }
+
 }

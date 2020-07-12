@@ -58,7 +58,7 @@ final class CodeWrapper
      */
     public function value(): string
     {
-        return $this->value;
+        return '<?php return ' . $this->value . ';';
     }
 
     /**
