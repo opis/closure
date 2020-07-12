@@ -170,7 +170,7 @@ final class SerializableClosureHandler
         if ($dst->func->type === 2) { // user function
             $op_array = $dst->func->op_array;
 
-            $op_array->refcount[0] += 1;
+            $op_array->refcount[0]++;
             if (!FFI::isNull($op_array->static_variables)) {
                 $op_array->static_variables->gc->refcount++;
                 $op_array->static_variables_ptr = FFI::addr($op_array->static_variables);
