@@ -641,7 +641,7 @@ class ReflectionClosure extends ReflectionFunction
 
         // PHP 8
         if (\PHP_MAJOR_VERSION === 8) {
-            return ['array', 'callable', 'string', 'int', 'bool', 'float', 'iterable', 'void', 'object', 'mixed'];
+            return ['array', 'callable', 'string', 'int', 'bool', 'float', 'iterable', 'void', 'object', 'mixed', 'false', 'null'];
         }
 
         // PHP 7
