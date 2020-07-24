@@ -10,11 +10,24 @@ namespace Opis\Closure\Test;
 use Closure;
 use stdClass;
 use Serializable;
+use Opis\Closure\ClosureContext;
 use Opis\Closure\ReflectionClosure;
 use Opis\Closure\SerializableClosure;
 
 class ClosureTest extends \PHPUnit\Framework\TestCase
 {
+    public function testClassNameWithUse()
+    {
+        $wrapper = new SerializableClosure(
+            function () {
+                return new ClosureContext; // new object without `()`
+            }
+        );
+
+        $code = $wrapper->getReflector()->getCode();
+        $this->assertStringContainsString('Opis\Closure\ClosureContext', $code);
+    }
+
     protected function s($closure)
     {
         if($closure instanceof Closure)

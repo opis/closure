@@ -469,6 +469,22 @@ class ReflectionClosure extends ReflectionFunction
                             $id_start_ci = strtolower($id_start);
                             $id_name = '';
                             $state = 'id_name';
+
+                            if ($context === 'new') {
+                                if ($id_start !== '\\' && !in_array($id_start_ci, $class_keywords)) {
+                                    if ($classes === null) {
+                                        $classes = $this->getClasses();
+                                    }
+
+                                    if (isset($classes[$id_start_ci])) {
+                                        $id_start = $classes[$id_start_ci];
+                                    }
+                                    if ($id_start[0] !== '\\') {
+                                        $id_start = $nsf . '\\' . $id_start;
+                                    }
+                                }
+                            }
+
                             break 2;
                         case T_VARIABLE:
                             $code .= $token[1];
