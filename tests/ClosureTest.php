@@ -16,18 +16,6 @@ use Opis\Closure\SerializableClosure;
 
 class ClosureTest extends \PHPUnit\Framework\TestCase
 {
-    public function testClassNameWithUse()
-    {
-        $wrapper = new SerializableClosure(
-            function () {
-                return new ClosureContext; // new object without `()`
-            }
-        );
-
-        $code = $wrapper->getReflector()->getCode();
-        $this->assertStringContainsString('Opis\Closure\ClosureContext', $code);
-    }
-
     protected function s($closure)
     {
         if($closure instanceof Closure)
@@ -364,6 +352,30 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($ro->getClosureScopeClass());
     }
 
+    /**
+     * Covers https://github.com/opis/closure/issues/70
+     */
+    public function testClosureContainingNewWithoutParentheses()
+    {
+        $closure = $this->s(function () {
+            return new A; // new object without `()`
+        });
+
+        $this->assertInstanceOf('Opis\Closure\Test\A', $closure());
+    }
+
+    /**
+     * Covers https://github.com/opis/closure/pull/71#issuecomment-663766050
+     */
+    public function testClosureContainingNewFromVariable()
+    {
+        $closure = $this->s(function () {
+            $className = 'Opis\Closure\Test\A';
+            return new $className;
+        });
+
+        $this->assertInstanceOf('Opis\Closure\Test\A', $closure());
+    }
 }
 
 class ObjnObj implements Serializable {
