@@ -234,7 +234,7 @@ class SerializableClosure implements Serializable
                 unset($hash, $closure);
             }
 
-            if (!\isset($data['closure']) || !\isset($data['hash'])) {
+            if (!isset($data['closure']) || !isset($data['hash'])) {
                 throw new SecurityException('Invalid signed closure');
             }
 
