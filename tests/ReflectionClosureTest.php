@@ -29,6 +29,29 @@ class ReflectionClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($e, $this->c($f));
     }
 
+    public function testNewInstance2()
+    {
+        $f = function (){ new A; };
+        $e = 'function (){ new \Opis\Closure\Test\A; }';
+        $this->assertEquals($e, $this->c($f));
+
+        $f = function (){ new A\B; };
+        $e = 'function (){ new \Opis\Closure\Test\A\B; }';
+        $this->assertEquals($e, $this->c($f));
+
+        $f = function (){ new \A; };
+        $e = 'function (){ new \A; }';
+        $this->assertEquals($e, $this->c($f));
+
+        $f = function (){ new A(new B, [new C]); };
+        $e = 'function (){ new \Opis\Closure\Test\A(new \Opis\Closure\Test\B, [new \Opis\Closure\Test\C]); }';
+        $this->assertEquals($e, $this->c($f));
+
+        $f = function (){ new self; new static; new parent; };
+        $e = 'function (){ new self; new static; new parent; }';
+        $this->assertEquals($e, $this->c($f));
+    }
+
     public function testInstanceOf()
     {
         $f = function (){ $c = null; $b = '\X\y'; v($c instanceof $b);};

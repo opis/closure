@@ -561,6 +561,22 @@ class ReflectionClosure extends ReflectionFunction
                                 }
                                 if(isset($constants[$id_start])){
                                     $id_start = $constants[$id_start];
+                                } elseif($context === 'new'){
+                                    if(in_array($id_start_ci, $class_keywords)) {
+                                        if (!$inside_structure) {
+                                            $isUsingScope = true;
+                                        }
+                                    } else {
+                                        if ($classes === null) {
+                                            $classes = $this->getClasses();
+                                        }
+                                        if (isset($classes[$id_start_ci])) {
+                                            $id_start = $classes[$id_start_ci];
+                                        }
+                                        if ($id_start[0] !== '\\') {
+                                            $id_start = $nsf . '\\' . $id_start;
+                                        }
+                                    }
                                 } elseif($context === 'use' ||
                                     $context === 'instanceof' ||
                                     $context === 'args' ||
@@ -568,7 +584,7 @@ class ReflectionClosure extends ReflectionFunction
                                     $context === 'extends' ||
                                     $context === 'root'
                                 ){
-                                    if($id_start_ci === 'self' || $id_start_ci === 'static' || $id_start_ci === 'parent'){
+                                    if(in_array($id_start_ci, $class_keywords)){
                                         if (!$inside_structure && !$id_start_ci === 'static') {
                                             $isUsingScope = true;
                                         }
