@@ -10,7 +10,7 @@ namespace Opis\Closure;
 /**
  * Serialize
  *
- * @param $data
+ * @param mixed $data
  * @return string
  */
 function serialize($data)
@@ -25,18 +25,16 @@ function serialize($data)
 /**
  * Unserialize
  *
- * @param $data
- * @param $options
+ * @param string $data
+ * @param array|null $options
  * @return mixed
  */
 function unserialize($data, array $options = null)
 {
     SerializableClosure::enterContext();
-    if ($options === null || PHP_MAJOR_VERSION < 7) {
-        $data = \unserialize($data);
-    } else {
-        $data = \unserialize($data, $options);
-    }
+    $data = ($options === null || \PHP_MAJOR_VERSION < 7)
+        ? \unserialize($data)
+        : \unserialize($data, $options);
     SerializableClosure::unwrapClosures($data);
     SerializableClosure::exitContext();
     return $data;
