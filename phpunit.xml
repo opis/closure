@@ -28,7 +28,7 @@
             <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
         </testsuite>
         <testsuite name="ReflectionClosure6">
-            <file phpVersion="8.0.0-x" phpVersionOperator=">=">./tests/ReflectionClosure6Test.php</file>
+            <file phpVersion="8.0.0-dev" phpVersionOperator=">=">./tests/ReflectionClosure6Test.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

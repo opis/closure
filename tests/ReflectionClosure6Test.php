@@ -32,8 +32,10 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
-//        $this->assertEquals($e3, $this->c($f3));
+        $this->assertEquals($e3, $this->c($f3));
         $this->assertEquals($e4, $this->c($f4));
+
+        self::assertTrue(true);
     }
 
     public function testMixedType()

@@ -230,7 +230,9 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
             $n = function ($b) {
                 return !$b;
             };
-            $ns = unserialize(serialize(new SerializableClosure($n)));
+            // Why isn't the namespace working? Does it work fully qualified?
+            // The function namespace is also not working
+            $ns = \unserialize(\serialize(new \Opis\Closure\SerializableClosure($n)));
 
             return $ns(false);
         };
