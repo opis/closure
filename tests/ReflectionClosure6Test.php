@@ -5,6 +5,9 @@ namespace Opis\Closure\Test;
 use Closure;
 use Opis\Closure\ReflectionClosure;
 
+// Fake
+use Some\ClassName as ClassAlias;
+
 final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 {
     protected function c(Closure $closure)
@@ -24,9 +27,13 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
         $f3 = fn() : false => false;
         $e3 = 'fn() : false => false';
 
+        $f4 = function () : null | MyClass | ClassAlias | Relative\Ns\ClassName | \Absolute\Ns\ClassName {return null;};
+        $e4 = 'fn() : null | \Opis\Closure\Test\MyClass | Opis\Closure\Test\Some\ClassName | \Opis\Closure\Test\Relative\Ns\ClassName | \Absolute\Ns\ClassName {return null;}';
+
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
         $this->assertEquals($e3, $this->c($f3));
+        $this->assertEquals($ee, $this->c($f4));
     }
 
     public function testMixedType()
