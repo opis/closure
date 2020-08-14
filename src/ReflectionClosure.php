@@ -843,6 +843,11 @@ class ReflectionClosure extends ReflectionFunction
 
     protected function fetchItems()
     {
+        // Not sure where to put this
+        if (! defined('T_NAME_QUALIFIED')) {
+            define('T_NAME_QUALIFIED', -4);
+        }
+
         $key = $this->getHashedFileName();
 
         $classes = array();
@@ -909,6 +914,11 @@ class ReflectionClosure extends ReflectionFunction
                         case T_STRING:
                             $name .= $token[1];
                             $alias = $token[1];
+                            break;
+                        case T_NAME_QUALIFIED:
+                            $name .= $token[1];
+                            $namespaceAsArray = explode('\\', $token[1]);
+                            $alias = end($namespaceAsArray);
                             break;
                         case T_AS:
                             $lastState = 'use';
