@@ -16,6 +16,7 @@
             <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceTest.php</file>
             <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceUnqualifiedTest.php</file>
             <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceFullyQualifiedTest.php</file>
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespacePartiallyQualifiedTest.php</file>
         </testsuite>
         <testsuite name="ReflectionClosure">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>

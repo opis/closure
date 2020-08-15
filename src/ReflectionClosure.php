@@ -182,6 +182,15 @@ class ReflectionClosure extends ReflectionFunction
                     break;
                 case 'closure_args':
                     switch ($token[0]){
+                        case T_NAME_QUALIFIED:
+                            $id_start = $token[1];
+                            $id_start_ci_length = strpos($token[1], '\\');
+                            $id_start_ci = strtolower(substr($token[1], 0, $id_start_ci_length));
+                            $id_name = substr($token[1], $id_start_ci_length);
+                            $context = 'args';
+                            $state = 'id_name';
+                            $lastState = 'closure_args';
+                            break;
                         case T_NS_SEPARATOR:
                         case T_STRING:
                             $id_start = $token[1];
@@ -482,8 +491,6 @@ class ReflectionClosure extends ReflectionFunction
                         case T_NAME_QUALIFIED:
                         case T_NS_SEPARATOR:
                         case T_STRING:
-                            $id_name .= $token[1];
-                            break;
                         case T_WHITESPACE:
                         case T_COMMENT:
                         case T_DOC_COMMENT:
