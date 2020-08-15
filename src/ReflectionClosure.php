@@ -36,6 +36,15 @@ class ReflectionClosure extends ReflectionFunction
      */
     public function __construct(Closure $closure, $code = null)
     {
+        // Not sure where to put this
+        if (! defined('T_NAME_QUALIFIED')) {
+            define('T_NAME_QUALIFIED', -4);
+        }
+
+        if (! defined('T_NAME_FULLY_QUALIFIED')) {
+            define('T_NAME_FULLY_QUALIFIED', -5);
+        }
+
         $this->code = $code;
         parent::__construct($closure);
     }
@@ -446,6 +455,8 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $token[1];
                             break;
                         case T_NS_SEPARATOR:
+                        case T_NAME_QUALIFIED:
+                        case T_NAME_FULLY_QUALIFIED:
                         case T_STRING:
                         case T_STATIC:
                             $id_start = $token[1];
@@ -468,6 +479,7 @@ class ReflectionClosure extends ReflectionFunction
                     break;
                 case 'id_name':
                     switch ($token[0]){
+                        case T_NAME_QUALIFIED:
                         case T_NS_SEPARATOR:
                         case T_STRING:
                             $id_name .= $token[1];
@@ -843,11 +855,6 @@ class ReflectionClosure extends ReflectionFunction
 
     protected function fetchItems()
     {
-        // Not sure where to put this
-        if (! defined('T_NAME_QUALIFIED')) {
-            define('T_NAME_QUALIFIED', -4);
-        }
-
         $key = $this->getHashedFileName();
 
         $classes = array();

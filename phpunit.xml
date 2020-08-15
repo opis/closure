@@ -12,6 +12,11 @@
         <testsuite name="Signed">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SignedClosureTest.php</file>
         </testsuite>
+        <testsuite name="Namespace">
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceTest.php</file>
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceUnqualifiedTest.php</file>
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceFullyQualifiedTest.php</file>
+        </testsuite>
         <testsuite name="ReflectionClosure">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>
         </testsuite>

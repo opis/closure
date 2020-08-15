@@ -15,8 +15,7 @@ final class NamespaceTest extends \PHPUnit\Framework\TestCase
             $object = new ClosureContext();
 
             self::assertInstanceOf('\Opis\Closure\ClosureContext', $object);
-            // This is not valid code on PHP on PHP 5.4
-//            self::assertInstanceOf(SomeAlias::class, $object);
+            self::assertInstanceOf(SomeAlias::class, $object);
         };
 
         $executable = $this->s($closure);
