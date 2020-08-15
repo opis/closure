@@ -464,13 +464,19 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $token[1];
                             break;
                         case T_NS_SEPARATOR:
-                        case T_NAME_QUALIFIED:
                         case T_NAME_FULLY_QUALIFIED:
                         case T_STRING:
                         case T_STATIC:
                             $id_start = $token[1];
                             $id_start_ci = strtolower($id_start);
                             $id_name = '';
+                            $state = 'id_name';
+                            break 2;
+                        case T_NAME_QUALIFIED:
+                            $id_start_ci_length = strpos($token[1], '\\');
+                            $id_start = substr($token[1], 0, $id_start_ci_length);
+                            $id_start_ci = strtolower($id_start);
+                            $id_name = substr($token[1], $id_start_ci_length);
                             $state = 'id_name';
                             break 2;
                         case T_VARIABLE:
