@@ -17,7 +17,6 @@
             <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceUnqualifiedTest.php</file>
             <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceFullyQualifiedTest.php</file>
             <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespacePartiallyQualifiedTest.php</file>
-            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceGroupTest.php</file>
         </testsuite>
         <testsuite name="ReflectionClosure">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>
@@ -33,6 +32,7 @@
         </testsuite>
         <testsuite name="ReflectionClosure5">
             <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
+            <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/NamespaceGroupTest.php</file>
         </testsuite>
         <testsuite name="ReflectionClosure6">
             <file phpVersion="8.0.0-dev" phpVersionOperator=">=">./tests/ReflectionClosure6Test.php</file>
