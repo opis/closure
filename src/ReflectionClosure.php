@@ -183,10 +183,7 @@ class ReflectionClosure extends ReflectionFunction
                 case 'closure_args':
                     switch ($token[0]){
                         case T_NAME_QUALIFIED:
-                            $id_start = $token[1];
-                            $id_start_ci_length = strpos($token[1], '\\');
-                            $id_start_ci = strtolower(substr($token[1], 0, $id_start_ci_length));
-                            $id_name = substr($token[1], $id_start_ci_length);
+                            list($id_start, $id_start_ci, $id_name) = $this->parseNameQualified($token[1]);
                             $context = 'args';
                             $state = 'id_name';
                             $lastState = 'closure_args';
@@ -255,6 +252,12 @@ class ReflectionClosure extends ReflectionFunction
                             $id_start = $token[1];
                             $id_start_ci = strtolower($id_start);
                             $id_name = '';
+                            $context = 'return_type';
+                            $state = 'id_name';
+                            $lastState = 'return';
+                            break 2;
+                        case T_NAME_QUALIFIED:
+                            list($id_start, $id_start_ci, $id_name) = $this->parseNameQualified($token[1]);
                             $context = 'return_type';
                             $state = 'id_name';
                             $lastState = 'return';
@@ -361,6 +364,12 @@ class ReflectionClosure extends ReflectionFunction
                             $id_start = $token[1];
                             $id_start_ci = strtolower($id_start);
                             $id_name = '';
+                            $context = 'root';
+                            $state = 'id_name';
+                            $lastState = 'closure';
+                            break 2;
+                        case T_NAME_QUALIFIED:
+                            list($id_start, $id_start_ci, $id_name) = $this->parseNameQualified($token[1]);
                             $context = 'root';
                             $state = 'id_name';
                             $lastState = 'closure';
@@ -473,10 +482,7 @@ class ReflectionClosure extends ReflectionFunction
                             $state = 'id_name';
                             break 2;
                         case T_NAME_QUALIFIED:
-                            $id_start_ci_length = strpos($token[1], '\\');
-                            $id_start = substr($token[1], 0, $id_start_ci_length);
-                            $id_start_ci = strtolower($id_start);
-                            $id_name = substr($token[1], $id_start_ci_length);
+                            list($id_start, $id_start_ci, $id_name) = $this->parseNameQualified($token[1]);
                             $state = 'id_name';
                             break 2;
                         case T_VARIABLE:
@@ -937,8 +943,8 @@ class ReflectionClosure extends ReflectionFunction
                             break;
                         case T_NAME_QUALIFIED:
                             $name .= $token[1];
-                            $namespaceAsArray = explode('\\', $token[1]);
-                            $alias = end($namespaceAsArray);
+                            $pieces = explode('\\', $token[1]);
+                            $alias = end($pieces);
                             break;
                         case T_AS:
                             $lastState = 'use';
@@ -973,6 +979,11 @@ class ReflectionClosure extends ReflectionFunction
                     switch ($token[0]) {
                         case T_NS_SEPARATOR:
                             $name .= $token[1];
+                            break;
+                        case T_NAME_QUALIFIED:
+                            $name .= $token[1];
+                            $pieces = explode('\\', $token[1]);
+                            $alias = end($pieces);
                             break;
                         case T_STRING:
                             $name .= $token[1];
@@ -1073,5 +1084,18 @@ class ReflectionClosure extends ReflectionFunction
         static::$functions[$key] = $functions;
         static::$constants[$key] = $constants;
         static::$structures[$key] = $structures;
+    }
+
+    private function parseNameQualified($token)
+    {
+        $pieces = explode('\\', $token);
+
+        $id_start = array_shift($pieces);
+
+        $id_start_ci = strtolower($id_start);
+
+        $id_name = '\\' . implode('\\', $pieces);
+
+        return [$id_start, $id_start_ci, $id_name];
     }
 }
