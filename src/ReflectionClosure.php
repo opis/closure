@@ -5,11 +5,11 @@
  * Licensed under the MIT License
  * =========================================================================== */
 
+namespace Opis\Closure;
+
 defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -4);
 defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -5);
 defined('T_FN') || define('T_FN', -6);
-
-namespace Opis\Closure;
 
 use Closure;
 use ReflectionFunction;
