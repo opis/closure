@@ -72,12 +72,45 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 
     public function testNamedParameter()
     {
-        $function = function (string $name) { return $name; };
-
-        $f1 = fn() => $function(name: 'Deleu');
+        $f1 = function(string $firstName, string $lastName) { return $firstName . ' ' . $lastName;};
 
         $unserialized = $this->s($f1);
 
-        $this->assertEquals('Deleu', $unserialized());
+        $this->assertEquals('Marco Deleu', $unserialized(
+            lastName: 'Deleu',
+            firstName: 'Marco')
+        );
+    }
+
+    public function testConstructorPropertyPromotion()
+    {
+        $class = new PropertyPromotion('public', 'protected', 'private');
+
+        $f1 = fn() => $class;
+
+        $object = $this->s($f1)();
+
+        $this->assertEquals('public', $object->public);
+        $this->assertEquals('protected', $object->getProtected());
+        $this->assertEquals('private', $object->getPrivate());
+    }
+}
+
+class PropertyPromotion
+{
+    public function __construct(
+                public string $public,
+                protected string $protected,
+                private string $private,
+            ){}
+
+    public function getProtected(): string
+    {
+        return $this->protected;
+    }
+
+    public function getPrivate(): string
+    {
+        return $this->private;
     }
 }
