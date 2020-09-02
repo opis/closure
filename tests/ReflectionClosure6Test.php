@@ -6,6 +6,7 @@ use Closure;
 use Opis\Closure\ReflectionClosure;
 
 // Fake
+use Opis\Closure\SerializableClosure;
 use Some\ClassName as ClassAlias;
 
 final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
@@ -14,6 +15,13 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
     {
         $r = new ReflectionClosure($closure);
         return $r->getCode();
+    }
+
+    protected function s($closure)
+    {
+        $closure = new SerializableClosure($closure);
+
+        return unserialize(serialize($closure))->getClosure();
     }
 
     public function testUnionTypes()
@@ -44,5 +52,32 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
         $e1 = 'function () : mixed { return 42;}';
 
         $this->assertEquals($e1, $this->c($f1));
+    }
+
+    public function testNullsafeOperator()
+    {
+        $f1 = function () { $obj = new \stdClass(); return $obj?->invalid();};
+        $e1 = 'function () { $obj = new \stdClass(); return $obj?->invalid();}';
+
+        $this->assertEquals($e1, $this->c($f1));
+    }
+
+    public function testTraillingComma()
+    {
+        $f1 = function (string $param,) {};
+        $e1 = 'function (string $param,) {}';
+
+        $this->assertEquals($e1, $this->c($f1));
+    }
+
+    public function testNamedParameter()
+    {
+        $function = function (string $name) { return $name; };
+
+        $f1 = fn() => $function(name: 'Deleu');
+
+        $unserialized = $this->s($f1);
+
+        $this->assertEquals('Deleu', $unserialized());
     }
 }
