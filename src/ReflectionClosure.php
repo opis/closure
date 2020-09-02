@@ -5,6 +5,10 @@
  * Licensed under the MIT License
  * =========================================================================== */
 
+defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -4);
+defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -5);
+defined('T_FN') || define('T_FN', -6);
+
 namespace Opis\Closure;
 
 use Closure;
@@ -36,15 +40,6 @@ class ReflectionClosure extends ReflectionFunction
      */
     public function __construct(Closure $closure, $code = null)
     {
-        // Not sure where to put this
-        if (! defined('T_NAME_QUALIFIED')) {
-            define('T_NAME_QUALIFIED', -4);
-        }
-
-        if (! defined('T_NAME_FULLY_QUALIFIED')) {
-            define('T_NAME_FULLY_QUALIFIED', -5);
-        }
-
         $this->code = $code;
         parent::__construct($closure);
     }
@@ -135,7 +130,7 @@ class ReflectionClosure extends ReflectionFunction
                     if ($token[0] === T_FUNCTION || $token[0] === T_STATIC) {
                         $code .= $token[1];
                         $state = $token[0] === T_FUNCTION ? 'function' : 'static';
-                    } elseif (\PHP_VERSION_ID >= 70400 && $token[0] === T_FN) {
+                    } elseif ($token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -147,7 +142,7 @@ class ReflectionClosure extends ReflectionFunction
                         if ($token[0] === T_FUNCTION) {
                             $state = 'function';
                         }
-                    } elseif (\PHP_VERSION_ID >= 70400 && $token[0] === T_FN) {
+                    } elseif ($token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
@@ -174,7 +169,7 @@ class ReflectionClosure extends ReflectionFunction
                     if($token[0] === T_FUNCTION || $token[0] === T_STATIC){
                         $code = $token[1];
                         $state = $token[0] === T_FUNCTION ? 'function' : 'static';
-                    } elseif (\PHP_VERSION_ID >= 70400 && $token[0] === T_FN) {
+                    } elseif ($token[0] === T_FN) {
                         $isShortClosure = true;
                         $code .= $token[1];
                         $state = 'closure_args';
