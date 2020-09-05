@@ -33,12 +33,6 @@ final class ClosureStream
 
     private static bool $isRegistered = false;
 
-    private static ?string $evalFile = null;
-
-    private static ?array $evalVars = null;
-
-    private static ?Closure $evalRet = null;
-
     private ?string $content;
 
     private int $length = 0;
@@ -144,35 +138,22 @@ final class ClosureStream
 
     public static function eval(CodeWrapper $code, ?array $vars = null): Closure
     {
-        // Use static class methods to avoid name collision and side-effects
-
-        self::$evalFile = self::url($code);
-        unset($code);
-
-        if ($vars) {
-            // Extract variables
-            self::$evalVars = &$vars;
-            unset($vars);
-            extract(self::$evalVars, EXTR_OVERWRITE | EXTR_REFS);
-            // Quickly cleanup
-            self::$evalVars = null;
-        } else {
-            unset($vars);
-        }
-
-        // we can use $evalRet as temporary
-        self::$evalRet = include(self::$evalFile);
-
-        // Remove possible reference
-        unset($_____);
-
-        // Get value
-        $_____ = self::$evalRet;
-
-        // Cleanup
-        self::$evalFile = self::$evalRet = null;
-
-        // Return closure
-        return $_____;
+        return $vars
+            ? include_closure_internal(self::url($code), $vars)
+            : include_closure_internal(self::url($code));
     }
+}
+
+/**
+ * Use this function to get an unbound closure
+ * @internal
+ */
+function include_closure_internal() {
+    if (func_num_args() > 1 && (${'#vars'} = func_get_arg(1))) {
+        extract(${'#vars'}, EXTR_SKIP | EXTR_REFS);
+        unset(${'#vars'});
+    }
+
+    /** @noinspection PhpIncludeInspection */
+    return include(func_get_arg(0));
 }

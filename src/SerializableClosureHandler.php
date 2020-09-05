@@ -152,8 +152,6 @@ final class SerializableClosureHandler
                 $temp = $temp->bindTo($data['this'], $data['scope'] ?? 'static');
             } elseif ($data['scope']) {
                 $temp = $temp->bindTo(null, $data['scope']);
-            } else {
-                $temp = $temp->bindTo(null, null);
             }
         }
 
