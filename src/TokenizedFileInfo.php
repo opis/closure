@@ -17,6 +17,9 @@
 
 namespace Opis\Closure;
 
+defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -101);
+defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -102);
+
 /**
  * @internal
  */
@@ -122,7 +125,6 @@ final class TokenizedFileInfo
      */
     private function handleGlobal(): void
     {
-
         foreach ($this->untilMarker(null) as $token) {
             switch ($token[0]) {
                 case T_NAMESPACE:
@@ -353,7 +355,6 @@ final class TokenizedFileInfo
      */
     private function handleAnonymousClass(): void
     {
-
         // Skip whitespace and comments
         $this->skipWhitespaceAndComments();
 
@@ -493,6 +494,8 @@ final class TokenizedFileInfo
             switch ($token[0]) {
                 case T_STRING:
                 case T_NS_SEPARATOR:
+                case T_NAME_QUALIFIED:
+                case T_NAME_FULLY_QUALIFIED:
                     $name .= $token[1];
                     $this->index++;
                     $this->line = $token[2];
@@ -523,7 +526,6 @@ final class TokenizedFileInfo
      */
     private function untilMarker($marker, bool $noAdvance = false): iterable
     {
-
         while ($this->index < $this->count) {
             $token = $this->tokens[$this->index];
             if (is_array($token)) {
@@ -572,7 +574,6 @@ final class TokenizedFileInfo
      */
     private function balanceCurly(): iterable
     {
-
         $marker = $this->openBrackets;
 
         do {

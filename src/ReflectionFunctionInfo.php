@@ -19,6 +19,9 @@ namespace Opis\Closure;
 
 use ReflectionFunction;
 
+defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -101);
+defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -102);
+
 /**
  * @internal
  */
@@ -37,7 +40,7 @@ final class ReflectionFunctionInfo
     /**
      * List of builtin php types
      */
-    private const BUILTIN = \PHP_MAJOR_VERSION === 8
+    private const BUILTIN = PHP_MAJOR_VERSION === 8
         ? [
             'bool', 'int', 'float', 'string', 'array',
             'object', 'iterable', 'callable', 'void', 'mixed',
@@ -316,8 +319,10 @@ final class ReflectionFunctionInfo
             $token = $tokens[$index++];
 
             switch ($token[0]) {
-                case T_NS_SEPARATOR:
                 case T_STRING:
+                case T_NS_SEPARATOR:
+                case T_NAME_QUALIFIED:
+                case T_NAME_FULLY_QUALIFIED:
                     if ($use_hints) {
                         $hint .= $token[1];
                         $add_hint = false;
@@ -424,24 +429,26 @@ final class ReflectionFunctionInfo
                 }
             }
 
-            switch ($token[0]) {
-                case T_STRING:
-                case T_NS_SEPARATOR:
-                    if ($use_hints) {
-                        $hint .= $token[1];
-                    }
-                    break;
-                case T_WHITESPACE:
-                case T_COMMENT:
-                case T_DOC_COMMENT:
-                    // ignore whitespace and comments
-                    break;
-                default:
-                    if ($use_hints && $hint !== '') {
-                        $this->addHint($hint);
-                        $hint = '';
-                    }
-                    break;
+            if ($use_hints) {
+                switch ($token[0]) {
+                    case T_STRING:
+                    case T_NS_SEPARATOR:
+                    case T_NAME_QUALIFIED:
+                    case T_NAME_FULLY_QUALIFIED:
+                            $hint .= $token[1];
+                        break;
+                    case T_WHITESPACE:
+                    case T_COMMENT:
+                    case T_DOC_COMMENT:
+                        // ignore whitespace and comments
+                        break;
+                    default:
+                        if ($hint !== '') {
+                            $this->addHint($hint);
+                            $hint = '';
+                        }
+                        break;
+                }
             }
 
         } while ($index < $count);
