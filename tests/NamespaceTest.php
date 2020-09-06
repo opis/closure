@@ -25,8 +25,7 @@ final class NamespaceTest extends \PHPUnit\Framework\TestCase
 
     protected function s($closure)
     {
-        if($closure instanceof Closure)
-        {
+        if ($closure instanceof Closure) {
             $closure = new SerializableClosure($closure);
         }
 
