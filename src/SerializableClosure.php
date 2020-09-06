@@ -662,7 +662,7 @@ class SerializableClosure implements Serializable
                         continue;
                     }
                     $property->setAccessible(true);
-                    if (PHP_VERSION >= 7.4 && !$property->isInitialized($data)) {
+                    if (PHP_VERSION >= 7.4 && !$property->isInitialized($instance)) {
                         continue;
                     }
                     $value = $property->getValue($instance);
