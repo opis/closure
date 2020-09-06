@@ -521,6 +521,10 @@ class ReflectionClosure extends ReflectionFunction
                                     }
                                     if(isset($functions[$id_start_ci])){
                                         $id_start = $functions[$id_start_ci];
+                                    } elseif ($nsf !== '\\' && function_exists($nsf . '\\' . $id_start)) {
+                                        $id_start = $nsf . '\\' . $id_start;
+                                        // Cache it to functions array
+                                        $functions[$id_start_ci] = $id_start;
                                     }
                                 }
                             }
