@@ -17,6 +17,7 @@ final class NamespaceUnqualifiedTest extends \PHPUnit\Framework\TestCase
     protected function c(Closure $closure)
     {
         $r = new ReflectionClosure($closure);
+
         return $r->getCode();
     }
 }
