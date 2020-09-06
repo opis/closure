@@ -143,4 +143,42 @@ class ReflectionClosure5Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals(40, $c3(4));
         $this->assertEquals(48, $c3(4, 6));
     }
+
+    public function testTypedProperties()
+    {
+        $user = new User();
+        $s = $this->s(function () use ($user) {
+            return true;
+        });
+        $this->assertTrue($s());
+
+        $user = new User();
+        $product = new Product();
+        $product->name = "PC";
+        $user->setProduct($product);
+
+        $u = $this->s(function () use ($user) {
+            return $user->getProduct()->name;
+        });
+
+        $this->assertEquals('PC', $u());
+    }
+}
+
+class Product {
+    public string $name;
+}
+
+class User {
+    protected Product $product;
+
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(Product $product): void
+    {
+        $this->product = $product;
+    }
 }
