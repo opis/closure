@@ -1,5 +1,10 @@
 CHANGELOG
 ---------
+### v3.5.7, 2020.09.06
+
+- Fixed issue [#76](https://github.com/opis/closure/issues/76).
+- Fixed issue [#78](https://github.com/opis/closure/issues/78).
+
 ### v3.5.6, 2020.08.11
 
 - Fixed issue [#70](https://github.com/opis/closure/issues/70)
