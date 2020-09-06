@@ -14,6 +14,7 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
     protected function c(Closure $closure)
     {
         $r = new ReflectionClosure($closure);
+
         return $r->getCode();
     }
 
@@ -26,17 +27,17 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 
     public function testUnionTypes()
     {
-        $f1 = fn() : string|int|false|Bar|null => 1;
-        $e1 = 'fn() : string|int|false|\Opis\Closure\Test\Bar|null => 1';
+        $f1 = fn(): string|int|false|Bar|null => 1;
+        $e1 = 'fn(): string|int|false|\Opis\Closure\Test\Bar|null => 1';
 
-        $f2 = fn() : \Foo|\Bar => 1;
-        $e2 = 'fn() : \Foo|\Bar => 1';
+        $f2 = fn(): \Foo|\Bar => 1;
+        $e2 = 'fn(): \Foo|\Bar => 1';
 
-        $f3 = fn() : int|false => false;
-        $e3 = 'fn() : int|false => false';
+        $f3 = fn(): int|false => false;
+        $e3 = 'fn(): int|false => false';
 
-        $f4 = function () : null | MyClass | ClassAlias | Relative\Ns\ClassName | \Absolute\Ns\ClassName {return null;};
-        $e4 = 'function () : null | \Opis\Closure\Test\MyClass | \Some\ClassName | \Opis\Closure\Test\Relative\Ns\ClassName | \Absolute\Ns\ClassName {return null;}';
+        $f4 = function (): null|MyClass|ClassAlias|Relative\Ns\ClassName|\Absolute\Ns\ClassName { return null; };
+        $e4 = 'function (): null|\Opis\Closure\Test\MyClass|\Some\ClassName \Opis\Closure\Test\Relative\Ns\ClassName|\Absolute\Ns\ClassName { return null; }';
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
@@ -48,16 +49,16 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 
     public function testMixedType()
     {
-        $f1 = function () : mixed { return 42;};
-        $e1 = 'function () : mixed { return 42;}';
+        $f1 = function (): mixed { return 42; };
+        $e1 = 'function (): mixed { return 42; }';
 
         $this->assertEquals($e1, $this->c($f1));
     }
 
     public function testNullsafeOperator()
     {
-        $f1 = function () { $obj = new \stdClass(); return $obj?->invalid();};
-        $e1 = 'function () { $obj = new \stdClass(); return $obj?->invalid();}';
+        $f1 = function () { $obj = new \stdClass(); return $obj?->invalid(); };
+        $e1 = 'function () { $obj = new \stdClass(); return $obj?->invalid(); }';
 
         $this->assertEquals($e1, $this->c($f1));
     }
@@ -78,8 +79,8 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals('Marco Deleu', $unserialized(
             lastName: 'Deleu',
-            firstName: 'Marco')
-        );
+            firstName: 'Marco'
+        ));
     }
 
     public function testConstructorPropertyPromotion()
@@ -99,10 +100,10 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
 class PropertyPromotion
 {
     public function __construct(
-                public string $public,
-                protected string $protected,
-                private string $private,
-            ){}
+        public string $public,
+        protected string $protected,
+        private string $private,
+    ) {}
 
     public function getProtected(): string
     {
