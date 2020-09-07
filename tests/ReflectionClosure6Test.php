@@ -37,7 +37,7 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
         $e3 = 'fn(): int|false => false';
 
         $f4 = function (): null|MyClass|ClassAlias|Relative\Ns\ClassName|\Absolute\Ns\ClassName { return null; };
-        $e4 = 'function (): null|\Opis\Closure\Test\MyClass|\Some\ClassName \Opis\Closure\Test\Relative\Ns\ClassName|\Absolute\Ns\ClassName { return null; }';
+        $e4 = 'function (): null|\Opis\Closure\Test\MyClass|\Some\ClassName|\Opis\Closure\Test\Relative\Ns\ClassName|\Absolute\Ns\ClassName { return null; }';
 
         $this->assertEquals($e1, $this->c($f1));
         $this->assertEquals($e2, $this->c($f2));
