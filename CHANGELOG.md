@@ -1,5 +1,10 @@
 CHANGELOG
 ---------
+
+### v3.6.0, 2020.10.12
+
+- Initial PHP 8 Support [#67](https://github.com/opis/closure/issues/67).
+
 ### v3.5.7, 2020.09.06
 
 - Fixed issue [#76](https://github.com/opis/closure/issues/76).
