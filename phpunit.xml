@@ -1,4 +1,4 @@
-<phpunit bootstrap="./vendor/autoload.php">
+<phpunit bootstrap="./vendor/autoload.php" verbose="true">
     <testsuites>
         <testsuite name="Main">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ClosureTest.php</file>
@@ -11,6 +11,12 @@
         </testsuite>
         <testsuite name="Signed">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SignedClosureTest.php</file>
+        </testsuite>
+        <testsuite name="Namespace">
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceTest.php</file>
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceUnqualifiedTest.php</file>
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceFullyQualifiedTest.php</file>
+            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespacePartiallyQualifiedTest.php</file>
         </testsuite>
         <testsuite name="ReflectionClosure">
             <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>
@@ -25,7 +31,11 @@
             <file phpVersion="7.2.0" phpVersionOperator=">=">./tests/ReflectionClosure4Test.php</file>
         </testsuite>
         <testsuite name="ReflectionClosure5">
-            <file phpVersion="7.4" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
+            <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
+            <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/NamespaceGroupTest.php</file>
+        </testsuite>
+        <testsuite name="ReflectionClosure6">
+            <file phpVersion="8.0.0-dev" phpVersionOperator=">=">./tests/ReflectionClosure6Test.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

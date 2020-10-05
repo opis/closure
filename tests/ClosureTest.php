@@ -230,6 +230,7 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
             $n = function ($b) {
                 return !$b;
             };
+
             $ns = unserialize(serialize(new SerializableClosure($n)));
 
             return $ns(false);
