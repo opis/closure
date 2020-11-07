@@ -94,7 +94,7 @@ class SerializableClosure implements Serializable
     public function getReflector()
     {
         if ($this->reflector === null) {
-            $this->reflector = new ReflectionClosure($this->closure, $this->code);
+            $this->reflector = new ReflectionClosure($this->closure);
             $this->code = null;
         }
 

@@ -230,6 +230,14 @@ class SerializeTest extends \PHPUnit\Framework\TestCase
 
         $this->assertFalse((new ReflectionClosure($f))->isShortClosure());
     }
+
+    public function testIfThisIsCorrectlySerialized() {
+        $o = new Clone1();
+        $f = $o->create();
+        $f = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
+        $f = \Opis\Closure\unserialize(\Opis\Closure\serialize($f));
+        $this->assertEquals(1, $f());
+    }
 }
 
 class Abc
@@ -264,6 +272,12 @@ class Clone1
     public function value()
     {
         return $this->a;
+    }
+
+    public function create() {
+        return function () {
+            return $this->a;
+        };
     }
 }
 
