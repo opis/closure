@@ -77,7 +77,10 @@ final class HeaderFile
     public static function preload(array $defs = [], ?string $file = null): FFI
     {
         $tmp = tempnam(sys_get_temp_dir(), 'opis_closure_ffi_');
-        file_put_contents($tmp, self::content($defs, $file));
+
+        if (!file_put_contents($tmp, self::content($defs, $file))) {
+            throw new RuntimeException("Cannot write header file: {$tmp}");
+        }
 
         try {
             return FFI::load($tmp);

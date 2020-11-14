@@ -17,9 +17,6 @@
 
 namespace Opis\Closure;
 
-defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -101);
-defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -102);
-
 /**
  * @internal
  */

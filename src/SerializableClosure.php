@@ -26,17 +26,30 @@ class SerializableClosure
      */
     public static function preload(): void
     {
+        // Preload FFI
         HeaderFile::preload();
 
-        array_map(static fn (string $file) => opcache_compile_file(__DIR__ . '/' . $file), [
-            'BaseClosure.php',
-            'ClosureStream.php',
-            'CodeWrapper.php',
-            'ReflectionClosure.php',
-            'ReflectionFunctionInfo.php',
-            'SerializableClosureHandler.php',
-            'TokenizedFileInfo.php',
-        ]);
+        // Ignore the following files to avoid 'Can't preload already declared class ...' warnings
+        $ignore = [
+            'HeaderFile.php', // header file used above
+            'SerializableClosure.php', // this file
+        ];
+
+        // Compile files
+        foreach ((new \DirectoryIterator(__DIR__)) as $fileInfo) {
+            if ($fileInfo->isDot() || !$fileInfo->isFile() ||
+                $fileInfo->getExtension() !== 'php' || in_array($fileInfo->getFilename(), $ignore)) {
+                continue;
+            }
+
+            $script = $fileInfo->getRealPath();
+
+            if (!$script || opcache_is_script_cached($script)) {
+                continue;
+            }
+
+            opcache_compile_file($script);
+        }
     }
 
     /**
@@ -50,6 +63,14 @@ class SerializableClosure
         }
         self::$init = true;
 
+        self::defines();
+
         SerializableClosureHandler::init(HeaderFile::load(), $options);
+    }
+
+    protected static function defines(): void
+    {
+        defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -101);
+        defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -102);
     }
 }
