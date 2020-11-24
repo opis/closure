@@ -352,6 +352,28 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($ro->getClosureScopeClass());
     }
 
+    public function testClosureUseSimpleArraySyntax()
+    {
+        $a = ["foo" => "bar"];
+        $c = function() use($a)
+        {
+            return "$a[foo]";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "$a[foo]");
+
+
+        $a = ["name" => "Abderrazzak OXA", "age" => 18];
+        $c = function() use($a)
+        {
+            $result = "My Name is $a[name]";
+            $result .= ", I am $a[age] years old.";
+            return $result;
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "My Name is $a[name], I am $a[age] years old.");
+    }
+
 }
 
 class ObjnObj implements Serializable {
