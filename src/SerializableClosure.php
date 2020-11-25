@@ -17,6 +17,8 @@
 
 namespace Opis\Closure;
 
+use DirectoryIterator;
+
 class SerializableClosure
 {
     private static bool $init = false;
@@ -36,7 +38,7 @@ class SerializableClosure
         ];
 
         // Compile files
-        foreach ((new \DirectoryIterator(__DIR__)) as $fileInfo) {
+        foreach ((new DirectoryIterator(__DIR__)) as $fileInfo) {
             if ($fileInfo->isDot() || !$fileInfo->isFile() ||
                 $fileInfo->getExtension() !== 'php' || in_array($fileInfo->getFilename(), $ignore)) {
                 continue;
@@ -70,7 +72,17 @@ class SerializableClosure
 
     protected static function defines(): void
     {
-        defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -101);
-        defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -102);
+        $const = [
+            'T_NAME_FULLY_QUALIFIED',
+            'T_NAME_QUALIFIED',
+            'T_NAME_RELATIVE',
+            'T_ATTRIBUTE',
+        ];
+
+        foreach ($const as $key => $value) {
+            if (!defined($value)) {
+                define($value, -(100 + $key));
+            }
+        }
     }
 }

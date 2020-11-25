@@ -70,20 +70,18 @@ final class ReflectionFunctionInfo
         $this->aliases = $aliases;
     }
 
+    /**
+     * @return array|null
+     */
     private function process(): ?array
     {
-        $this->functionInit();
-        if ($this->index === -1) {
+        $this->index = $this->functionIndex();
+
+        if ($this->index < 0) {
             return null;
         }
 
-        $code = $this->code() . ";";
-
-        if ($this->isStatic) {
-            $code = 'return static ' . $code;
-        } else {
-            $code = 'return ' . $code;
-        }
+        $code = "return " . $this->sourceCode() . ";";
 
         $code = $this->imports() . $code;
 
@@ -96,25 +94,25 @@ final class ReflectionFunctionInfo
     }
 
     /**
-     * Initialize index
+     * @return int
      */
-    private function functionInit(): void
+    private function functionIndex(): int
     {
         $startLine = $this->reflector->getStartLine();
-
-        $index = -1;
-
         $tokens = $this->tokens;
+
+        $f_index = -1; // Function index (function|fn)
 
         foreach ($tokens as $key => $token) {
             if (is_array($token) && $token[2] >= $startLine) {
-                $index = $key;
+                $f_index = $key;
                 break;
             }
         }
 
-        if ($index === -1) {
-            return;
+        if ($f_index === -1) {
+            // Function not found
+            return -1;
         }
 
         // Search for T_FUNCTION / T_FN
@@ -123,94 +121,101 @@ final class ReflectionFunctionInfo
         $endLine = $this->reflector->getEndLine();
 
         do {
-            switch ($tokens[$index][0]) {
+            switch ($tokens[$f_index][0]) {
                 case T_FN:
-                    $this->isShort = true;
-                    $this->index = $index;
-                    break 2;
+                    return $f_index;
                 case T_FUNCTION:
-                    for ($i = $index + 1; $index < $count; $i++) {
+                    for ($i = $f_index + 1; $f_index < $count; $i++) {
                         switch ($tokens[$i][0]) {
                             case '(':
-                                $this->index = $index;
-                                break 4;
+                                return $f_index;
                             case T_WHITESPACE:
                             case T_COMMENT:
                             case T_DOC_COMMENT:
                             case '&':
-                                continue 2;
+                                continue 2; // for
                         }
-
-                        $index = $i;
-                    }
-                    break;
-                default:
-                    if (is_array($tokens[$index]) && $tokens[$index][2] > $endLine) {
-                        break 2;
+                        // Continue from here
+                        $f_index = $i - 1;
                     }
                     break;
             }
-        } while (++$index < $count);
-
-        while (--$index >= 0) {
-            switch ($tokens[$index][0]) {
-                case T_WHITESPACE:
-                case T_COMMENT:
-                case T_DOC_COMMENT:
-                    continue 2;
-                case T_STATIC:
-                    $this->isStatic = true;
-                    return;
+            if (is_array($tokens[$f_index]) && $tokens[$f_index][2] > $endLine) {
+                return -1;
             }
+        } while (++$f_index < $count);
 
-            return;
-        }
-    }
-
-    /**
-     * @returns string
-     */
-    private function imports(): string
-    {
-        $code = "<?php\n";
-
-        $ns = $this->reflector->getNamespaceName();
-
-        if ($ns) {
-            $code .= "namespace {$ns};\n";
-        }
-
-        if (!$this->aliases || !$this->hints) {
-            return $code;
-        }
-
-
-        $code .= self::formatImports($this->aliases, $this->hints, $ns);
-
-
-        return $code;
+        return -1;
     }
 
     /**
      * @return string
      */
-    private function code(): string
+    private function sourceCode(): string
     {
         $tokens = $this->tokens;
         $count = $this->count;
         $index = &$this->index;
 
-        $code = '';
+        // Check if short
+        $this->isShort = $tokens[$index][0] === T_FN;
+
+        // Check for attributes and static keyword
+        $start_index = $index;
+
+        $balance = 0;
+        while (--$start_index >= 0) {
+            if ($balance === 0) {
+                switch ($tokens[$start_index][0]) {
+                    /** @noinspection PhpMissingBreakStatementInspection */
+                    case T_STATIC:
+                        // Mark as static
+                        $this->isStatic = true;
+                    // Fall
+                    case T_WHITESPACE:
+                    case T_COMMENT:
+                    case T_DOC_COMMENT:
+                        continue 2;
+                    case ']':
+                        if (T_ATTRIBUTE > 0) {
+                            $balance--;
+                            continue 2;
+                        }
+                }
+            } else {
+                switch ($tokens[$start_index][0]) {
+                    case ']':
+                        $balance--;
+                        continue 2;
+                    case T_ATTRIBUTE:
+                    case '[':
+                        $balance++;
+                        continue 2;
+                    default:
+                        continue 2;
+                }
+            }
+
+            $start_index++;
+            break;
+        }
+
+        if ($balance === 0) {
+            // Skip whitespace from start
+            while ($tokens[$start_index][0] === T_WHITESPACE) $start_index++;
+            $code = $this->between($start_index, $index);
+        } else {
+            $code = $tokens[$index][1];
+        }
 
         // Function start
-
         do {
-            $token = $tokens[$index];
+            $token = $tokens[++$index];
             if ($token === '(') {
                 break;
             }
             $code .= is_array($token) ? $token[1] : $token;
-        } while (++$index < $count);
+        } while ($index < $count);
 
         // Function args
         if ($this->reflector->getNumberOfParameters() > 0) {
@@ -294,6 +299,30 @@ final class ReflectionFunctionInfo
     }
 
     /**
+     * @returns string
+     */
+    private function imports(): string
+    {
+        $code = "<?php\n";
+
+        $ns = $this->reflector->getNamespaceName();
+
+        if ($ns) {
+            $code .= "namespace {$ns};\n";
+        }
+
+        if (!$this->aliases || !$this->hints) {
+            return $code;
+        }
+
+
+        $code .= self::formatImports($this->aliases, $this->hints, $ns);
+
+
+        return $code;
+    }
+
+    /**
      * @return string
      */
     private function balanceExpression(): string
@@ -338,6 +367,7 @@ final class ReflectionFunctionInfo
                     }
                     $open_curly--;
                     break;
+                case T_ATTRIBUTE:
                 case '[':
                     $open_square++;
                     break;
@@ -404,18 +434,6 @@ final class ReflectionFunctionInfo
 
         do {
             $token = $tokens[$index++];
-
-            /*
-            if (is_array($token)) {
-                if ($token[0] === T_CLASS_CURRENT_C) { // custom constant
-                    $code .= $this->currentClass;
-                } else {
-                    $code .= $token[1];
-                }
-            } else {
-                $code .= $token;
-            }*/
-
             $code .= is_array($token) ? $token[1] : $token;
 
             if ($is_array_start ? in_array($token[0], $start, true) : $token[0] === $start) {
@@ -449,6 +467,52 @@ final class ReflectionFunctionInfo
             }
 
         } while ($index < $count);
+
+        if ($use_hints && $hint !== '') {
+            $this->addHint($hint);
+        }
+
+        return $code;
+    }
+
+    /**
+     * @param int $index
+     * @param int $end
+     * @return string
+     */
+    private function between(int $index, int $end): string
+    {
+        $hint = '';
+        $code = '';
+        $tokens = $this->tokens;
+        $use_hints = $this->aliases !== null;
+
+        while ($index <= $end) {
+            $token = $tokens[$index++];
+            $code .= is_array($token) ? $token[1] : $token;
+
+            if ($use_hints) {
+                switch ($token[0]) {
+                    case T_STRING:
+                    case T_NS_SEPARATOR:
+                    case T_NAME_QUALIFIED:
+                    case T_NAME_FULLY_QUALIFIED:
+                        $hint .= $token[1];
+                        break;
+                    case T_WHITESPACE:
+                    case T_COMMENT:
+                    case T_DOC_COMMENT:
+                        // ignore whitespace and comments
+                        break;
+                    default:
+                        if ($hint !== '') {
+                            $this->addHint($hint);
+                            $hint = '';
+                        }
+                        break;
+                }
+            }
+        }
 
         if ($use_hints && $hint !== '') {
             $this->addHint($hint);

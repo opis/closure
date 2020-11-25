@@ -27,6 +27,7 @@ class BaseClosure
      */
     final public function __serialize()
     {
+        /** @noinspection PhpParamsInspection */
         return SerializableClosureHandler::instance()->serializeClosure($this);
     }
 
@@ -35,6 +36,7 @@ class BaseClosure
      */
     final public function __unserialize($data)
     {
+        /** @noinspection PhpParamsInspection */
         SerializableClosureHandler::instance()->unserializeClosure($this, $data);
     }
 }

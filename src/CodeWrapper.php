@@ -61,26 +61,17 @@ final class CodeWrapper
         return $this->value;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function __serialize(): array
     {
         return ['value' => $this->value];
     }
 
-    /**
-     * @inheritDoc
-     */
     public function __unserialize(array $data): void
     {
         $this->value = $data['value'];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->value;
     }

@@ -2,6 +2,7 @@
     <testsuites>
         <testsuite name="SerializableClosure">
             <directory suffix="Test.php">./tests</directory>
+            <directory suffix="Test8.php" phpVersion="8.0" phpVersionOperator=">=">./tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>
