@@ -29,16 +29,17 @@ use SomeClass as ClassAlias;
 class SerializeTest8 extends TestCase
 {
     /**
+     * @param string $message
      * @param Closure $closure
      * @param string $code
      * @dataProvider closureProvider
      */
-    public function testAttributes(Closure $closure, string $code)
+    public function testSourceCode(string $message, Closure $closure, string $code)
     {
         $code = $this->lineEndings("<?php" . PHP_EOL . $code);
         $source = $this->lineEndings((new ReflectionClosure($closure))->getCode());
 
-        $this->assertEquals($code, $source);
+        $this->assertEquals($code, $source, $message);
     }
 
     private function lineEndings(string $data): string
@@ -50,6 +51,17 @@ class SerializeTest8 extends TestCase
     {
         return [
             [
+                'Test union types',
+                static fn(int | string $a, ClassAlias | AttrAlias | null $b): int | false | null => false,
+                <<<'PHP'
+namespace Opis\Closure\Test;
+use SomeClass as ClassAlias,
+    MyAttr as AttrAlias;
+return static fn(int | string $a, ClassAlias | AttrAlias | null $b): int | false | null => false;
+PHP,
+            ],
+            [
+                'Test PHP attributes',
                 #[MyAttr] /*comment*/ #[AttrAlias(1, ClassAlias::class, namespace\Other::class)] static fn(#[MyAttr('param')] int $i) => 1,
                 <<<'PHP'
 namespace Opis\Closure\Test;
