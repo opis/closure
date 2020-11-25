@@ -70,6 +70,30 @@ use MyAttr as AttrAlias,
 return #[MyAttr] /*comment*/ #[AttrAlias(1, ClassAlias::class, namespace\Other::class)] static fn(#[MyAttr('param')] int $i) => 1;
 PHP,
             ],
+            [
+                'Test ctor',
+static function() {
+    return new #[MyAttr] class(1, null) {
+        #[AttrAlias(1, 2)]
+        public function __construct(public int | string $a, private ?ClassAlias $b, )
+        {
+        }
+    };
+},
+                <<<'PHP'
+namespace Opis\Closure\Test;
+use MyAttr as AttrAlias,
+    SomeClass as ClassAlias;
+return static function() {
+    return new #[MyAttr] class(1, null) {
+        #[AttrAlias(1, 2)]
+        public function __construct(public int | string $a, private ?ClassAlias $b, )
+        {
+        }
+    };
+};
+PHP,
+            ],
         ];
     }
 }
