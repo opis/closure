@@ -35,7 +35,15 @@ class SerializeTest8 extends TestCase
      */
     public function testAttributes(Closure $closure, string $code)
     {
-        $this->assertEquals("<?php\n" . $code, (new ReflectionClosure($closure))->getCode());
+        $code = $this->lineEndings("<?php" . PHP_EOL . $code);
+        $source = $this->lineEndings((new ReflectionClosure($closure))->getCode());
+
+        $this->assertEquals($code, $source);
+    }
+
+    private function lineEndings(string $data): string
+    {
+        return str_replace("\r\n", "\n", $data);
     }
 
     public function closureProvider(): array
