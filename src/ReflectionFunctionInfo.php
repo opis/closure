@@ -579,6 +579,8 @@ final class ReflectionFunctionInfo
             }
         }
 
+        sort($items);
+
         return $prefix . implode(",\n" . str_repeat(' ', strlen($prefix)), $items) . ";\n";
     }
 
@@ -611,10 +613,6 @@ final class ReflectionFunctionInfo
                 if (strcasecmp($ns . '\\' . $hint, $values[$hint]) === 0) {
                     // Skip redundant import
                     continue;
-                }
-
-                if (!isset($use[$type])) {
-                    $use[$type] = [];
                 }
 
                 $use[$type][$hintValue] = $values[$hint];

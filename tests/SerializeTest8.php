@@ -56,8 +56,8 @@ class SerializeTest8 extends TestCase
                 static fn(int | string $a, ClassAlias | AttrAlias | null $b): int | false | null => false,
                 <<<'PHP'
 namespace Opis\Closure\Test;
-use SomeClass as ClassAlias,
-    MyAttr as AttrAlias;
+use MyAttr as AttrAlias,
+    SomeClass as ClassAlias;
 return static fn(int | string $a, ClassAlias | AttrAlias | null $b): int | false | null => false;
 PHP,
             ],
