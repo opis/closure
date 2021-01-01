@@ -527,7 +527,8 @@ final class ReflectionFunctionInfo
      */
     private function addHint(string $hint): bool
     {
-        if (!$hint || strpos($hint, '\\') !== false) {
+        if (!$hint || $hint[0] == '\\') {
+            // Ignore empty or absolute
             return false;
         }
 
@@ -565,16 +566,17 @@ final class ReflectionFunctionInfo
      */
     private static function formatUse(string $prefix, array $items): string
     {
-        foreach ($items as $key => $value) {
-            if (strcasecmp('\\' . $value[1], substr($value[0], - strlen($value[1]) - 1)) === 0) {
-                $items[$key] = trim($value[0], '\\');
-            } else {
-                $items[$key] = trim($value[0], '\\') . ' as ' . $value[1];
-            }
-        }
-
         if (!$items) {
             return '';
+        }
+
+        foreach ($items as $alias => $full) {
+            if (strcasecmp('\\' . $alias, substr($full, 0 - strlen($alias) - 1)) === 0) {
+                // Same name as alias, do not use as
+                $items[$alias] = trim($full, '\\');
+            } else {
+                $items[$alias] = trim($full, '\\') . ' as ' . $alias;
+            }
         }
 
         return $prefix . implode(",\n" . str_repeat(' ', strlen($prefix)), $items) . ";\n";
@@ -595,6 +597,12 @@ final class ReflectionFunctionInfo
         $use = [];
 
         foreach ($hints as $hint => $hintValue) {
+            if (($pos = strpos($hint, '\\')) !== false) {
+                // Relative
+                $hint = substr($hint, 0, $pos);
+                $hintValue = substr($hintValue, 0, $pos);
+            }
+
             foreach ($alias as $type => $values) {
                 if (!isset($values[$hint])) {
                     continue;
@@ -609,7 +617,7 @@ final class ReflectionFunctionInfo
                     $use[$type] = [];
                 }
 
-                $use[$type][] = [$values[$hint], $hintValue];
+                $use[$type][$hintValue] = $values[$hint];
             }
         }
 

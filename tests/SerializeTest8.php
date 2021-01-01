@@ -25,6 +25,7 @@ use PHPUnit\Framework\TestCase;
 
 use MyAttr as AttrAlias;
 use SomeClass as ClassAlias;
+use Opis\Closure as OpisClosure;
 
 class SerializeTest8 extends TestCase
 {
@@ -92,6 +93,15 @@ return static function() {
         }
     };
 };
+PHP,
+            ],
+            [
+                'Test ns alias',
+                static fn(OpisClosure\A $a, OpisClosure\B $b, Other\C $c): int => 0,
+                <<<'PHP'
+namespace Opis\Closure\Test;
+use Opis\Closure as OpisClosure;
+return static fn(OpisClosure\A $a, OpisClosure\B $b, Other\C $c): int => 0;
 PHP,
             ],
         ];
