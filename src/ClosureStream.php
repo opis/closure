@@ -120,7 +120,7 @@ final class ClosureStream
         return $this->pointer;
     }
 
-    public static function register()
+    public static function register(): void
     {
         if (!self::$isRegistered) {
             self::$isRegistered = stream_wrapper_register(self::STREAM_PROTO, __CLASS__);

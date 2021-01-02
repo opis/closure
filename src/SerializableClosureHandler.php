@@ -204,6 +204,35 @@ final class SerializableClosureHandler
     }
 
     /**
+     * @param string $code
+     * @param object|null $self
+     * @param string|null $scope
+     * @param array|null $use
+     * @return Closure
+     */
+    public function createClosure(string $code, ?object $self = null, ?string $scope = null,
+                                  ?array $use = null): Closure
+    {
+        if ($use && $this->resolveUseVariables) {
+            $use = ($this->resolveUseVariables)($use);
+        }
+
+        $code = new CodeWrapper( "<?php\nreturn {$code};");
+
+        $closure = ClosureStream::eval($code, $use);
+
+        if ($self) {
+            return $closure->bindTo($self, $scope ?? 'static');
+        }
+
+        if ($scope) {
+            return $closure->bindTo(null, $scope);
+        }
+
+        return $closure;
+    }
+
+    /**
      * ZEND_CALL_FRAME_SLOT
      * @return int
      */
