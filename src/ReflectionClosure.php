@@ -45,14 +45,14 @@ final class ReflectionClosure extends ReflectionFunction
     private bool $isStatic = false;
 
     /**
-     * @var bool True if there is a reference to $this
+     * @var bool True if there is a reference to $this or parent
      */
-    private bool $thisRef = false;
+    private bool $isBindingReq = false;
 
     /**
      * @var bool True if there is a reference to static, self or parent
      */
-    private bool $scopeRef = false;
+    private bool $isScopeReq = false;
 
     /**
      * @var string[]|null
@@ -86,8 +86,8 @@ final class ReflectionClosure extends ReflectionFunction
             $this->isShort = $info['short'] ?? false;
             $this->isStatic = $info['static'] ?? false;
             $this->use = $info['use'] ?? null;
-            $this->thisRef = $info['this'] ?? false;
-            $this->scopeRef = $info['scope'] ?? false;
+            $this->isBindingReq = $info['this'] ?? false;
+            $this->isScopeReq = $info['scope'] ?? false;
         }
 
         return $this;
@@ -101,6 +101,42 @@ final class ReflectionClosure extends ReflectionFunction
         $class = parent::getClosureScopeClass();
         // PHP sets the scope to Closure for some reason
         return !$class || $class->name === Closure::class ? null : $class;
+    }
+
+    /**
+     * Get the callable form
+     * @return callable|null
+     */
+    public function getCallableForm(): ?callable
+    {
+        if ($this->getShortName() === '{closure}') {
+            // not from callable
+            return null;
+        }
+
+        $name = $this->getName();
+
+        if ($this->getNamespaceName()) {
+            // User function
+            return $name;
+        }
+
+        if ($closure_this = $this->getClosureThis()) {
+            if (strcasecmp($name, '__invoke') === 0) {
+                // Invokable object
+                return $closure_this;
+            }
+            // Invokable method
+            return [$closure_this, $name];
+        }
+
+        if ($scope = $this->getClosureScopeClass()) {
+            // Static method
+            return $scope->getName() . '::' . $name;
+        }
+
+        // Global function
+        return $name;
     }
 
     /**
@@ -165,7 +201,7 @@ final class ReflectionClosure extends ReflectionFunction
      * Checks if the closure was created using the short form
      * @return bool
      */
-    public function isShort(): bool
+    public function isShortClosure(): bool
     {
         if ($this->isInternal()) {
             return false;
@@ -175,27 +211,27 @@ final class ReflectionClosure extends ReflectionFunction
     }
 
     /**
-     * Checks if the closure uses $this
+     * Checks if the closure is using: $this or parent
      * @return bool
      */
-    public function isUsingThis(): bool
+    public function isBindingRequired(): bool
     {
         if ($this->isInternal()) {
             return false;
         }
-        return $this->init()->thisRef;
+        return $this->init()->isBindingReq;
     }
 
     /**
-     * Checks if the closure is using scope: static, self, parent
+     * Checks if the closure is using: static, self or parent
      * @return bool
      */
-    public function isUsingScope(): bool
+    public function isScopeRequired(): bool
     {
         if ($this->isInternal()) {
             return false;
         }
-        return $this->init()->scopeRef;
+        return $this->init()->isScopeReq;
     }
 
     /**
@@ -218,7 +254,7 @@ final class ReflectionClosure extends ReflectionFunction
     }
 
     /**
-     * @return array|null
+     * @return array
      */
     public function getUseVariableNames(): array
     {

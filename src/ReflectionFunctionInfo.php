@@ -683,7 +683,8 @@ final class ReflectionFunctionInfo
             if (strcasecmp($token[1], 'self') === 0) {
                 $check = true;
             } elseif (strcasecmp($token[1], 'parent') === 0) {
-                $check = $checkThis = $isParent = true;
+                $check = $isParent = true;
+                $checkThis = !$this->isStatic;
             }
         }
 

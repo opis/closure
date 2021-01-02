@@ -97,13 +97,8 @@ final class SerializableClosureHandler
     {
         $reflector = new ReflectionClosure($closure);
 
-        if ($reflector->isFromCallable()) {
-            if ($reflector->isClassMethod()) {
-                $ret = [$reflector->getClosureThis() ?? $reflector->getClosureScopeClass()->name, $reflector->name];
-            } else {
-                $ret = $reflector->name;
-            }
-            return ['func' => $ret];
+        if (($callable = $reflector->getCallableForm()) !== null) {
+            return ['func' => $callable];
         }
 
         $ret = [];
@@ -114,8 +109,8 @@ final class SerializableClosureHandler
             $ret['use'] = $this->transformUseVariables ? ($this->transformUseVariables)($use) : $use;
         }
 
-        $object = (!$this->autoDetectThis || $reflector->isUsingThis()) ? $reflector->getClosureThis() : null;
-        $scope = (!$this->autoDetectScope || $reflector->isUsingScope()) ? $reflector->getClosureScopeClass() : null;
+        $object = (!$this->autoDetectThis || $reflector->isBindingRequired()) ? $reflector->getClosureThis() : null;
+        $scope = (!$this->autoDetectScope || $reflector->isScopeRequired()) ? $reflector->getClosureScopeClass() : null;
 
         if ($object && !$reflector->isStatic()) {
             $ret['this'] = $object;
@@ -123,7 +118,7 @@ final class SerializableClosureHandler
 
         // Do not add internal or anonymous scope
         if ($scope && !$scope->isInternal() && !$scope->isAnonymous()) {
-            $ret['scope'] = $scope->name;
+            $ret['scope'] = $scope->getName();
         }
 
         return $ret;

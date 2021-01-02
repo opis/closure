@@ -34,7 +34,7 @@ class ReflectionTest extends TestCase
     {
         $reflector = new ReflectionClosure($closure);
 
-        $this->assertEquals($short, $reflector->isShort());
+        $this->assertEquals($short, $reflector->isShortClosure());
         $this->assertEquals($static, $reflector->isStatic());
         $this->assertEquals($use, $reflector->getUseVariableNames());
     }
@@ -112,8 +112,8 @@ class ReflectionTest extends TestCase
     public function testAutoDetect(Closure $closure, bool $refThis, bool $refScope)
     {
         $reflector = new ReflectionClosure($closure);
-        $this->assertEquals($refThis, $reflector->isUsingThis());
-        $this->assertEquals($refScope, $reflector->isUsingScope());
+        $this->assertEquals($refThis, $reflector->isBindingRequired());
+        $this->assertEquals($refScope, $reflector->isScopeRequired());
     }
 
     public function autoDetectDataProvider(): array
