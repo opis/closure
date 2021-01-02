@@ -45,6 +45,16 @@ final class ReflectionClosure extends ReflectionFunction
     private bool $isStatic = false;
 
     /**
+     * @var bool True if there is a reference to $this
+     */
+    private bool $thisRef = false;
+
+    /**
+     * @var bool True if there is a reference to static, self or parent
+     */
+    private bool $scopeRef = false;
+
+    /**
      * @var string[]|null
      */
     private ?array $use = null;
@@ -76,6 +86,8 @@ final class ReflectionClosure extends ReflectionFunction
             $this->isShort = $info['short'] ?? false;
             $this->isStatic = $info['static'] ?? false;
             $this->use = $info['use'] ?? null;
+            $this->thisRef = $info['this'] ?? false;
+            $this->scopeRef = $info['scope'] ?? false;
         }
 
         return $this;
@@ -160,6 +172,30 @@ final class ReflectionClosure extends ReflectionFunction
         }
 
         return $this->init()->isShort;
+    }
+
+    /**
+     * Checks if the closure uses $this
+     * @return bool
+     */
+    public function isUsingThis(): bool
+    {
+        if ($this->isInternal()) {
+            return false;
+        }
+        return $this->init()->thisRef;
+    }
+
+    /**
+     * Checks if the closure is using scope: static, self, parent
+     * @return bool
+     */
+    public function isUsingScope(): bool
+    {
+        if ($this->isInternal()) {
+            return false;
+        }
+        return $this->init()->scopeRef;
     }
 
     /**

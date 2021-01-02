@@ -89,6 +89,12 @@ final class TokenizedFileInfo
     private array $collectedInfo = [];
 
     /**
+     * Anonymous bounds
+     * @var array
+     */
+    private array $anonymous = [];
+
+    /**
      * @var string|null #trackme prefix
      */
     private ?string $trackPrefix = null;
@@ -98,7 +104,7 @@ final class TokenizedFileInfo
      */
     private function __construct(string $file)
     {
-        $this->tokens = token_get_all(file_get_contents($file));
+        $this->tokens = token_get_all(file_get_contents($file), TOKEN_PARSE);
         $this->count = count($this->tokens);
 
         $this->fileName = var_export($file, true) ?? "''";
@@ -114,6 +120,7 @@ final class TokenizedFileInfo
         return [
             'tokens' => $this->tokens,
             'namespaces' => $this->collectedInfo,
+            'anonymous' => $this->anonymous,
         ];
     }
 
@@ -333,14 +340,16 @@ final class TokenizedFileInfo
         }
 
         foreach ($this->balanceCurly() as $token) {
-            if ($token[0] === T_CLASS) {
-                // We are already inside a class
-                // so it must be anonymous
-                // Skip T_CLASS
-                $this->index++;
-                $this->handleAnonymousClass();
-            } elseif (is_array($token)) {
-                $this->handleGenericToken();
+            if (is_array($token)) {
+                if ($token[0] === T_CLASS) {
+                    // We are already inside a class
+                    // so it must be anonymous
+                    // Skip T_CLASS
+                    $this->index++;
+                    $this->handleAnonymousClass();
+                } else {
+                    $this->handleGenericToken();
+                }
             }
         }
 
@@ -358,7 +367,6 @@ final class TokenizedFileInfo
         // Check if the constructor is invoked
         if ($this->tokens[$this->index] === '(') {
             $open = 1;
-            $clsMarkers = [];
 
             // Skip (
             $this->index++;
@@ -377,8 +385,10 @@ final class TokenizedFileInfo
                         break;
                     case T_CLASS:
                         // This can only be anonymous
-                        $clsMarkers[] = $this->openBrackets;
-                        $this->insideAnonymousClass++;
+                        // Skip T_CLASS
+                        $this->index++;
+                        $this->handleAnonymousClass();
+                        $this->index--;
                         break;
                     case T_CURLY_OPEN:
                     case T_DOLLAR_OPEN_CURLY_BRACES:
@@ -387,10 +397,6 @@ final class TokenizedFileInfo
                         break;
                     case '}':
                         $this->openBrackets--;
-                        if ($clsMarkers && end($clsMarkers) === $this->openBrackets) {
-                            array_pop($clsMarkers);
-                            $this->insideAnonymousClass--;
-                        }
                         break;
                     case T_COMMENT:
                         $this->handleTrackComment();
@@ -413,14 +419,26 @@ final class TokenizedFileInfo
         }
 
         // Now we can check body
+        $start = $this->index + 1;
 
         $this->insideAnonymousClass++;
         foreach ($this->balanceCurly() as $token) {
             if (is_array($token)) {
-                $this->handleGenericToken();
+                if ($token[0] === T_CLASS) {
+                    // We are already inside an anonymous class
+                    // Skip T_CLASS
+                    $this->index++;
+                    $this->handleAnonymousClass();
+                } else {
+                    $this->handleGenericToken();
+                }
             }
         }
         $this->insideAnonymousClass--;
+
+        if ($start !== $this->index - 1) {
+            $this->anonymous[] = [$start, $this->index - 1];
+        }
     }
 
     /**

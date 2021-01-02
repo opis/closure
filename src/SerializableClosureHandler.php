@@ -60,6 +60,9 @@ final class SerializableClosureHandler
      */
     private $resolveUseVariables = null;
 
+    private bool $autoDetectThis = true;
+    private bool $autoDetectScope = true;
+
     /**
      * @param FFI $lib
      * @param array|null $options
@@ -78,6 +81,8 @@ final class SerializableClosureHandler
         if ($options) {
             $this->transformUseVariables = $options['transformUseVariables'] ?? null;
             $this->resolveUseVariables = $options['resolveUseVariables'] ?? null;
+            $this->autoDetectThis = $options['autoDetectThis'] ?? true;
+            $this->autoDetectScope = $options['autoDetectScope'] ?? true;
         }
 
         // Apply patch
@@ -109,14 +114,15 @@ final class SerializableClosureHandler
             $ret['use'] = $this->transformUseVariables ? ($this->transformUseVariables)($use) : $use;
         }
 
-        $object = $reflector->getClosureThis();
-        $scope = $reflector->getClosureScopeClass();
+        $object = (!$this->autoDetectThis || $reflector->isUsingThis()) ? $reflector->getClosureThis() : null;
+        $scope = (!$this->autoDetectScope || $reflector->isUsingScope()) ? $reflector->getClosureScopeClass() : null;
 
-        if ($object) {
+        if ($object && !$reflector->isStatic()) {
             $ret['this'] = $object;
         }
 
-        if ($scope && !$scope->isInternal()) {
+        // Do not add internal or anonymous scope
+        if ($scope && !$scope->isInternal() && !$scope->isAnonymous()) {
             $ret['scope'] = $scope->name;
         }
 

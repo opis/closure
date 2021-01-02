@@ -56,18 +56,22 @@ final class ReflectionFunctionInfo
     private int $count;
     private int $index = -1;
     private ?array $aliases;
+    private array $anonymous;
 
     private bool $isShort = false;
     private bool $isStatic = false;
+    private bool $scopeRef = false;
+    private bool $thisRef = false;
     private array $use = [];
     private array $hints = [];
 
-    private function __construct(ReflectionFunction $reflector, array $tokens, ?array $aliases)
+    private function __construct(ReflectionFunction $reflector, array $tokens, ?array $aliases, array $anonymous)
     {
         $this->reflector = $reflector;
         $this->tokens = $tokens;
         $this->count = count($tokens);
         $this->aliases = $aliases;
+        $this->anonymous = $anonymous;
     }
 
     /**
@@ -81,6 +85,8 @@ final class ReflectionFunctionInfo
             return null;
         }
 
+        $this->filterAnonymous($this->index);
+
         $code = "return " . $this->sourceCode() . ";";
 
         $code = $this->imports() . $code;
@@ -90,7 +96,24 @@ final class ReflectionFunctionInfo
             'code' => new CodeWrapper($code),
             'short' => $this->isShort,
             'use' => $this->use ?: null,
+            'this' => $this->thisRef,
+            'scope' => $this->scopeRef,
         ];
+    }
+
+    /**
+     * @param int $index
+     */
+    private function filterAnonymous(int $index): void
+    {
+        if (!$this->anonymous) {
+            return;
+        }
+
+        $this->anonymous = array_filter(
+            $this->anonymous,
+            static fn (array $bound) => $bound[0] >= $index && $index <= $bound[1]
+        );
     }
 
     /**
@@ -219,7 +242,7 @@ final class ReflectionFunctionInfo
 
         // Function args
         if ($this->reflector->getNumberOfParameters() > 0) {
-            $code .= $this->balance( '(', ')');
+            $code .= $this->balance('(', ')');
         } else {
             // Skip empty args
             do {
@@ -290,7 +313,7 @@ final class ReflectionFunctionInfo
         }
 
         if ($this->isShort) {
-            $code .= $this->balanceExpression();
+            $code .= $this->balanceExpression($this->reflector->getEndLine());
         } else {
             $code .= $this->balance(['{', T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], '}', $has_ret_type ? 1 : 0);
         }
@@ -323,9 +346,10 @@ final class ReflectionFunctionInfo
     }
 
     /**
+     * @param int $end_line
      * @return string
      */
-    private function balanceExpression(): string
+    private function balanceExpression(int $end_line): string
     {
         $tokens = $this->tokens;
         $count = $this->count;
@@ -343,6 +367,12 @@ final class ReflectionFunctionInfo
         do {
             $add_hint = true;
             $token = $tokens[$index++];
+            $is_array = is_array($token);
+
+            if ($is_array && $token[2] > $end_line) {
+                // end line
+                break;
+            }
 
             switch ($token[0]) {
                 case T_STRING:
@@ -398,7 +428,14 @@ final class ReflectionFunctionInfo
                     break;
             }
 
-            $code .= is_array($token) ? $token[1] : $token;
+            if ($is_array) {
+                $this->checkSpecialToken($index - 1);
+                $code .= $token[1];
+            } else {
+                $code .= $token;
+            }
+
+            // $code .= $is_array ? $token[1] : $token;
 
             if ($use_hints && $add_hint && $hint !== '') {
                 $this->addHint($hint);
@@ -434,7 +471,8 @@ final class ReflectionFunctionInfo
 
         do {
             $token = $tokens[$index++];
-            $code .= is_array($token) ? $token[1] : $token;
+            $is_array = is_array($token);
+            $code .= $is_array ? $token[1] : $token;
 
             if ($is_array_start ? in_array($token[0], $start, true) : $token[0] === $start) {
                 $open++;
@@ -442,6 +480,8 @@ final class ReflectionFunctionInfo
                 if (--$open === 0) {
                     break;
                 }
+            } elseif ($is_array) {
+                $this->checkSpecialToken($index - 1);
             }
 
             if ($use_hints) {
@@ -450,7 +490,7 @@ final class ReflectionFunctionInfo
                     case T_NS_SEPARATOR:
                     case T_NAME_QUALIFIED:
                     case T_NAME_FULLY_QUALIFIED:
-                            $hint .= $token[1];
+                        $hint .= $token[1];
                         break;
                     case T_WHITESPACE:
                     case T_COMMENT:
@@ -541,6 +581,86 @@ final class ReflectionFunctionInfo
         $this->hints[$key] = $hint;
 
         return true;
+    }
+
+    private function checkSpecialToken(int $index): void
+    {
+        if ($this->thisRef && $this->scopeRef) {
+            // we already have these
+            return;
+        }
+
+        $check = false;
+        $checkThis = false;
+        $isStatic = false;
+        $isParent = false;
+
+        $token = $this->tokens[$index];
+
+        if ($token[0] === T_STATIC) {
+            $check = $isStatic = true;
+        } elseif ($token[0] === T_VARIABLE) {
+            $check = $checkThis = strcasecmp($token[1], '$this') === 0;
+        } elseif ($token[0] === T_STRING) {
+            if (strcasecmp($token[1], 'self') === 0) {
+                $check = true;
+            } elseif (strcasecmp($token[1], 'parent') === 0) {
+                $check = $checkThis = $isParent = true;
+            }
+        }
+
+        if (!$check) {
+            // nothing to check
+            return;
+        }
+
+        if ($checkThis) {
+            if ($this->thisRef) {
+                if ($isParent) {
+                    $this->scopeRef = true;
+                }
+                // already has $this
+                return;
+            }
+        } elseif ($this->scopeRef) {
+            // already has scope
+            return;
+        }
+
+        foreach ($this->anonymous as $anonymous) {
+            if ($index >= $anonymous[0] && $index <= $anonymous[1]) {
+                // this token is inside anonymous class body, ignore it
+                return;
+            }
+        }
+
+        if ($checkThis) {
+            $this->thisRef = true;
+            if ($isParent) {
+                $this->scopeRef = true;
+            }
+            return;
+        }
+
+        if ($isStatic) {
+            while (true) {
+                switch ($this->tokens[++$index][0]) {
+                    case T_WHITESPACE:
+                    case T_COMMENT:
+                    case T_DOC_COMMENT:
+                        continue 2;
+                    case T_VARIABLE:
+                        // static variable
+                        return;
+                }
+                break;
+            }
+        }
+
+        $this->scopeRef = true;
+        if ($isParent) {
+            $this->thisRef = true;
+        }
     }
 
     /**
@@ -689,6 +809,6 @@ final class ReflectionFunctionInfo
         }
 
         // Cache result and return info
-        return self::$globalInfoCache[$cacheKey] = (new self($reflector, $fileInfo['tokens'], $nsInfo))->process();
+        return self::$globalInfoCache[$cacheKey] = (new self($reflector, $fileInfo['tokens'], $nsInfo, $fileInfo['anonymous']))->process();
     }
 }

@@ -105,4 +105,113 @@ class ReflectionTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider autoDetectDataProvider
+     */
+    public function testAutoDetect(Closure $closure, bool $refThis, bool $refScope)
+    {
+        $reflector = new ReflectionClosure($closure);
+        $this->assertEquals($refThis, $reflector->isUsingThis());
+        $this->assertEquals($refScope, $reflector->isUsingScope());
+    }
+
+    public function autoDetectDataProvider(): array
+    {
+        return [
+            [
+                fn() => 123,
+                false,
+                false,
+            ],
+            [
+                fn() => self::class,
+                false,
+                true,
+            ],
+            [
+                fn() => static::class,
+                false,
+                true,
+            ],
+            [
+                fn() => parent::method(),
+                true,
+                true,
+            ],
+            [
+                function () {
+                    static $i = 0;
+                    return $this;
+                },
+                true,
+                false, // static variable
+            ],
+            [
+                function () {
+                    $i = static::class;
+                    return $this;
+                },
+                true,
+                true,
+            ],
+            [
+                function () {
+                    // anonymous class body should be ignored
+                    return new class {
+                        public static function cls() {
+                            return self::class;
+                        }
+                        public function me() {
+                            return $this;
+                        }
+                    };
+                },
+                false,
+                false,
+            ],
+            [
+                function () {
+                    return new class (self::class) {
+                        public static function cls() {
+                            return self::class;
+                        }
+                        public function me() {
+                            return $this;
+                        }
+                    };
+                },
+                false,
+                true, // self::class is passed as arg
+            ],
+            [
+                function () {
+                    return new class ($this) {
+                        public static function cls() {
+                            return self::class;
+                        }
+                        public function me() {
+                            return $this;
+                        }
+                    };
+                },
+                true, // $this is passed as arg
+                false,
+            ],
+            [
+                function () {
+                    return new class ($this, static::$var) {
+                        public static function cls() {
+                            return self::class;
+                        }
+                        public function me() {
+                            return $this;
+                        }
+                    };
+                },
+                true, // $this is passed as arg
+                true, // static::$var passed as arg
+            ],
+        ];
+    }
 }
