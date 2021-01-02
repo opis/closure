@@ -20,6 +20,8 @@ namespace Opis\Closure\Test;
 // Test only
 
 use Opis\Closure as OpisClosure;
+use const A1 as Y;
+use const A2 as Z;
 
 class SourceTest extends SourceCodeTestCase
 {
@@ -89,6 +91,33 @@ PHP,
                 <<<'PHP'
 namespace Opis\Closure\Test;
 return fn() => [1,];
+PHP,
+            ],
+            [
+                'Test const in ternary',
+function () {
+    return true ? Y : (a(Z: true ? 0 : 1) ? false : test(Z: 1));
+},
+                <<<'PHP'
+namespace Opis\Closure\Test;
+use const A1 as Y;
+return function () {
+    return true ? Y : (a(Z: true ? 0 : 1) ? false : test(Z: 1));
+};
+PHP,
+            ],
+            [
+                'Test const in ternary 2',
+function () {
+    return true ? Y : (a(Z: true ? Z : 1) ? false : test(Z: 1));
+},
+                <<<'PHP'
+namespace Opis\Closure\Test;
+use const A1 as Y,
+          A2 as Z;
+return function () {
+    return true ? Y : (a(Z: true ? Z : 1) ? false : test(Z: 1));
+};
 PHP,
             ],
         ];

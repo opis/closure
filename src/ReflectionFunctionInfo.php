@@ -366,7 +366,6 @@ final class ReflectionFunctionInfo
         $open_round = 0;
 
         $ternary_q = [];
-        $probably_label = false;
 
         do {
             $add_hint = true;
@@ -380,16 +379,9 @@ final class ReflectionFunctionInfo
 
             switch ($token[0]) {
                 case T_STRING:
-                    $probably_label = true;
-                    if ($use_hints) {
-                        $hint .= $token[1];
-                        $add_hint = false;
-                    }
-                    break;
                 case T_NS_SEPARATOR:
                 case T_NAME_QUALIFIED:
                 case T_NAME_FULLY_QUALIFIED:
-                    $probably_label = false;
                     if ($use_hints) {
                         $hint .= $token[1];
                         $add_hint = false;
@@ -399,11 +391,9 @@ final class ReflectionFunctionInfo
                 case T_CURLY_OPEN:
                 case T_DOLLAR_OPEN_CURLY_BRACES:
                 case '{':
-                    $probably_label = false;
                     $open_curly++;
                     break;
                 case '}':
-                    $probably_label = false;
                     if ($open_curly === 0) {
                         // Stop!
                         break 2;
@@ -412,11 +402,9 @@ final class ReflectionFunctionInfo
                     break;
                 case T_ATTRIBUTE:
                 case '[':
-                    $probably_label = false;
                     $open_square++;
                     break;
                 case ']':
-                    $probably_label = false;
                     $open_square--;
                     if ($open_square < 0) {
                         // Stop
@@ -424,44 +412,41 @@ final class ReflectionFunctionInfo
                     }
                     break;
                 case '(':
-                    $probably_label = false;
                     $open_round++;
                     break;
                 case ')':
-                    $probably_label = false;
                     $open_round--;
                     if ($open_round < 0) {
                         // Stop
                         break 2;
                     }
                     break;
-
                 case '?':
-                    $probably_label = false;
                     $ternary_q[] = $open_round;
                     break;
                 case ':':
-                    if ($probably_label && $open_round) {
-                        $hint = '';
-                        $add_hint = false;
-                    }
-                    $probably_label = false;
-
                     if ($ternary_q) {
                         if ($open_round === end($ternary_q)) {
-                            // Pop ternary op
                             array_pop($ternary_q);
+                        } else {
+                            // this is label
+                            $hint = '';
+                            $add_hint = false;
                         }
-                    } elseif (!$open_round) {
-                        // No label either
-                        break 2;
+                    } else {
+                        if (!$open_round) {
+                            // no more labels. stop
+                            break 2;
+                        }
+                        // these are labels
+                        $hint = '';
+                        $add_hint = false;
                     }
                     break;
 
                 // Delimiters
                 case ',':
                 case ';':
-                    $probably_label = false;
                     if ($open_curly <= 0 && $open_round === 0 && $open_square === 0) {
                         break 2;
                     }
@@ -469,10 +454,8 @@ final class ReflectionFunctionInfo
                 case T_WHITESPACE:
                 case T_COMMENT:
                 case T_DOC_COMMENT:
-                    // do not touch probably_label
-                    break;
-                default:
-                    $probably_label = false;
+                    // do not add hint yet
+                    $add_hint = false;
                     break;
             }
 
@@ -515,8 +498,9 @@ final class ReflectionFunctionInfo
         $is_array_start = is_array($start);
         $use_hints = $this->aliases !== null;
 
-        $probably_label = false;
+        $ternary_q = [];
         $goto = false;
+        $open_round = 0;
 
         do {
             $token = $tokens[$index++];
@@ -534,47 +518,69 @@ final class ReflectionFunctionInfo
             }
 
             if ($use_hints) {
+                $add_hint = true;
+
                 switch ($token[0]) {
                     case T_STRING:
-                        $probably_label = true;
                         if ($goto) {
                             $goto = false;
                             $hint = '';
                         } else {
                             $hint .= $token[1];
                         }
+                        $add_hint = false;
                         break;
                     case T_NS_SEPARATOR:
                     case T_NAME_QUALIFIED:
                     case T_NAME_FULLY_QUALIFIED:
-                        $goto = $probably_label = false;
+                        $goto = false;
                         $hint .= $token[1];
+                        $add_hint = false;
+                        break;
+                    case T_GOTO:
+                        $goto = true;
+                        break;
+                    case '(':
+                        $goto = false;
+                        $open_round++;
+                        break;
+                    case ')':
+                        $goto = false;
+                        $open_round--;
+                        break;
+                    case '?':
+                        $goto = false;
+                        $ternary_q[] = $open_round;
+                        break;
+                    case ':':
+                        $goto = false;
+                        if ($ternary_q) {
+                            if ($open_round === end($ternary_q)) {
+                                array_pop($ternary_q);
+                            } else {
+                                // this is label
+                                $hint = '';
+                                $add_hint = false;
+                            }
+                        } else {
+                            // these are labels
+                            $hint = '';
+                            $add_hint = false;
+                        }
                         break;
                     case T_WHITESPACE:
                     case T_COMMENT:
                     case T_DOC_COMMENT:
-                        // ignore whitespace and comments
+                        $add_hint = false;
                         break;
-                    case ':':
-                        $goto = false;
-                        if ($probably_label) {
-                            $hint = '';
-                            $probably_label = false;
-                        } elseif ($hint !== '') {
-                            $this->addHint($hint);
-                            $hint = '';
-                        }
-                        break;
-                    case T_GOTO:
-                        $goto = true;
-                        // fall
                     default:
-                        $probably_label = false;
-                        if ($hint !== '') {
-                            $this->addHint($hint);
-                            $hint = '';
-                        }
+                        $goto = false;
                         break;
+                }
+
+                if ($add_hint && $hint !== '') {
+                    $this->addHint($hint);
+                    $hint = '';
                 }
             }
 
