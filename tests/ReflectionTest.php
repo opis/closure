@@ -212,11 +212,12 @@ class ReflectionTest extends TestCase
                 true, // $this is passed as arg
                 true, // static::$var passed as arg
             ],
-            [
-                fn($x) : static => null,
-                false,
-                true,
-            ],
+// Only php 8
+//            [
+//                fn($x) : static => null,
+//                false,
+//                true,
+//            ],
             [
                 fn(self $x) => null,
                 false,
