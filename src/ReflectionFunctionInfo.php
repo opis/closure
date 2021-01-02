@@ -721,7 +721,7 @@ final class ReflectionFunctionInfo
         }
 
         if ($isStatic) {
-            while (true) {
+            while ($index < $this->count) {
                 switch ($this->tokens[++$index][0]) {
                     case T_WHITESPACE:
                     case T_COMMENT:
