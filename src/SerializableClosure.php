@@ -25,11 +25,16 @@ class SerializableClosure
 
     /**
      * Preload files and ffi
+     * @param bool $compile_files
      */
-    public static function preload(): void
+    public static function preload(bool $compile_files = true): void
     {
         // Preload FFI
         HeaderFile::preload();
+
+        if (!$compile_files) {
+            return;
+        }
 
         // Ignore the following files to avoid 'Can't preload already declared class ...' warnings
         $ignore = [
