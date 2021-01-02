@@ -1,6 +1,6 @@
 <?php
 /* ============================================================================
- * Copyright 2020 Zindex Software
+ * Copyright 2020-2021 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,37 +17,13 @@
 
 namespace Opis\Closure\Test;
 
-use Closure;
-use Opis\Closure\ReflectionClosure;
-use PHPUnit\Framework\TestCase;
-
 // Test only
 
 use MyAttr as AttrAlias;
 use SomeClass as ClassAlias;
-use Opis\Closure as OpisClosure;
 
-class SerializeTest8 extends TestCase
+class SerializeTest8 extends SourceCodeTestCase
 {
-    /**
-     * @param string $message
-     * @param Closure $closure
-     * @param string $code
-     * @dataProvider closureProvider
-     */
-    public function testSourceCode(string $message, Closure $closure, string $code)
-    {
-        $code = $this->lineEndings("<?php" . PHP_EOL . $code);
-        $source = $this->lineEndings((new ReflectionClosure($closure))->getCode());
-
-        $this->assertEquals($code, $source, $message);
-    }
-
-    private function lineEndings(string $data): string
-    {
-        return str_replace("\r\n", "\n", $data);
-    }
-
     public function closureProvider(): array
     {
         return [
@@ -95,15 +71,7 @@ return static function() {
 };
 PHP,
             ],
-            [
-                'Test ns alias',
-                static fn(OpisClosure\A $a, OpisClosure\B $b, Other\C $c): int => 0,
-                <<<'PHP'
-namespace Opis\Closure\Test;
-use Opis\Closure as OpisClosure;
-return static fn(OpisClosure\A $a, OpisClosure\B $b, Other\C $c): int => 0;
-PHP,
-            ],
+
         ];
     }
 }

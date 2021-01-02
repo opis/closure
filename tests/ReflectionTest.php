@@ -212,6 +212,26 @@ class ReflectionTest extends TestCase
                 true, // $this is passed as arg
                 true, // static::$var passed as arg
             ],
+            [
+                fn($x) : static => null,
+                false,
+                true,
+            ],
+            [
+                fn(self $x) => null,
+                false,
+                true,
+            ],
+            [
+                fn($x = self::CONSTANT) => null,
+                false,
+                true,
+            ],
+            [
+                fn($x = SomeClass::CONSTANT) => null,
+                false,
+                false,
+            ],
         ];
     }
 }

@@ -62,6 +62,7 @@ final class ReflectionFunctionInfo
     private bool $isStatic = false;
     private bool $scopeRef = false;
     private bool $thisRef = false;
+
     private array $use = [];
     private array $hints = [];
 
@@ -364,6 +365,9 @@ final class ReflectionFunctionInfo
         $open_square = 0;
         $open_round = 0;
 
+        $ternaryQ = 0;
+        $ternaryC = 0;
+
         do {
             $add_hint = true;
             $token = $tokens[$index++];
@@ -419,6 +423,17 @@ final class ReflectionFunctionInfo
                     }
                     break;
 
+                case '?':
+                    $ternaryQ++;
+                    break;
+                case ':':
+                    if (++$ternaryC > $ternaryQ) {
+                        // $f = true ? fn() => 1 : null;
+                        // $f = true ? fn() => true ? 1 : 0 : null;
+                        break 2;
+                    }
+                    break;
+
                 // Delimiters
                 case ',':
                 case ';':
@@ -434,8 +449,6 @@ final class ReflectionFunctionInfo
             } else {
                 $code .= $token;
             }
-
-            // $code .= $is_array ? $token[1] : $token;
 
             if ($use_hints && $add_hint && $hint !== '') {
                 $this->addHint($hint);
