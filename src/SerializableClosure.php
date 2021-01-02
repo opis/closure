@@ -23,101 +23,45 @@ use Serializable;
 use ReflectionObject;
 use RuntimeException;
 use SplObjectStorage;
-use DirectoryIterator;
 use function unserialize;
 
+/**
+ * @deprecated Used only for 3.x unserialization
+ */
 class SerializableClosure implements Serializable
 {
-    private static bool $init = false;
-
-    /**
-     * Preload files and ffi
-     * @param bool $compile_files
-     */
-    public static function preload(bool $compile_files = true): void
-    {
-        // Preload FFI
-        HeaderFile::preload();
-
-        if (!$compile_files) {
-            return;
-        }
-
-        // Ignore the following files to avoid 'Can't preload already declared class ...' warnings
-        $ignore = [
-            'HeaderFile.php', // header file used above
-            'SerializableClosure.php', // this file
-        ];
-
-        // Compile files
-        foreach ((new DirectoryIterator(__DIR__)) as $fileInfo) {
-            if ($fileInfo->isDot() || !$fileInfo->isFile() ||
-                $fileInfo->getExtension() !== 'php' || in_array($fileInfo->getFilename(), $ignore)) {
-                continue;
-            }
-
-            $script = $fileInfo->getRealPath();
-
-            if (!$script || opcache_is_script_cached($script)) {
-                continue;
-            }
-
-            opcache_compile_file($script);
-        }
-    }
-
-    /**
-     * Init serializable closures
-     * @param array|null $options
-     */
-    public static function init(?array $options = null): void
-    {
-        if (self::$init) {
-            return;
-        }
-        self::$init = true;
-
-        self::defines();
-
-        SerializableClosureHandler::init(HeaderFile::load(), $options);
-    }
-
-    protected static function defines(): void
-    {
-        $const = [
-            'T_NAME_FULLY_QUALIFIED',
-            'T_NAME_QUALIFIED',
-            'T_NAME_RELATIVE',
-            'T_ATTRIBUTE',
-        ];
-
-        foreach ($const as $key => $value) {
-            if (!defined($value)) {
-                define($value, -(100 + $key));
-            }
-        }
-    }
-
-    // --- 3.x compatibility ---
-
     /** Array recursive constant **/
     private const ARRAY_RECURSIVE_KEY = '¯\_(ツ)_/¯';
-
-    protected static $securityProvider = null;
 
     private ?SplObjectStorage $scope = null;
     private ?string $hash = null;
     private ?array $objects = null;
     protected ?Closure $closure = null;
+    protected ?ReflectionClosure $reflector = null;
 
     public function __construct(Closure $closure)
     {
         $this->closure = $closure;
     }
 
-    public function getClosure(): Closure
+    /**
+     * @return Closure
+     */
+    public function getClosure()
     {
         return $this->closure;
+    }
+
+    /**
+     * @internal
+     * @return ReflectionClosure
+     */
+    public function getReflector()
+    {
+        if ($this->reflector == null) {
+            $this->reflector = new ReflectionClosure($this->closure);
+        }
+        return $this->reflector;
     }
 
     public function __invoke()
@@ -125,13 +69,9 @@ class SerializableClosure implements Serializable
         return call_user_func_array($this->closure, func_get_args());
     }
 
-    public static function from(Closure $closure): SerializableClosure
-    {
-        return new self($closure);
-    }
-
     final public function __serialize(): array
     {
+        // We serialize using the new serialization mechanism
         return ['closure' => $this->closure];
     }
 
@@ -140,77 +80,11 @@ class SerializableClosure implements Serializable
         $this->closure = $data['closure'];
     }
 
-    final public function serialize()
+    public function serialize()
     {
+        // Do not allow serialization from Serializable interface
+        // __serialize() should prevent calling this method
         throw new RuntimeException("Invalid serialization method!");
-    }
-
-    final public static function createClosure(string $args, string $code): Closure
-    {
-        return SerializableClosureHandler::instance()->createClosure("function({$args}){{$code}}");
-    }
-
-    /**
-     * @param string $data
-     * @return string
-     * @throws SecurityException
-     */
-    protected function decode(string $data): string
-    {
-        if (static::$securityProvider !== null) {
-            if ($data[0] !== '@') {
-                throw new SecurityException("The serialized closure is not signed. " .
-                    "Make sure you use a security provider for both serialization and unserialization.");
-            }
-
-            if ($data[1] !== '{') {
-                $separator = strpos($data, '.');
-                if ($separator === false) {
-                    throw new SecurityException('Invalid signed closure');
-                }
-                $hash = substr($data, 1, $separator - 1);
-                $closure = substr($data, $separator + 1);
-
-                $data = ['hash' => $hash, 'closure' => $closure];
-
-                unset($hash, $closure);
-            } else {
-                $data = json_decode(substr($data, 1), true);
-            }
-
-            if (!is_array($data) || !static::$securityProvider->verify($data)) {
-                throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized. " .
-                    "Make sure you use the same security provider, with the same settings, " .
-                    "both for serialization and unserialization.");
-            }
-
-            return $data['closure'];
-        }
-
-        if ($data[0] === '@') {
-            if ($data[1] !== '{') {
-                $separator = strpos($data, '.');
-                if ($separator === false) {
-                    throw new SecurityException('Invalid signed closure');
-                }
-                $hash = substr($data, 1, $separator - 1);
-                $closure = substr($data, $separator + 1);
-
-                $data = ['hash' => $hash, 'closure' => $closure];
-
-                unset($hash, $closure);
-            } else {
-                $data = json_decode(substr($data, 1), true);
-            }
-
-            if (!is_array($data) || !isset($data['closure']) || !isset($data['hash'])) {
-                throw new SecurityException('Invalid signed closure');
-            }
-
-            return $data['closure'];
-        }
-
-        return $data;
     }
 
     /**
@@ -221,7 +95,7 @@ class SerializableClosure implements Serializable
      */
     public function unserialize($data)
     {
-        $data = unserialize($this->decode($data));
+        $data = unserialize(static::decode($data));
 
         $objects = null;
 
@@ -230,6 +104,7 @@ class SerializableClosure implements Serializable
             $this->hash = $data['self'] ?? null;
             $this->objects = [];
 
+            $data['use'] = $this->resolveUseVariables($data['use']);
             $this->mapPointers($data['use']);
             $objects = $this->objects;
 
@@ -243,6 +118,7 @@ class SerializableClosure implements Serializable
             $data['this'] ?? null,
             $data['scope'] ?? null,
                   $data['use'] ?? null,
+            false
         );
 
         unset($data);
@@ -255,12 +131,33 @@ class SerializableClosure implements Serializable
     }
 
     /**
+     * Transform the use variables before serialization.
+     *
+     * @param  array  $data The Closure's use variables
+     * @return array
+     */
+    protected function transformUseVariables($data)
+    {
+        return $data;
+    }
+
+    /**
+     * Resolve the use variables after unserialization.
+     *
+     * @param  array  $data The Closure's transformed use variables
+     * @return array
+     */
+    protected function resolveUseVariables($data)
+    {
+        return $data;
+    }
+
+    /**
      * Internal method used to map closure pointers
      * @param $data
-     * @deprecated
      * @internal
      */
-    private function mapPointers(&$data): void
+    protected function mapPointers(&$data)
     {
         if ($data instanceof self) {
             $data = &$data->closure;
@@ -376,5 +273,135 @@ class SerializableClosure implements Serializable
                 }
             }
         } while ($reflection = $reflection->getParentClass());
+    }
+
+    public static function enterContext()
+    {
+        // Nothing
+    }
+
+    public static function exitContext()
+    {
+        // Nothing
+    }
+
+    /**
+     * @param Closure $closure
+     * @return static
+     */
+    public static function from(Closure $closure)
+    {
+        return new static($closure);
+    }
+
+    /**
+     * Creates a new closure from arbitrary code,
+     * emulating create_function, but without using eval
+     * @param string $args
+     * @param string $code
+     * @return Closure
+     */
+    public static function createClosure($args, $code)
+    {
+        return SerializableClosureHandler::instance()->createClosure("function({$args}){{$code}}");
+    }
+
+    protected static ?ISecurityProvider $securityProvider = null;
+
+    /**
+     * @param string $data
+     * @return string
+     * @throws SecurityException
+     */
+    protected static function decode(string $data): string
+    {
+        if (static::$securityProvider !== null) {
+            if ($data[0] !== '@') {
+                throw new SecurityException("The serialized closure is not signed. " .
+                    "Make sure you use a security provider for both serialization and unserialization.");
+            }
+
+            if ($data[1] !== '{') {
+                $separator = strpos($data, '.');
+                if ($separator === false) {
+                    throw new SecurityException('Invalid signed closure');
+                }
+                $hash = substr($data, 1, $separator - 1);
+                $closure = substr($data, $separator + 1);
+
+                $data = ['hash' => $hash, 'closure' => $closure];
+
+                unset($hash, $closure);
+            } else {
+                $data = json_decode(substr($data, 1), true);
+            }
+
+            if (!is_array($data) || !static::$securityProvider->verify($data)) {
+                throw new SecurityException("Your serialized closure might have been modified and it's unsafe to be unserialized. " .
+                    "Make sure you use the same security provider, with the same settings, " .
+                    "both for serialization and unserialization.");
+            }
+
+            return $data['closure'];
+        }
+
+        if ($data[0] === '@') {
+            if ($data[1] !== '{') {
+                $separator = strpos($data, '.');
+                if ($separator === false) {
+                    throw new SecurityException('Invalid signed closure');
+                }
+                $hash = substr($data, 1, $separator - 1);
+                $closure = substr($data, $separator + 1);
+
+                $data = ['hash' => $hash, 'closure' => $closure];
+
+                unset($hash, $closure);
+            } else {
+                $data = json_decode(substr($data, 1), true);
+            }
+
+            if (!is_array($data) || !isset($data['closure']) || !isset($data['hash'])) {
+                throw new SecurityException('Invalid signed closure');
+            }
+
+            return $data['closure'];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param string $secret
+     */
+    public static function setSecretKey(string $secret): void
+    {
+        if(static::$securityProvider === null){
+            static::$securityProvider = new SecurityProvider($secret);
+        }
+    }
+
+    /**
+     * @param ISecurityProvider $securityProvider
+     */
+    public static function addSecurityProvider(ISecurityProvider $securityProvider): void
+    {
+        static::$securityProvider = $securityProvider;
+    }
+
+    /**
+     * Remove security provider
+     */
+    public static function removeSecurityProvider(): void
+    {
+        static::$securityProvider = null;
+    }
+
+    /**
+     * @return null|ISecurityProvider
+     */
+    public static function getSecurityProvider(): ?ISecurityProvider
+    {
+        return static::$securityProvider;
     }
 }

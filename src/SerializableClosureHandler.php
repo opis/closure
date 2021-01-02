@@ -208,12 +208,13 @@ final class SerializableClosureHandler
      * @param object|null $self
      * @param string|null $scope
      * @param array|null $use
+     * @param bool $resolve_use
      * @return Closure
      */
     public function createClosure(string $code, ?object $self = null, ?string $scope = null,
-                                  ?array $use = null): Closure
+                                  ?array $use = null, bool $resolve_use = true): Closure
     {
-        if ($use && $this->resolveUseVariables) {
+        if ($use && $resolve_use && $this->resolveUseVariables) {
             $use = ($this->resolveUseVariables)($use);
         }
 

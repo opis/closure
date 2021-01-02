@@ -19,7 +19,7 @@ namespace Opis\Closure;
 
 /**
  * @internal
- * @deprecated This will be removed in 5.0
+ * @deprecated
  */
 final class SelfReference
 {

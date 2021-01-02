@@ -13,14 +13,14 @@ Serializable closures
 All you have to do is to add a single line of code, and you are good to go.
 
 ```php
-\Opis\Closure\SerializableClosure::init();
+\Opis\Closure\Library::init();
 ```
 
 If you are using this library in a server environment, and you have preload enabled (which you should), then 
 add the following line of code in your preload file:
 
 ```php
-\Opis\Closure\SerializableClosure::preload();
+\Opis\Closure\Library::preload();
 ```
 
 Now you can serialize/unserialize closures the same way you would serialize/unserialize any other data structure.
