@@ -365,8 +365,8 @@ final class ReflectionFunctionInfo
         $open_square = 0;
         $open_round = 0;
 
-        $ternaryQ = 0;
-        $ternaryC = 0;
+        $ternary_q = 0;
+        $ternary_c = 0;
 
         do {
             $add_hint = true;
@@ -424,10 +424,10 @@ final class ReflectionFunctionInfo
                     break;
 
                 case '?':
-                    $ternaryQ++;
+                    $ternary_q++;
                     break;
                 case ':':
-                    if (++$ternaryC > $ternaryQ) {
+                    if (++$ternary_c > $ternary_q) {
                         // $f = true ? fn() => 1 : null;
                         // $f = true ? fn() => true ? 1 : 0 : null;
                         break 2;
