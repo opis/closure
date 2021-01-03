@@ -51,7 +51,7 @@ class Unserialize3Test extends TestCase
 
     public function fileDataProvider(): array
     {
-        $data = json_decode(file_get_contents(__DIR__ . '/data.3.x.json'), false);
+        $data = json_decode(file_get_contents(__DIR__ . '/data/3.x.json'), false);
         return array_map(fn ($v) => (array) $v, $data);
     }
 }

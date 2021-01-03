@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Run this code using opis/closure 3.x to get data.3.x.json
+ * Run this code using opis/closure 3.x to get 3.x.json
  */
 
 use Opis\Closure\SerializableClosure;
