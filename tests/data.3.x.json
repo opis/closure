@@ -1,0 +1,69 @@
+[
+    {
+        "name": "simple",
+        "data": "C:32:\"Opis\\Closure\\SerializableClosure\":236:{a:5:{s:3:\"use\";a:0:{}s:8:\"function\";s:112:\"function (int $x, int $y) : \\stdClass {\r\n    return (object)[\r\n        'x' => $x,\r\n        'y' => $y,\r\n    ];\r\n}\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e41000000002bd77764\";}}",
+        "secret": null,
+        "call": [
+            1,
+            2
+        ],
+        "expect": {
+            "x": 1,
+            "y": 2
+        }
+    },
+    {
+        "name": "use",
+        "data": "C:32:\"Opis\\Closure\\SerializableClosure\":317:{a:5:{s:3:\"use\";a:1:{s:4:\"data\";a:2:{s:1:\"a\";i:1;s:1:\"b\";R:5;}}s:8:\"function\";s:152:\"function (int $x, int $y) use (&$data): \\stdClass {\r\n    return (object)[\r\n        'x' => $x,\r\n        'y' => $y,\r\n        'a' => $data['a'],\r\n    ];\r\n}\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e40000000002bd77764\";}}",
+        "secret": null,
+        "call": [
+            3,
+            4
+        ],
+        "expect": {
+            "x": 3,
+            "y": 4,
+            "a": 1
+        }
+    },
+    {
+        "name": "self_ref",
+        "data": "C:32:\"Opis\\Closure\\SerializableClosure\":355:{a:5:{s:3:\"use\";a:1:{s:8:\"self_ref\";O:26:\"Opis\\Closure\\SelfReference\":1:{s:4:\"hash\";s:32:\"000000007d6d9e46000000002bd77764\";}}s:8:\"function\";s:127:\"function (int $n) use (&$self_ref) : int {\r\n    if ($n <= 0) {\r\n        return 0;\r\n    }\r\n    return $n + $self_ref($n - 1);\r\n}\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e46000000002bd77764\";}}",
+        "secret": null,
+        "call": [
+            100
+        ],
+        "expect": 5050
+    },
+    {
+        "name": "sqr_plus_1",
+        "data": "C:32:\"Opis\\Closure\\SerializableClosure\":384:{a:5:{s:3:\"use\";a:1:{s:3:\"sqr\";C:32:\"Opis\\Closure\\SerializableClosure\":172:{a:5:{s:3:\"use\";a:0:{}s:8:\"function\";s:49:\"function (int $n) : int {\r\n    return $n * $n;\r\n}\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e47000000002bd77764\";}}}s:8:\"function\";s:33:\"fn (int $n) : int => $sqr($n) + 1\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e44000000002bd77764\";}}",
+        "secret": null,
+        "call": [
+            10
+        ],
+        "expect": 101
+    },
+    {
+        "name": "simple:secret",
+        "data": "C:32:\"Opis\\Closure\\SerializableClosure\":282:{@Bme4Vrbum4mJj6QoA6X9qKjK7zmIJotIS93FIDHLEhc=.a:5:{s:3:\"use\";a:0:{}s:8:\"function\";s:112:\"function (int $x, int $y) : \\stdClass {\r\n    return (object)[\r\n        'x' => $x,\r\n        'y' => $y,\r\n    ];\r\n}\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e41000000002bd77764\";}}",
+        "secret": "my_secret_key",
+        "call": [
+            1,
+            2
+        ],
+        "expect": {
+            "x": 1,
+            "y": 2
+        }
+    },
+    {
+        "name": "sqr_plus_1:secret",
+        "data": "C:32:\"Opis\\Closure\\SerializableClosure\":476:{@ylpAYLDYdS1I1rVEG/y9ZGvU9tEB25PCUyyRXqsV/vY=.a:5:{s:3:\"use\";a:1:{s:3:\"sqr\";C:32:\"Opis\\Closure\\SerializableClosure\":218:{@Ku8RaB1B5jBF0txBq4M7k6PVK94c+6kPXJ6yivVf/CI=.a:5:{s:3:\"use\";a:0:{}s:8:\"function\";s:49:\"function (int $n) : int {\r\n    return $n * $n;\r\n}\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e47000000002bd77764\";}}}s:8:\"function\";s:33:\"fn (int $n) : int => $sqr($n) + 1\";s:5:\"scope\";N;s:4:\"this\";N;s:4:\"self\";s:32:\"000000007d6d9e44000000002bd77764\";}}",
+        "secret": "my_secret_key",
+        "call": [
+            10
+        ],
+        "expect": 101
+    }
+]
