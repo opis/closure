@@ -35,6 +35,15 @@ class Unserialize3Test extends TestCase
 
         $this->assertEquals($expect, $closure(...$call), $name);
 
+        // Serialize/unserialize again
+        $serialized_closure = unserialize(serialize($closure));
+
+        $this->assertInstanceOf(SerializableClosure::class, $serialized_closure);
+
+        $this->assertEquals($expect, $serialized_closure(...$call), $name . ':serialized');
+        $this->assertEquals($expect, ($serialized_closure->getClosure())(...$call), $name . ':serialized-closure');
+
+
         if ($secret) {
             SerializableClosure::removeSecurityProvider();
         }
