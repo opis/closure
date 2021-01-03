@@ -39,7 +39,7 @@ final class Library
         // Ignore the following files to avoid 'Can't preload already declared class ...' warnings
         $ignore = [
             'HeaderFile.php', // header file used above
-            'SerializableClosure.php', // this file
+            'Library.php', // this file
         ];
 
         // Compile files
