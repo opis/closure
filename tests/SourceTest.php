@@ -84,6 +84,14 @@ return static fn() => true ? 1 : -1 ;
 PHP,
             ],
             [
+                'Test ternary else branch',
+                false ? false : fn() => 1 ? true : false,
+                <<<'PHP'
+namespace Opis\Closure\Test;
+return fn() => 1 ? true : false;
+PHP,
+            ],
+            [
                 'Test as array item',
                 [fn() => [1,],][0],
                 <<<'PHP'
