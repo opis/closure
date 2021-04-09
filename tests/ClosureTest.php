@@ -14,6 +14,7 @@ use Opis\Closure\ReflectionClosure;
 use Opis\Closure\SerializableClosure;
 
 const foo = 0;
+const foo_val = 'fooVal';
 
 class ClosureTest extends \PHPUnit\Framework\TestCase
 {
@@ -395,6 +396,39 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         };
         $u = $this->s($c);
         $this->assertEquals($u(), "${a[\Opis\Closure\Test\foo]} is $a[0]");
+    }
+
+    public function testClosureUseSimpleArraySyntaxWithComplexSyntax()
+    {
+        $c = function () {
+            $x = [
+                'fooValConst' => 1,
+                'fooVal' => 3,
+                'foo' => 4,
+            ];
+            $y = [
+                'fooVal' => 'Const'
+            ];
+            return "${x[foo_val]}${x[foo_val . "${y[foo_val]}"]}$x[foo]${x[foo_val]}";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), $c());
+    }
+
+    public function testHEREDOC()
+    {
+        $c = function () {
+            $a = ["name" => "Abderrazzak OXA", "age" => 18, 'love' => 'programing'];
+            $b = [0 => 10];
+            return <<<FOOBAR
+My Name is $a[name]
+, I am $a[age] years old.
+Test ${b[foo]}
+Finally {$b[foo]}
+FOOBAR;
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), $c());
     }
 
 }
