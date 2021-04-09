@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright (c) 2018-2019 Zindex Software
+ * Copyright (c) 2018-2021 Zindex Software
  *
  * Licensed under the MIT License
  * =========================================================================== */
@@ -272,7 +272,7 @@ class ReflectionClosure extends ReflectionFunction
                         case T_CURLY_OPEN:
                         case T_DOLLAR_OPEN_CURLY_BRACES:
                         case '{':
-                            if ($context === 'string') {
+                            if ($context === 'string' && $token[0] !== '{') {
                                 $context = 'root';
                             }
                             $code .= is_array($token) ? $token[1] : $token;
@@ -310,8 +310,12 @@ class ReflectionClosure extends ReflectionFunction
                             }
                             $code .= $token[0];
                             break;
+                        case T_START_HEREDOC:
+                        case T_END_HEREDOC:
+                            $context = $token[0] === T_START_HEREDOC ? "string" : "root";
+                            $code .= $token[1];
+                            break;
                         case '"':
-                        case '\'':
                             if ($lastStringSymbol === null) {
                                 $lastStringSymbol = $token[0];
                                 $context = "string";
