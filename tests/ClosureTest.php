@@ -374,6 +374,18 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($u(), "My Name is $a[name], I am $a[age] years old.");
     }
 
+    public function testClosureUseSimpleArraySyntaxWithConstantKey()
+    {
+        define('test_array_key', 0);
+        $a = [0 => "bar"];
+        $c = function() use($a)
+        {
+            return "${a[test_array_key]}";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "${a[test_array_key]}");
+    }
+
 }
 
 class ObjnObj implements Serializable {
