@@ -376,14 +376,14 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
 
     public function testClosureUseSimpleArraySyntaxWithConstantKey()
     {
-        define('test_array_key', 0);
+        define('test_array_key_for_bar_value', 0);
         $a = [0 => "bar"];
         $c = function() use($a)
         {
-            return "${a[test_array_key]}";
+            return "${a[test_array_key_for_bar_value]}";
         };
         $u = $this->s($c);
-        $this->assertEquals($u(), "${a[test_array_key]}");
+        $this->assertEquals($u(), "${a[test_array_key_for_bar_value]}");
     }
 
 }
