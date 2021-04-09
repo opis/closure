@@ -13,6 +13,8 @@ use Serializable;
 use Opis\Closure\ReflectionClosure;
 use Opis\Closure\SerializableClosure;
 
+const foo = 0;
+
 class ClosureTest extends \PHPUnit\Framework\TestCase
 {
     protected function s($closure)
@@ -386,6 +388,13 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
         };
         $u = $this->s($c);
         $this->assertEquals($u(), "${a[test_array_key_for_bar_value]}");
+
+        $c = function() use($a)
+        {
+            return "${a[foo]} is $a[0]";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "${a[\Opis\Closure\Test\foo]} is $a[0]");
     }
 
 }

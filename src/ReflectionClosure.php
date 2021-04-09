@@ -272,6 +272,9 @@ class ReflectionClosure extends ReflectionFunction
                         case T_CURLY_OPEN:
                         case T_DOLLAR_OPEN_CURLY_BRACES:
                         case '{':
+                            if ($context === 'string') {
+                                $context = 'root';
+                            }
                             $code .= is_array($token) ? $token[1] : $token;
                             $open++;
                             break;
