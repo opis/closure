@@ -311,8 +311,11 @@ class ReflectionClosure extends ReflectionFunction
                             $code .= $token[0];
                             break;
                         case T_START_HEREDOC:
+                            $context = "string";
+                            $code .= $token[1];
+                            break;
                         case T_END_HEREDOC:
-                            $context = $token[0] === T_START_HEREDOC ? "string" : "root";
+                            $context = "root";
                             $code .= $token[1];
                             break;
                         case '"':
