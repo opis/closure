@@ -115,6 +115,7 @@ class ReflectionClosure extends ReflectionFunction
         $lineAdd = 0;
         $isUsingScope = false;
         $isUsingThisObject = false;
+        $lastStringSymbol = null;
 
         for($i = 0, $l = count($tokens); $i < $l; $i++) {
             $token = $tokens[$i];
@@ -270,6 +271,9 @@ class ReflectionClosure extends ReflectionFunction
                     switch ($token[0]){
                         case T_CURLY_OPEN:
                         case T_DOLLAR_OPEN_CURLY_BRACES:
+                            if ($context === 'string') {
+                                $context = 'root';
+                            }
                         case '{':
                             $code .= is_array($token) ? $token[1] : $token;
                             $open++;
@@ -303,6 +307,24 @@ class ReflectionClosure extends ReflectionFunction
                         case ';':
                             if ($isShortClosure && $open === 0) {
                                 break 3;
+                            }
+                            $code .= $token[0];
+                            break;
+                        case T_START_HEREDOC:
+                            $context = "string";
+                            $code .= $token[1];
+                            break;
+                        case T_END_HEREDOC:
+                            $context = "root";
+                            $code .= $token[1];
+                            break;
+                        case '"':
+                            if ($lastStringSymbol === null) {
+                                $lastStringSymbol = $token[0];
+                                $context = "string";
+                            } else if ($lastStringSymbol === $token[0]) {
+                                $lastStringSymbol = null;
+                                $context = "root";
                             }
                             $code .= $token[0];
                             break;
@@ -349,13 +371,17 @@ class ReflectionClosure extends ReflectionFunction
                         case T_STATIC:
                         case T_NS_SEPARATOR:
                         case T_STRING:
-                            $id_start = $token[1];
-                            $id_start_ci = strtolower($id_start);
-                            $id_name = '';
-                            $context = 'root';
-                            $state = 'id_name';
-                            $lastState = 'closure';
-                            break 2;
+                            if ($context !== 'string') {
+                                $id_start = $token[1];
+                                $id_start_ci = strtolower($id_start);
+                                $id_name = '';
+                                $context = 'root';
+                                $state = 'id_name';
+                                $lastState = 'closure';
+                                break 2;
+                            }
+                            $code .= $token[1];
+                            break;
                         case T_NAME_QUALIFIED:
                             list($id_start, $id_start_ci, $id_name) = $this->parseNameQualified($token[1]);
                             $context = 'root';

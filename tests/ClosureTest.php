@@ -13,6 +13,9 @@ use Serializable;
 use Opis\Closure\ReflectionClosure;
 use Opis\Closure\SerializableClosure;
 
+const foo = 0;
+const foo_val = 'fooVal';
+
 class ClosureTest extends \PHPUnit\Framework\TestCase
 {
     protected function s($closure)
@@ -350,6 +353,82 @@ class ClosureTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull($rf->getClosureScopeClass());
         $this->assertNull($ro->getClosureScopeClass());
+    }
+
+    public function testClosureUseSimpleArraySyntax()
+    {
+        $a = ["foo" => "bar"];
+        $c = function() use($a)
+        {
+            return "$a[foo]";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "$a[foo]");
+
+
+        $a = ["name" => "Abderrazzak OXA", "age" => 18];
+        $c = function() use($a)
+        {
+            $result = "My Name is $a[name]";
+            $result .= ", I am $a[age] years old.";
+            return $result;
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "My Name is $a[name], I am $a[age] years old.");
+    }
+
+    public function testClosureUseSimpleArraySyntaxWithConstantKey()
+    {
+        if (! defined('test_array_key_for_bar_value')) {
+            define('test_array_key_for_bar_value', 0);
+        }
+        $a = [0 => "bar"];
+        $c = function() use($a)
+        {
+            return "${a[test_array_key_for_bar_value]}";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "${a[test_array_key_for_bar_value]}");
+
+        $c = function() use($a)
+        {
+            return "${a[foo]} is $a[0]";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), "${a[\Opis\Closure\Test\foo]} is $a[0]");
+    }
+
+    public function testClosureUseSimpleArraySyntaxWithComplexSyntax()
+    {
+        $c = function () {
+            $x = [
+                'fooValConst' => 1,
+                'fooVal' => 3,
+                'foo' => 4,
+            ];
+            $y = [
+                'fooVal' => 'Const'
+            ];
+            return "${x[foo_val]}${x[foo_val . "${y[foo_val]}"]}$x[foo]${x[foo_val]}";
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), $c());
+    }
+
+    public function testHEREDOC()
+    {
+        $c = function () {
+            $a = ["name" => "Abderrazzak OXA", "age" => 18, 'love' => 'programing'];
+            $b = [0 => 10];
+            return <<<FOOBAR
+My Name is $a[name]
+, I am $a[age] years old.
+Test ${b[foo]}
+Finally {$b[foo]}
+FOOBAR;
+        };
+        $u = $this->s($c);
+        $this->assertEquals($u(), $c());
     }
 
 }
