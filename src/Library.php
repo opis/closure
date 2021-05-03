@@ -82,6 +82,7 @@ final class Library
             'T_NAME_QUALIFIED',
             'T_NAME_RELATIVE',
             'T_ATTRIBUTE',
+            'T_ENUM',
         ];
 
         foreach ($const as $key => $value) {

@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2020 Zindex Software
+ * Copyright 2020-2021 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,8 +164,6 @@ final class HeaderFile
             return $m['else'] ?? '';
         }, $data);
 
-        $data = strtr($data, $defs);
-
-        return $data;
+        return strtr($data, $defs);
     }
 }

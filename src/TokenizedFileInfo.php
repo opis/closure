@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2020 Zindex Software
+ * Copyright 2020-2021 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,7 @@ final class TokenizedFileInfo
                     $this->insideTrait = true;
                 case T_INTERFACE:
                 case T_CLASS:
+                case T_ENUM:
                     $this->handleClass();
                     $this->insideTrait = false;
                     break;
@@ -199,6 +200,7 @@ final class TokenizedFileInfo
                     $this->insideTrait = true;
                 case T_CLASS:
                 case T_INTERFACE:
+                case T_ENUM:
                     $this->handleClass();
                     $this->insideTrait = false;
                     break;
@@ -323,7 +325,7 @@ final class TokenizedFileInfo
      */
     private function handleClass(): void
     {
-        // Skip T_CLASS, T_INTERFACE, T_TRAIT
+        // Skip T_CLASS, T_INTERFACE, T_TRAIT, T_ENUM
         $this->index++;
 
         $name = $this->readIdentifier();

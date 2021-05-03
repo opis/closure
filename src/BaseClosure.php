@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2020 Zindex Software
+ * Copyright 2020-2021 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class BaseClosure
     /**
      * @return array
      */
-    final public function __serialize()
+    final public function __serialize(): array
     {
         /** @noinspection PhpParamsInspection */
         return SerializableClosureHandler::instance()->serializeClosure($this);
@@ -34,7 +34,7 @@ class BaseClosure
     /**
      * @param array $data
      */
-    final public function __unserialize($data)
+    final public function __unserialize(array $data): void
     {
         /** @noinspection PhpParamsInspection */
         SerializableClosureHandler::instance()->unserializeClosure($this, $data);

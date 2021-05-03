@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2018-2020 Zindex Software
+ * Copyright 2018-2021 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ final class ClosureStream
 
     private int $pointer = 0;
 
-    function stream_open($path, $mode, $options, &$opened_path)
+    public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool
     {
         $path = substr($path, strlen(self::STREAM_PROTO . '://'));
 
@@ -53,45 +53,45 @@ final class ClosureStream
         return true;
     }
 
-    public function stream_close()
+    public function stream_close(): void
     {
         unset($this->content);
         $this->length = 0;
         $this->pointer = 0;
     }
 
-    public function stream_read($count)
+    public function stream_read(int $count): string
     {
         $value = substr($this->content, $this->pointer, $count);
         $this->pointer += $count;
         return $value;
     }
 
-    public function stream_eof()
+    public function stream_eof(): bool
     {
         return $this->pointer >= $this->length;
     }
 
-    public function stream_set_option($option, $arg1, $arg2)
+    public function stream_set_option(int $option, int $arg1, int $arg2): bool
     {
         return false;
     }
 
-    public function stream_stat()
+    public function stream_stat(): array
     {
         $stat = stat(__FILE__);
         $stat[7] = $stat['size'] = $this->length;
         return $stat;
     }
 
-    public function url_stat($path, $flags)
+    public function url_stat(string $path, int $flags): array
     {
         $stat = stat(__FILE__);
         $stat[7] = $stat['size'] = $this->length;
         return $stat;
     }
 
-    public function stream_seek($offset, $whence = SEEK_SET)
+    public function stream_seek(int $offset, int $whence = SEEK_SET): bool
     {
         $crt = $this->pointer;
 
@@ -115,7 +115,7 @@ final class ClosureStream
         return true;
     }
 
-    public function stream_tell()
+    public function stream_tell(): int
     {
         return $this->pointer;
     }

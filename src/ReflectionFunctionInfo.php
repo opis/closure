@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2020 Zindex Software
+ * Copyright 2020-2021 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,34 @@ final class ReflectionFunctionInfo
     /**
      * List of builtin php types
      */
-    private const BUILTIN = PHP_MAJOR_VERSION === 8
-        ? [
-            'bool', 'int', 'float', 'string', 'array',
-            'object', 'iterable', 'callable', 'void', 'mixed',
-            'self', 'parent', 'static',
-            'false', 'null',
-        ]
-        : [
-            'bool', 'int', 'float', 'string', 'array',
-            'object', 'iterable', 'callable', 'void',
-            'self', 'parent', 'static',
-        ];
+    private const BUILTIN_TYPES = [
+        7 => [
+            4 => [
+                'bool', 'int', 'float', 'string', 'array',
+                'object', 'iterable', 'callable', 'void',
+                'self', 'parent', 'static',
+            ],
+        ],
+        8 => [
+            0 => [
+                'bool', 'int', 'float', 'string', 'array',
+                'object', 'iterable', 'callable', 'void', 'mixed',
+                'self', 'parent', 'static',
+                'false', 'null',
+            ],
+            1 => [
+                'bool', 'int', 'float', 'string', 'array',
+                'object', 'iterable', 'callable', 'void', 'mixed',
+                'self', 'parent', 'static', 'never',
+                'false', 'null',
+            ],
+        ],
+    ];
+
+    /**
+     * List of builtin php types
+     */
+    private const BUILTIN = self::BUILTIN_TYPES[PHP_MAJOR_VERSION][PHP_MINOR_VERSION];
 
     private ReflectionFunction $reflector;
 
