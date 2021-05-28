@@ -601,7 +601,7 @@ class ReflectionClosure extends ReflectionFunction
                                         if(isset($classes[$id_start_ci])){
                                             $id_start = $classes[$id_start_ci];
                                         }
-                                        if($id_start[0] !== '\\'){
+                                        if($id_start[0] !== '\\' && (is_array($token) ? $token[1] : $token) !== ':'){
                                             $id_start = $nsf . '\\' . $id_start;
                                         }
                                     }

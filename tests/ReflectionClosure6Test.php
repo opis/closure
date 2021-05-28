@@ -95,6 +95,23 @@ final class ReflectionClosure6Test extends \PHPUnit\Framework\TestCase
         $this->assertEquals('protected', $object->getProtected());
         $this->assertEquals('private', $object->getPrivate());
     }
+
+    public function testClosureUseNamedParameters()
+    {
+        $f = function (string $name) {
+            return sprintf("Hello, %s", $name);
+        };
+
+        $g = function () use ($f) {
+            return $f(name: 'Foo');
+        };
+
+        $res = new SerializableClosure($g);
+        $res = unserialize(serialize($res));
+
+        $this->assertEquals('Hello, Foo', $res());
+    }
+
 }
 
 class PropertyPromotion
