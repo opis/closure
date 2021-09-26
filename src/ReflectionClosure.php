@@ -13,6 +13,7 @@ defined('T_FN') || define('T_FN', -6);
 
 use Closure;
 use ReflectionFunction;
+use ReturnTypeWillChange;
 
 class ReflectionClosure extends ReflectionFunction
 {
@@ -46,6 +47,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return bool
      */
+    #[ReturnTypeWillChange]
     public function isStatic()
     {
         if ($this->isStaticClosure === null) {
