@@ -91,7 +91,7 @@ class ClosureStream
 
     public static function register()
     {
-        if (!static::$isRegistered) {
+        if (!static::$isRegistered && ! in_array(static::STREAM_PROTO, stream_get_wrappers())) {
             static::$isRegistered = stream_wrapper_register(static::STREAM_PROTO, __CLASS__);
         }
     }
