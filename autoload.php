@@ -5,7 +5,7 @@
  * Licensed under the MIT License
  * =========================================================================== */
 
-require_once 'functions.php';
+require_once __DIR__ . '/functions.php';
 
 spl_autoload_register(function($class){
    
