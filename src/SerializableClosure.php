@@ -398,6 +398,18 @@ class SerializableClosure implements Serializable
             }
             unset($value);
         } elseif (is_object($data) && ! $data instanceof static){
+
+            // Starting at PHP 7.4 there is a bug that prevents the use of
+            // the ReflectionObject with a DateTime object, as the getProperties() method
+            // returns an empty array.
+            // @see https://bugs.php.net/bug.php?id=79041
+            // @see https://3v4l.org/joLur
+            // For this reason and to avoid any issues, we can just skip the wrapping
+            // of DateTime objects.
+            if (PHP_VERSION >= 7.4 && $data instanceof \DateTime) {
+                return;
+            }
+
             if(isset($storage[$data])){
                 $data = $storage[$data];
                 return;
