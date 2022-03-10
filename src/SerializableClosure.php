@@ -406,8 +406,11 @@ class SerializableClosure implements Serializable
             // @see https://3v4l.org/joLur
             // For this reason and to avoid any issues, we can just skip the wrapping
             // of DateTime objects.
-            if (PHP_VERSION >= 7.4 && $data instanceof \DateTime) {
-                return;
+            if (PHP_VERSION >= 7.1) {
+                // Cannot do this if statement one line as DateTime is only available since PHP 7.1
+                if ($data instanceof \DateTime) {
+                    return;
+                }
             }
 
             if(isset($storage[$data])){

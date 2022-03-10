@@ -37,5 +37,8 @@
         <testsuite name="ReflectionClosure6">
             <file phpVersion="8.0.0-dev" phpVersionOperator=">=">./tests/ReflectionClosure6Test.php</file>
         </testsuite>
+        <testsuite name="DateTimeReflection">
+            <file phpVersion="7.1.0" phpVersionOperator=">=">./tests/DateTimeReflectionTest.php</file>
+        </testsuite>
     </testsuites>
 </phpunit>
