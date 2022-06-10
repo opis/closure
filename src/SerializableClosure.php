@@ -387,6 +387,8 @@ class SerializableClosure implements Serializable
             }
             unset($value);
             unset($data[self::ARRAY_RECURSIVE_KEY]);
+        } elseif(interface_exists('UnitEnum') && is_object($data) && is_subclass_of($data, 'UnitEnum')){
+            return;
         } elseif($data instanceof \stdClass){
             if(isset($storage[$data])){
                 $data = $storage[$data];
@@ -627,6 +629,8 @@ class SerializableClosure implements Serializable
             }
             unset($value);
             unset($data[self::ARRAY_RECURSIVE_KEY]);
+        } elseif(interface_exists('UnitEnum') && is_object($data) && is_subclass_of($data, 'UnitEnum')){
+            return;
         } elseif ($data instanceof \stdClass) {
             if(isset($this->scope[$data])){
                 $data = $this->scope[$data];
