@@ -5,6 +5,8 @@ Opis Closure
 [![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
 
+This is a temporary fork containing a patch to prevent issues when serializing `Carbon` instances. See [This PR](https://github.com/opis/closure/pull/113) further information.
+
 Serializable closures
 ---------------------
 **Opis Closure** is a library that aims to overcome PHP's limitations regarding closure
