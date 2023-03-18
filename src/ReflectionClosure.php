@@ -46,7 +46,7 @@ class ReflectionClosure extends ReflectionFunction
     /**
      * @return bool
      */
-    public function isStatic()
+    public function isStatic(): bool
     {
         if ($this->isStaticClosure === null) {
             $this->isStaticClosure = strtolower(substr($this->getCode(), 0, 6)) === 'static';
@@ -84,6 +84,10 @@ class ReflectionClosure extends ReflectionFunction
 
         if (null !== $className = $this->getClosureScopeClass()) {
             $className = '\\' . trim($className->getName(), '\\');
+        }
+
+        if ($className === null) {
+            $className = '';
         }
 
         $builtin_types = self::getBuiltinTypes();
