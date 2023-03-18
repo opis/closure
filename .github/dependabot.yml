@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "daily"
 
-- package-ecosystem: "composer"
+  - package-ecosystem: "composer"
     directory: "/"
     schedule:
       interval: "daily"
