@@ -109,7 +109,12 @@ class SerializableClosure implements Serializable
         return call_user_func_array($this->closure, func_get_args());
     }
 
-    /**
+	public function __serialize(): array
+	{
+		return $this->serialize();
+	}
+
+	/**
      * Implementation of Serializable::serialize()
      *
      * @return  string  The serialized closure
@@ -178,7 +183,12 @@ class SerializableClosure implements Serializable
         return $data;
     }
 
-    /**
+	public function __unserialize(array $data): void
+	{
+		$this->unserialize($data);
+	}
+
+	/**
      * Implementation of Serializable::unserialize()
      *
      * @param   string $data Serialized data
