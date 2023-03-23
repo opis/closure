@@ -111,7 +111,7 @@ class SerializableClosure implements Serializable
 
 	public function __serialize(): array
 	{
-		return $this->serialize();
+		return ['closure' =>$this->serialize()];
 	}
 
 	/**
@@ -185,7 +185,7 @@ class SerializableClosure implements Serializable
 
 	public function __unserialize(array $data): void
 	{
-		$this->unserialize($data);
+		$this->unserialize($data['closure']);
 	}
 
 	/**
