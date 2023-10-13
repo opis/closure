@@ -5,7 +5,7 @@ namespace Opis\Closure\Test;
 use Closure;
 use Opis\Closure\ReflectionClosure;
 
-final class NamespaceGroupTest extends \PHPUnit\Framework\TestCase
+final class NamespaceFullyQualifiedTest extends \PHPUnit\Framework\TestCase
 {
     public function test_namespace_fully_qualified()
     {
