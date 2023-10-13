@@ -9,7 +9,7 @@ use Foo\{
     Baz\Qux\Forest
 };
 
-final class NamespaceFullyQualifiedTest extends \PHPUnit\Framework\TestCase
+final class NamespaceGroupTest extends \PHPUnit\Framework\TestCase
 {
     public function test_namespace_fully_qualified()
     {
