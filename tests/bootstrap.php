@@ -2,4 +2,4 @@
 
 require_once './vendor/autoload.php';
 
-\Opis\Closure\Serializer::init();
+\Opis\Closure\Serializer::init(null, true);

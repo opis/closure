@@ -17,6 +17,11 @@ class DeserializationHandler
         $this->refs = new WeakMap();
         $this->visitedArrays = [];
 
+        if (Serializer::$v3Compatible) {
+            $this->v3_unboxed = [];
+            $this->v3_refs = [];
+        }
+
         try {
             $data = unserialize($serialized);
             unset($serialized);
@@ -33,6 +38,7 @@ class DeserializationHandler
             return $data;
         } finally {
             $this->unboxed = $this->refs = $this->visitedArrays = null;
+            $this->v3_unboxed = $this->v3_refs = null;
         }
     }
 
@@ -92,6 +98,11 @@ class DeserializationHandler
         }
 
         if (!($object instanceof Box)) {
+            // 3.x compatibility
+            if (Serializer::$v3Compatible && $this->v3_handleObject($object)) {
+                return;
+            }
+
             // mark as unboxed (to not process again)
             $this->unboxed[$object] = $object;
 
@@ -219,5 +230,121 @@ class DeserializationHandler
         }
 
         return $info->getFactory($data["this"], $data["scope"])($data["vars"]);
+    }
+
+    ///////////////////////////////////////////////////////
+
+    /**
+     * @var Closure[]|null
+     */
+    private ?array $v3_unboxed = null;
+    private ?array $v3_refs = null;
+
+    private function v3_handleObject(object &$object): bool
+    {
+        if ($object instanceof SelfReference) {
+            $id = $object->hash;
+
+            if (isset($this->v3_unboxed[$id])) {
+                // get the resolved closure
+                $object = $this->unboxed[$object] = $this->v3_unboxed[$id];
+                return true;
+            }
+
+            if (isset($this->v3_refs[$id])) {
+                // just save a reference
+                $this->v3_refs[$id][] = &$object;
+                return true;
+            }
+
+            // this will be set, eventually
+            $this->v3_unboxed[$id] ??= null;
+            $object = &$this->v3_unboxed[$id];
+
+            return true;
+        }
+
+        if ($object instanceof SerializableClosure) {
+            // closure id
+            $id = $object->data["self"];
+            if (isset($this->v3_unboxed[$id])) {
+                // get the resolved closure
+                $object = $this->unboxed[$object] = $this->v3_unboxed[$id];
+                return true;
+            }
+
+            if (isset($this->v3_refs[$id])) {
+                // we are currently unboxing the SerializableClosure
+                // just save a reference
+                $this->v3_refs[$id][] = &$object;
+                return true;
+            }
+
+            $this->v3_refs[$id] = [];
+            $unboxed = $this->v3_unboxClosure($object->data);
+            foreach ($this->v3_refs[$id] as &$ref) {
+                $ref = $unboxed;
+                unset($ref);
+            }
+            unset($this->v3_refs[$id]);
+
+            // clear data
+            $object->data = null;
+
+            // save the object
+            $object = $this->unboxed[$object] = $this->v3_unboxed[$id] = $unboxed;
+            return true;
+        }
+
+        return false;
+    }
+
+    private function v3_unboxClosure(array &$data): Closure
+    {
+        $data += [
+            "use" => null,
+            "this" => null,
+            "scope" => null,
+        ];
+
+        $v3_imports = "/* v3 */";
+        // @see ClosureInfo::key()
+        if (!($info = ClosureInfo::resolve(md5($v3_imports . "\n" . $data["function"])))) {
+            $flags = 0;
+
+            // use some heuristics for flags
+            $cstr = strtolower(ltrim($data["function"]));
+            if (str_starts_with($cstr, "static")) {
+                $flags |= ClosureInfo::FLAG_IS_STATIC;
+                $cstr = ltrim(substr($cstr, 6));
+            }
+            if (str_starts_with($cstr, "fn")) {
+                $flags |= ClosureInfo::FLAG_IS_SHORT;
+            }
+            unset($cstr);
+
+            if ($data["this"] && !($flags & ClosureInfo::FLAG_IS_STATIC)) {
+                $flags |= ClosureInfo::FLAG_HAS_THIS;
+            }
+            if ($data["scope"]) {
+                $flags |= ClosureInfo::FLAG_HAS_SCOPE;
+            }
+
+            // create info
+            $info = new ClosureInfo($v3_imports, $data["function"], $data["use"] ? array_keys($data["use"]) : null, $flags);
+        }
+
+        if ($info->isStatic()) {
+            // we cannot have objects on static closures
+            $data["this"] = null;
+        } elseif ($data["this"]) {
+            $this->handleObject($data["this"]);
+        }
+
+        if ($data["use"]) {
+            $this->handleArray($data["use"]);
+        }
+
+        return $info->getFactory($data["this"], $data["scope"])($data["use"]);
     }
 }

@@ -35,7 +35,8 @@ Starting with v4.0 **Opis Closure** is about arbitrary data serialization not ju
 
 ## Migrating from 3.x
 
-Version 4.x is a full rewrite of the library, and unfortunately it is not compatible with 3.x.
+Version 4.x is a full rewrite of the library, but unserialization from 3.x is possible.
+Read the [docs][documentation] on how to migrate from 3.x.
 
 ## Documentation
 

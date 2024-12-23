@@ -17,15 +17,22 @@ final class Serializer
     public static string $uniqKey;
 
     private static ?SecurityProviderInterface $securityProvider = null;
-
     private static bool $enumExists;
 
-    public static function init(SecurityProviderInterface|string|null $security = null): void
+    public static bool $v3Compatible = false;
+
+    public static function init(
+        SecurityProviderInterface|string|null $security = null,
+        bool                                  $v3Compatible = false
+    ): void
     {
         if (self::$init) {
             return;
         }
         self::$init = true;
+
+        // Handle v3compatible data
+        self::$v3Compatible = $v3Compatible;
 
         // Add missing defines
         $const = [
@@ -112,49 +119,71 @@ final class Serializer
         );
     }
 
-    public static function serialize(mixed $data): string
+    public static function serialize(mixed $data, ?SecurityProviderInterface $security = null): string
     {
         self::$init || self::init();
-        return self::encode((new SerializationHandler())->serialize($data));
+        return self::encode((new SerializationHandler())->serialize($data), $security);
     }
 
     /**
      * @throws SecurityException
      */
-    public static function unserialize(string $data): mixed
+    public static function unserialize(string $data, ?SecurityProviderInterface $security = null): mixed
     {
         self::$init || self::init();
-        return (new DeserializationHandler())->unserialize(self::decode($data));
+        return (new DeserializationHandler())->unserialize(self::decode($data, $security));
     }
 
-    public static function encode(string $data): string
+    public static function unserialize_v3(string $data, ?SecurityProviderInterface $security = null): mixed
     {
-        if (!self::$securityProvider) {
+        self::$init || self::init();
+
+        $security ??= self::$securityProvider;
+
+        $enabled = self::$v3Compatible;
+        $prevSecurity = self::$securityProvider;
+
+        self::$v3Compatible = true;
+        self::$securityProvider = $security;
+
+        try {
+            return (new DeserializationHandler())->unserialize($data);
+        } finally {
+            self::$v3Compatible = $enabled;
+            self::$securityProvider = $prevSecurity;
+        }
+    }
+
+    public static function encode(string $data, ?SecurityProviderInterface $security = null): string
+    {
+        $security ??= self::$securityProvider;
+        if (!$security) {
             return $data;
         }
-        return '@' . self::$securityProvider->sign($data) . "\n" . $data;
+        return '@' . $security->sign($data) . "\n" . $data;
     }
 
     /**
      * @throws SecurityException
      */
-    public static function decode(string $data): string
+    public static function decode(string $data, ?SecurityProviderInterface $security = null): string
     {
+        $security ??= self::$securityProvider;
         // we must use here the security provider
-        if (!self::$securityProvider) {
+        if (!$security) {
             if ($data[0] === '@') {
-                throw new SecurityException("The serialized closure is signed, use a security provider at init.");
+                throw new SecurityException("The serialized closure is signed, use a security provider.");
             }
             return $data;
         }
 
         if ($data[0] !== '@') {
-            throw new SecurityException("The serialized closure is NOT signed.");
+            throw new SecurityException("The serialized closure is NOT signed, but a security provider was used.");
         }
 
         [$hash, $data] = explode("\n", $data, 2);
 
-        if (!self::$securityProvider->verify(substr($hash, 1), $data)) {
+        if (!$security->verify(substr($hash, 1), $data)) {
             throw new SecurityException(
                 "Your serialized closure might have been modified and it's unsafe to be unserialized. " .
                 "Make sure you use the same security provider, with the same settings, " .
