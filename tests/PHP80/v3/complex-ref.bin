@@ -1,4 +1,4 @@
-C:32:"Opis\Closure\SerializableClosure":378:{a:5:{s:3:"use";a:1:{s:3:"arr";a:3:{s:4:"self";O:26:"Opis\Closure\SelfReference":1:{s:4:"hash";s:32:"00000000000000020000000000000000";}s:1:"a";i:1;s:8:"ref_to_a";R:7;}}s:8:"function";s:107:"static function &(string $key, $value) use (&$arr) : array {
+C:32:"Opis\Closure\SerializableClosure":375:{a:5:{s:3:"use";a:1:{s:3:"arr";a:3:{s:4:"self";O:26:"Opis\Closure\SelfReference":1:{s:4:"hash";s:32:"00000000000000020000000000000000";}s:1:"a";i:1;s:8:"ref_to_a";R:7;}}s:8:"function";s:104:"static function &(string $key, $value) use (&$arr) : array {
     $arr[$key] = $value;
     return $arr;
 }";s:5:"scope";N;s:4:"this";N;s:4:"self";s:32:"00000000000000020000000000000000";}}
