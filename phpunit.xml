@@ -1,41 +1,11 @@
-<phpunit bootstrap="./vendor/autoload.php" verbose="true">
+<phpunit bootstrap="./tests/bootstrap.php">
     <testsuites>
-        <testsuite name="Main">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ClosureTest.php</file>
-        </testsuite>
-        <testsuite name="Serialize">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SerializeTest.php</file>
-        </testsuite>
-        <testsuite name="Recursive">
-            <file phpVersion="7.1.0" phpVersionOperator="&lt;">./tests/RecursiveArrayTest.php</file>
-        </testsuite>
-        <testsuite name="Signed">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/SignedClosureTest.php</file>
-        </testsuite>
-        <testsuite name="Namespace">
-            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceTest.php</file>
-            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceUnqualifiedTest.php</file>
-            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespaceFullyQualifiedTest.php</file>
-            <file phpVersion="5.5.0" phpVersionOperator=">=">./tests/NamespacePartiallyQualifiedTest.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure">
-            <file phpVersion="5.4.0" phpVersionOperator=">=">./tests/ReflectionClosureTest.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure2">
-            <file phpVersion="7.0.0" phpVersionOperator=">=">./tests/ReflectionClosure2Test.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure3">
-            <file phpVersion="7.1.0" phpVersionOperator=">=">./tests/ReflectionClosure3Test.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure4">
-            <file phpVersion="7.2.0" phpVersionOperator=">=">./tests/ReflectionClosure4Test.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure5">
-            <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/ReflectionClosure5Test.php</file>
-            <file phpVersion="7.4.0" phpVersionOperator=">=">./tests/NamespaceGroupTest.php</file>
-        </testsuite>
-        <testsuite name="ReflectionClosure6">
-            <file phpVersion="8.0.0-dev" phpVersionOperator=">=">./tests/ReflectionClosure6Test.php</file>
+        <testsuite name="Opis Closure">
+            <directory suffix="Test.php" phpVersion="8.0" phpVersionOperator=">=">./tests/PHP80</directory>
+            <directory suffix="Test.php" phpVersion="8.1" phpVersionOperator=">=">./tests/PHP81</directory>
+            <directory suffix="Test.php" phpVersion="8.2" phpVersionOperator=">=">./tests/PHP82</directory>
+            <directory suffix="Test.php" phpVersion="8.3" phpVersionOperator=">=">./tests/PHP83</directory>
+            <directory suffix="Test.php" phpVersion="8.4" phpVersionOperator=">=">./tests/PHP84</directory>
         </testsuite>
     </testsuites>
 </phpunit>

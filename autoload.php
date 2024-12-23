@@ -1,39 +1,25 @@
 <?php
-/* ===========================================================================
- * Copyright (c) 2018-2021 Zindex Software
- *
- * Licensed under the MIT License
- * =========================================================================== */
 
-require_once __DIR__ . '/functions.php';
-
-spl_autoload_register(function($class){
-   
+spl_autoload_register(static function ($class) {
     $class = ltrim($class, '\\');
     $dir = __DIR__ . '/src';
     $namespace = 'Opis\Closure';
-    
-    if(strpos($class, $namespace) === 0)
-    {
+
+    if (str_starts_with($class, $namespace)) {
         $class = substr($class, strlen($namespace));
         $path = '';
-        if(($pos = strripos($class, '\\')) !== FALSE)
-        {
+        if (($pos = strrpos($class, '\\')) !== false) {
             $path = str_replace('\\', '/', substr($class, 0, $pos)) . '/';
             $class = substr($class, $pos + 1);
         }
         $path .= str_replace('_', '/', $class) . '.php';
         $dir .= '/' . $path;
-        
-        if(file_exists($dir))
-        {
+
+        if (is_file($dir)) {
             include $dir;
             return true;
         }
-        
-        return false;
     }
-    
-    return false;
 
+    return false;
 });
