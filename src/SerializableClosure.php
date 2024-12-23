@@ -3,7 +3,6 @@
 namespace Opis\Closure;
 
 use Opis\Closure\Security\SecurityException;
-use Opis\Closure\Security\SecurityProviderInterface;
 use Serializable, RuntimeException;
 use function unserialize;
 

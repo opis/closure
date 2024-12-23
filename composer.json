@@ -37,5 +37,9 @@
         "branch-alias": {
             "dev-master": "4.x-dev"
         }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
     }
 }
