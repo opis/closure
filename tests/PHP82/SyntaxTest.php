@@ -24,13 +24,5 @@ use ExternalRequest as Req,
 return static function ((HReq & RequestInterface\Req) | Req $request) {return $request?->proces();};
 PHP,
         ];
-        yield [
-            'Test readonly anonymous class',
-            static fn() => new #[XAttr()] readonly class(){},
-                <<<'PHP'
-namespace Opis\Closure\Test\PHP82;
-return static fn() => new #[XAttr()] readonly class(){};
-PHP,
-        ];
     }
 }

@@ -20,5 +20,14 @@ return static fn() => new class() {
 };
 PHP,
         ];
+        // readonly classes were added in php 8.2, but readonly anonymous classes are supported only from php 8.3?
+        yield [
+            'Test readonly anonymous class',
+            static fn() => new #[XAttr()] readonly class(){},
+                <<<'PHP'
+namespace Opis\Closure\Test\PHP83;
+return static fn() => new #[XAttr()] readonly class(){};
+PHP,
+        ];
     }
 }
