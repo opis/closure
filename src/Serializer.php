@@ -53,7 +53,9 @@ final class Serializer
         ClosureStream::init();
 
         // Set security provider
-        self::setSecurityProvider($security);
+        if ($security) {
+            self::setSecurityProvider($security);
+        }
 
         // Set uniq key
         self::$uniqKey = '@(opis/closure):key:' . chr(0) . uniqid() . chr(8);
