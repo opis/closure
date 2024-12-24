@@ -51,6 +51,6 @@ class V3CompatTest extends TestCase
         if (is_string($security)) {
             $security = new DefaultSecurityProvider($security);
         }
-        return Serializer::unserialize_v3($data, $security);
+        return Serializer::unserialize($data, $security);
     }
 }

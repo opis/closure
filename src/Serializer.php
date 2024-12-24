@@ -131,9 +131,47 @@ final class Serializer
     public static function unserialize(string $data, ?SecurityProviderInterface $security = null): mixed
     {
         self::$init || self::init();
-        return (new DeserializationHandler())->unserialize(self::decode($data, $security));
+
+        $skipDecode = false;
+        // when $data starts with @ - it indicates that it is v4 signed
+        if (self::$v3Compatible && ($data[0] ?? null) !== "@") {
+            // in v3 only the content of SerializableClosure is signed
+            // we must use some simple heuristics to determine if this is v3
+            // this will only work if the serialized data contains a closure
+            // the security checks will be made inside SerializableClosure::unserialize()
+            $skipDecode = str_contains($data, 'C:32:"Opis\Closure\SerializableClosure"');
+        }
+
+        // Create a new deserialization handler
+        $handler = new DeserializationHandler();
+
+        if (!$skipDecode) {
+            // current - v4
+            return $handler->unserialize(self::decode($data, $security));
+        }
+
+        // v3
+        if (!$security || self::$securityProvider === $security) {
+            return $handler->unserialize($data);
+        }
+
+        // we have to use the current security provider
+        $prevSecurity = self::$securityProvider;
+        self::$securityProvider = $security;
+
+        try {
+            return $handler->unserialize($data);
+        } finally {
+            self::$securityProvider = $prevSecurity;
+        }
     }
 
+    /**
+     * Unserialize data from v3.x using a security provider (optional)
+     * DO NOT use this to unserialize data from v4
+     * This method was created in order to help with migration from v3 to v4
+     * @throws SecurityException
+     */
     public static function unserialize_v3(string $data, ?SecurityProviderInterface $security = null): mixed
     {
         self::$init || self::init();
@@ -154,6 +192,9 @@ final class Serializer
         }
     }
 
+    /**
+     * Sign data using a security provider
+     */
     public static function encode(string $data, ?SecurityProviderInterface $security = null): string
     {
         $security ??= self::$securityProvider;
@@ -164,6 +205,7 @@ final class Serializer
     }
 
     /**
+     * Extract signed data using a security provider
      * @throws SecurityException
      */
     public static function decode(string $data, ?SecurityProviderInterface $security = null): string
@@ -223,6 +265,12 @@ final class Serializer
         ];
     }
 
+    /**
+     * Prevent serialization boxing for specified classes
+     * @param string ...$class
+     * @return void
+     * @throws \ReflectionException
+     */
     public static function preventBoxing(string ...$class): void
     {
         foreach ($class as $cls) {
@@ -240,6 +288,9 @@ final class Serializer
         return self::classInfo($class)->unserialize ?? null;
     }
 
+    /**
+     * Use a generic object serializer/deserializer for specified classes
+     */
     public static function setObjectSerialization(string ...$class): void
     {
         $serialize = [CustomSplSerialization::class, "sObject"];
@@ -255,6 +306,9 @@ final class Serializer
         }
     }
 
+    /**
+     * Use custom serialization/deserialization for a class
+     */
     public static function setCustomSerialization(string $class, ?callable $serialize, ?callable $unserialize): void
     {
         $data = self::classInfo($class);
@@ -262,6 +316,9 @@ final class Serializer
         $data->unserialize = $unserialize;
     }
 
+    /**
+     * Set current security provider
+     */
     public static function setSecurityProvider(SecurityProviderInterface|null|string $security): void
     {
         if (is_string($security)) {
@@ -270,12 +327,19 @@ final class Serializer
         self::$securityProvider = $security;
     }
 
+    /**
+     * Get current security provider
+     */
     public static function getSecurityProvider(): ?SecurityProviderInterface
     {
         return self::$securityProvider;
     }
 
-    public static function isEnum($value): bool
+    /**
+     * Helper function to detect if a value is Enum
+     * @internal
+     */
+    public static function isEnum(mixed $value): bool
     {
         return self::$enumExists && ($value instanceof UnitEnum);
     }

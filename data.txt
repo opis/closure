@@ -1,1 +1,0 @@
-C:32:"Opis\Closure\SerializableClosure":181:{@RQlO9jkdxEek6V0Q5LV32kwuyRaPK7EhiHQjSKhTgks=.a:5:{s:3:"use";a:0:{}s:8:"function";s:12:"fn() => "ok"";s:5:"scope";N;s:4:"this";N;s:4:"self";s:32:"00000000000000040000000000000000";}}
