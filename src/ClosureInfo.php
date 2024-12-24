@@ -128,7 +128,9 @@ if ({$varName}) {
     \\extract({$varName}, \\EXTR_SKIP | \\EXTR_REFS);
 }
 unset({$varName});
+// Start of serialized closure
 return {$this->body};
+// End of serialized closure
 };";
         return $code;
     }

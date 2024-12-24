@@ -336,7 +336,7 @@ final class ClosureParser
             $code = self::formatImports($this->aliases, $this->hints, $ns);
         }
 
-        if ($ns !== "\\") {
+        if ($ns) {
             return "namespace {$ns};" . ($code ? "\n" : "") . $code;
         }
 

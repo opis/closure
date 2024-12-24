@@ -474,7 +474,7 @@ final class TokenizedFileInfo
                 $this->trackPrefix = ' - generated at ' . date(DATE_W3C) . ', file ' . $this->fileName . ', line ';
             }
             // Only append line number to track prefix
-            $token[1] = '// ' . trim(substr($token[1], 8)) . $this->trackPrefix . $token[2] . "\n";
+            $token[1] = '// ' . trim(substr($token[1], 8)) . $this->trackPrefix . $token[2];
         }
     }
 
