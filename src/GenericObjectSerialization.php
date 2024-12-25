@@ -26,7 +26,7 @@ class GenericObjectSerialization
                 if ($property->isStatic() || !$property->getDeclaringClass()->isUserDefined()) {
                     continue;
                 }
-                // $property->setAccessible(true);
+                $property->setAccessible(true);
                 if ($property->isInitialized($object)) {
                     $data[$name] = $property->getValue($object);
                 }
