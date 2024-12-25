@@ -2,8 +2,7 @@
 
 namespace Opis\Closure;
 
-use UnitEnum, ReflectionClass;
-use Opis\Closure\Attribute\NoBox;
+use UnitEnum;
 use Opis\Closure\Security\{
     DefaultSecurityProvider,
     SecurityProviderInterface,
@@ -64,57 +63,57 @@ final class Serializer
         self::$enumExists = interface_exists(UnitEnum::class, false);
 
         // add spl serializations
-        self::setCustomSerialization(
+        self::setCustom(
             \ArrayObject::class,
             [CustomSplSerialization::class, "sArrayObject"],
             [CustomSplSerialization::class, "uArrayObject"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplDoublyLinkedList::class,
             [CustomSplSerialization::class, "sDoublyLinkedList"],
             [CustomSplSerialization::class, "uDoublyLinkedList"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplStack::class,
             [CustomSplSerialization::class, "sStack"],
             [CustomSplSerialization::class, "uStack"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplQueue::class,
             [CustomSplSerialization::class, "sQueue"],
             [CustomSplSerialization::class, "uQueue"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplPriorityQueue::class,
             [CustomSplSerialization::class, "sPriorityQueue"],
             [CustomSplSerialization::class, "uPriorityQueue"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplObjectStorage::class,
             [CustomSplSerialization::class, "sObjectStorage"],
             [CustomSplSerialization::class, "uObjectStorage"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplFixedArray::class,
             [CustomSplSerialization::class, "sFixedArray"],
             [CustomSplSerialization::class, "uFixedArray"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplMinHeap::class,
             [CustomSplSerialization::class, "sHeap"],
             [CustomSplSerialization::class, "uMinHeap"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \SplMaxHeap::class,
             [CustomSplSerialization::class, "sHeap"],
             [CustomSplSerialization::class, "uMaxHeap"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \WeakMap::class,
             [CustomSplSerialization::class, "sWeakMap"],
             [CustomSplSerialization::class, "uWeakMap"],
         );
-        self::setCustomSerialization(
+        self::setCustom(
             \WeakReference::class,
             [CustomSplSerialization::class, "sWeakReference"],
             [CustomSplSerialization::class, "uWeakReference"],
@@ -242,29 +241,12 @@ final class Serializer
 
     /**
      * @param string $class
-     * @return object
-     * @throws \ReflectionException
+     * @return ClassInfo
+     * @internal
      */
-    public static function classInfo(string $class): object
+    public static function getClassInfo(string $class): ClassInfo
     {
-        if (isset(self::$info[$class])) {
-            return self::$info[$class];
-        }
-
-        $reflector = new ReflectionClass($class);
-
-        return self::$info[$class] = (object)[
-            // "reflector" => $reflector,
-            // mark it as internal
-            "internal" => $reflector->isInternal(),
-            // mark it as serializable
-            "serializable" => $reflector->hasMethod("__serialize"),
-            // we don't box when we have NoBox attr on class
-            "box" => empty($reflector->getAttributes(NoBox::class)),
-            // custom serialize/unserialize functions
-            // "serialize" => null,
-            // "unserialize" => null,
-        ];
+        return self::$info[$class] ??= new ClassInfo($class);
     }
 
     /**
@@ -273,47 +255,19 @@ final class Serializer
      * @return void
      * @throws \ReflectionException
      */
-    public static function preventBoxing(string ...$class): void
+    public static function noBox(string ...$class): void
     {
         foreach ($class as $cls) {
-            self::classInfo($cls)->box = false;
-        }
-    }
-
-    public static function getSerializer(string $class): ?callable
-    {
-        return self::classInfo($class)->serialize ?? null;
-    }
-
-    public static function getUnserializer(string $class): ?callable
-    {
-        return self::classInfo($class)->unserialize ?? null;
-    }
-
-    /**
-     * Use a generic object serializer/deserializer for specified classes
-     */
-    public static function setObjectSerialization(string ...$class): void
-    {
-        $serialize = [CustomSplSerialization::class, "sObject"];
-        $unserialize = [CustomSplSerialization::class, "uObject"];
-        foreach ($class as $cls) {
-            $data = self::classInfo($cls);
-            if ($data->serializable || !$data->box) {
-                // already serializable or boxing is prevented
-                continue;
-            }
-            $data->serialize = $serialize;
-            $data->unserialize = $unserialize;
+            self::getClassInfo($cls)->box = false;
         }
     }
 
     /**
      * Use custom serialization/deserialization for a class
      */
-    public static function setCustomSerialization(string $class, ?callable $serialize, ?callable $unserialize): void
+    public static function setCustom(string $class, ?callable $serialize, ?callable $unserialize): void
     {
-        $data = self::classInfo($class);
+        $data = self::getClassInfo($class);
         $data->serialize = $serialize;
         $data->unserialize = $unserialize;
     }

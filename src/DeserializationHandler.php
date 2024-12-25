@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use stdClass, WeakMap, Closure, ReflectionClass;
+use stdClass, WeakMap, Closure;
 use function unserialize;
 
 class DeserializationHandler
@@ -153,17 +153,21 @@ class DeserializationHandler
 
     private function unboxObject(Box $box): object
     {
-        /**
-         * @var string $class
-         * @var array|null $data
-         */
-        [$class, &$data] = $box->data;
+        $info = Serializer::getClassInfo($box->data[0]);
 
+        /**
+         * @var $data array|null
+         */
+        $data = &$box->data[1];
         // we must always have an array
         $data ??= [];
 
-        // check if we have a custom unserialize
-        $unserialize = Serializer::getUnserializer($class);
+        $unserialize = $info->unserialize;
+        if (!$unserialize && !$info->hasMagicUnserialize) {
+            // if we don't have a custom unserializer, and we don't have __unserialize
+            // then use the generic object unserialize
+            $unserialize = [GenericObjectSerialization::class, "unserialize"];
+        }
         if ($unserialize) {
             return $unserialize($data, function (?object $object, mixed &$value = null) use ($box, &$data): void {
                 if ($object) {
@@ -175,11 +179,11 @@ class DeserializationHandler
                     // handle
                     $this->handle($value);
                 }
-            }, $class, $this);
+            }, $info->className(), $this);
         }
 
         // create a new object
-        $object = (new ReflectionClass($class))->newInstanceWithoutConstructor();
+        $object = $info->reflector->newInstanceWithoutConstructor();
 
         // we eagerly save cache
         $this->unboxed[$box] = $object;

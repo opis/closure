@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v4.0.0, 2024.12.25
+
+- Complete rewrite of the library
+
 ### v3.6.2, 2021.04.09
 
 - Fixed string interpolation

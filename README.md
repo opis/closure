@@ -1,9 +1,9 @@
 Opis Closure
 ====================
-![](https://github.com/opis/closure/workflows/Tests/badge.svg?branch=4.x)
-[![Latest Stable Version](https://poser.pugx.org/opis/closure/v/stable.png)](https://packagist.org/packages/opis/closure)
-[![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
-[![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
+[![Tests](https://github.com/opis/closure/workflows/Tests/badge.svg)](https://github.com/opis/closure/actions)
+[![Packagist Version](https://img.shields.io/packagist/v/opis/closure?label=Version)](https://packagist.org/packages/opis/closure)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/opis/closure?label=Downloads)](https://packagist.org/packages/opis/closure)
+[![Packagist License](https://img.shields.io/packagist/l/opis/closure?color=teal&label=License)](https://packagist.org/packages/opis/closure)
 
 Serialize anything
 ------------------
@@ -14,13 +14,10 @@ including closures, without breaking a sweat.
 ```php
 use Opis\Closure\Serializer;
 
-// init lib
-Serializer::init();
-
 $serialized = Serializer::serialize(fn() => "hello!");
 $greet = Serializer::unserialize($serialized);
 
-echo $greet();
+echo $greet(); // hello
 ```
 
 A full rewrite was necessary to keep this project compatible with the PHP's new features, such as 
@@ -31,12 +28,12 @@ we had to serialize the object too. Since we had to do arbitrary data serializat
 about arbitrary data serialization, providing support for serializing closures but also adding easier ways to
 serialize custom objects.
 
-Starting with v4.0 **Opis Closure** is about arbitrary data serialization not just closure serialization. 
+Starting with v4, **Opis Closure** is about arbitrary data serialization not just closure serialization. 
 
 ## Migrating from 3.x
 
-Version 4.x is a full rewrite of the library, but unserialization from 3.x is possible.
-Read the [docs][documentation] on how to migrate from 3.x.
+Version 4.x is a full rewrite of the library, but data deserialization from 3.x is possible.
+Read the docs on [how to migrate from 3.x][migration].
 
 ## Documentation
 
@@ -70,6 +67,7 @@ Or you could directly reference it into your `composer.json` file as a dependenc
 ```
 
 [documentation]: https://opis.io/closure/4.x/ "Opis Closure Documentation"
+[migration]: https://opis.io/closure/4.x/migrate.html "Opis Closure Migration guide"
 [license]: http://opensource.org/licenses/MIT "MIT License"
 [Packagist]: https://packagist.org/packages/opis/closure "Packagist"
 [Composer]: https://getcomposer.org "Composer"

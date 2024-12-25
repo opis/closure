@@ -16,10 +16,7 @@ class SerializationHandler
      */
     private ?array $priority;
 
-    /**
-     * @var bool[]
-     */
-    private array $shouldBox = [];
+    private ?WeakMap $shouldBox;
 
     private int $uniqueArrayKeyValue;
 
@@ -30,6 +27,7 @@ class SerializationHandler
         $this->arrayMap = [];
         $this->objectMap = new WeakMap();
         $this->priority = [];
+        $this->shouldBox = new WeakMap();
         $this->uniqueArrayKeyValue = 0;
         $this->hasAnonymousObjects = false;
 
@@ -49,7 +47,7 @@ class SerializationHandler
             }
             return serialize($data);
         } finally {
-            $this->arrayMap = $this->objectMap = $this->priority = null;
+            $this->arrayMap = $this->objectMap = $this->priority = $this->shouldBox = null;
         }
     }
 
@@ -64,31 +62,30 @@ class SerializationHandler
         return $data;
     }
 
-    private function shouldBox(string $class): bool
+    private function shouldBox(ClassInfo $info): bool
     {
-        if (isset($this->shouldBox[$class])) {
-            return $this->shouldBox[$class];
+        if (isset($this->shouldBox[$info])) {
+            // already marked
+            return $this->shouldBox[$info];
         }
-
-        $info = Serializer::classInfo($class);
 
         if (!$info->box) {
             // explicit no box
-            return $this->shouldBox[$class] = false;
+            return $this->shouldBox[$info] = false;
         }
 
-        if (isset($info->serialize)) {
+        if ($info->serialize) {
             // we have a custom serializer set
-            return $this->shouldBox[$class] = true;
+            return $this->shouldBox[$info] = true;
         }
 
-        if ($info->internal) {
+        if ($info->reflector->isInternal()) {
             // internal classes are supported with custom serializers only
-            return $this->shouldBox[$class] = false;
+            return $this->shouldBox[$info] = false;
         }
 
-        // shows if __serialize is present
-        return $this->shouldBox[$class] = $info->serializable;
+        // yes, we box by default
+        return $this->shouldBox[$info] = true;
     }
 
     private function handleObject(object $data): object
@@ -119,17 +116,26 @@ class SerializationHandler
             return $this->handleClosure($data);
         }
 
-        $class = get_class($data);
-
-        if (!$this->shouldBox($class)) {
+        $info = Serializer::getClassInfo(get_class($data));
+        if (!$this->shouldBox($info)) {
             // skip boxing
             return $this->objectMap[$data] = $data;
         }
 
-        $box = $this->objectMap[$data] = new Box(Box::TYPE_OBJECT, [$class, null]);
+        $box = $this->objectMap[$data] = new Box(Box::TYPE_OBJECT, [$info->className(), null]);
 
-        $serializer = Serializer::getSerializer($class);
-        $vars = $serializer ? $serializer($data, $this) : $data->__serialize();
+
+        if ($serializer = $info->serialize ?? null) {
+            // we have a custom serializer
+            $vars = $serializer($data, $this);
+        } elseif ($info->hasMagicSerialize) {
+            // we have the magic __serialize
+            $vars = $data->__serialize();
+        } else {
+            // we use a generic object serializer
+            $vars = GenericObjectSerialization::serialize($data);
+        }
+
         if (!empty($vars) && is_array($vars)) {
             $box->data[1] = &$this->handleArray($vars);
         }
