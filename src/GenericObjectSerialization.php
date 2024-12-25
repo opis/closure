@@ -49,19 +49,31 @@ class GenericObjectSerialization
 
         $solve($object, $data);
 
-        foreach ($data as $name => $value) {
-            if (!$reflection->hasProperty($name)) {
-                // dynamic
-                $object->{$name} = $value;
-                continue;
+        do {
+            if (!$data || !$reflection->isUserDefined()) {
+                break;
             }
+            foreach ($data as $name => $value) {
+                if (!$reflection->hasProperty($name)) {
+                    continue;
+                }
 
-            $property = $reflection->getProperty($name);
-            if ($property->isStatic()) {
-                continue;
+                $property = $reflection->getProperty($name);
+                if ($property->isStatic()) {
+                    continue;
+                }
+
+                $property->setAccessible(true);
+                $property->setValue($object, $value);
+                unset($data[$name]);
             }
-            $property->setAccessible(true);
-            $property->setValue($object, $value);
+        } while ($reflection = $reflection->getParentClass());
+
+        if ($data) {
+            // dynamic
+            foreach ($data as $name => $value) {
+                $object->{$name} = $value;
+            }
         }
 
         return $object;
