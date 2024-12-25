@@ -43,10 +43,8 @@ class GenericObjectSerialization
         return $data;
     }
 
-    public static function unserialize(array &$data, callable $solve, string $class): object
+    public static function unserialize(array &$data, callable $solve, ReflectionClass $reflection): object
     {
-        $reflection = new ReflectionClass($class);
-
         $object = $reflection->newInstanceWithoutConstructor();
 
         $solve($object, $data);

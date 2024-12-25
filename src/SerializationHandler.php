@@ -79,7 +79,7 @@ class SerializationHandler
             return $this->shouldBox[$info] = true;
         }
 
-        if ($info->reflector->isInternal()) {
+        if ($info->reflection->isInternal()) {
             // internal classes are supported with custom serializers only
             return $this->shouldBox[$info] = false;
         }

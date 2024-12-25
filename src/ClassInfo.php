@@ -10,7 +10,7 @@ use Opis\Closure\Attribute\NoBox;
  */
 class ClassInfo
 {
-    public ReflectionClass $reflector;
+    public ReflectionClass $reflection;
     public bool $box;
     public bool $hasMagicSerialize;
     public bool $hasMagicUnserialize;
@@ -27,14 +27,14 @@ class ClassInfo
 
     public function __construct(string $className)
     {
-        $reflector = $this->reflector = new ReflectionClass($className);
-        $this->box = empty($reflector->getAttributes(NoBox::class));
-        $this->hasMagicSerialize = $reflector->hasMethod("__serialize");
-        $this->hasMagicUnserialize = $reflector->hasMethod("__unserialize");
+        $reflection = $this->reflection = new ReflectionClass($className);
+        $this->box = empty($reflection->getAttributes(NoBox::class));
+        $this->hasMagicSerialize = $reflection->hasMethod("__serialize");
+        $this->hasMagicUnserialize = $reflection->hasMethod("__unserialize");
     }
 
     public function className(): string
     {
-        return $this->reflector->name;
+        return $this->reflection->name;
     }
 }

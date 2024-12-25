@@ -179,11 +179,11 @@ class DeserializationHandler
                     // handle
                     $this->handle($value);
                 }
-            }, $info->className(), $this);
+            }, $info->reflection, $this);
         }
 
         // create a new object
-        $object = $info->reflector->newInstanceWithoutConstructor();
+        $object = $info->reflection->newInstanceWithoutConstructor();
 
         // we eagerly save cache
         $this->unboxed[$box] = $object;
