@@ -23,7 +23,8 @@
     "autoload": {
         "psr-4": {
             "Opis\\Closure\\": "src/"
-        }
+        },
+        "files": ["functions.php"]
     },
     "autoload-dev": {
         "psr-4": {

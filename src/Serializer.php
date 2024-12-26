@@ -126,9 +126,6 @@ final class Serializer
         return self::encode((new SerializationHandler())->serialize($data), $security);
     }
 
-    /**
-     * @throws SecurityException
-     */
     public static function unserialize(string $data, ?SecurityProviderInterface $security = null): mixed
     {
         self::$init || self::init();

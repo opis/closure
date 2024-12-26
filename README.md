@@ -12,10 +12,10 @@ Serialize anything
 including closures, without breaking a sweat.
 
 ```php
-use Opis\Closure\Serializer;
+use function Opis\Closure\{serialize, unserialize};
 
-$serialized = Serializer::serialize(fn() => "hello!");
-$greet = Serializer::unserialize($serialized);
+$serialized = serialize(fn() => "hello!");
+$greet = unserialize($serialized);
 
 echo $greet(); // hello
 ```
