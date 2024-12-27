@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use Closure, UnitEnum;
+use UnitEnum;
 use Opis\Closure\Security\{
     DefaultSecurityProvider,
     SecurityProviderInterface,
@@ -165,12 +165,11 @@ final class Serializer
     }
 
     /**
-     * Unserialize data from v3.x using a security provider (optional)
+     * Unserialize data from v3 using a security provider (optional)
      * DO NOT use this to unserialize data from v4
      * This method was created in order to help with migration from v3 to v4
-     * @throws SecurityException
      */
-    public static function unserialize_v3(string $data, ?SecurityProviderInterface $security = null, ?array $options = null): mixed
+    public static function v3_unserialize(string $data, ?SecurityProviderInterface $security = null, ?array $options = null): mixed
     {
         self::$init || self::init();
 
@@ -270,27 +269,6 @@ final class Serializer
         $data = self::getClassInfo($class);
         $data->serialize = $serialize;
         $data->unserialize = $unserialize;
-    }
-
-    /**
-     * Helper method used to replace the deprecated create_function() from PHP
-     * @param string $args
-     * @param string $body
-     * @return Closure
-     */
-    public static function createClosure(string $args, string $body): Closure
-    {
-        // make sure we are registered
-        self::$init || self::init();
-
-        $header = "/* created with " . __METHOD__ . "() */";
-        $body = "static function (" . $args . ") {\n" . $body . "\n}";
-
-        if (!($info = ClosureInfo::resolve(ClosureInfo::createKey($header, $body)))) {
-            $info = new ClosureInfo($header, $body, null, ClosureInfo::FLAG_IS_STATIC);
-        }
-
-        return ($info->getFactory(null))();
     }
 
     /**
