@@ -317,9 +317,8 @@ class DeserializationHandler
             "scope" => null,
         ];
 
-        $v3_imports = "/* v3 */";
-        // @see ClosureInfo::key()
-        if (!($info = ClosureInfo::resolve(md5($v3_imports . "\n" . $data["function"])))) {
+        $v3_header = "/* v3 */";
+        if (!($info = ClosureInfo::resolve(ClosureInfo::createKey($v3_header, $data["function"])))) {
             $flags = 0;
 
             // use some heuristics for flags
@@ -341,7 +340,7 @@ class DeserializationHandler
             }
 
             // create info
-            $info = new ClosureInfo($v3_imports, $data["function"], $data["use"] ? array_keys($data["use"]) : null, $flags);
+            $info = new ClosureInfo($v3_header, $data["function"], $data["use"] ? array_keys($data["use"]) : null, $flags);
         }
 
         if ($info->isStatic()) {

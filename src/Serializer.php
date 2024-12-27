@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use UnitEnum;
+use Closure, UnitEnum;
 use Opis\Closure\Security\{
     DefaultSecurityProvider,
     SecurityProviderInterface,
@@ -63,57 +63,57 @@ final class Serializer
         self::$enumExists = interface_exists(UnitEnum::class, false);
 
         // add spl serializations
-        self::setCustom(
+        self::register(
             \ArrayObject::class,
             [CustomSplSerialization::class, "sArrayObject"],
             [CustomSplSerialization::class, "uArrayObject"],
         );
-        self::setCustom(
+        self::register(
             \SplDoublyLinkedList::class,
             [CustomSplSerialization::class, "sDoublyLinkedList"],
             [CustomSplSerialization::class, "uDoublyLinkedList"],
         );
-        self::setCustom(
+        self::register(
             \SplStack::class,
             [CustomSplSerialization::class, "sStack"],
             [CustomSplSerialization::class, "uStack"],
         );
-        self::setCustom(
+        self::register(
             \SplQueue::class,
             [CustomSplSerialization::class, "sQueue"],
             [CustomSplSerialization::class, "uQueue"],
         );
-        self::setCustom(
+        self::register(
             \SplPriorityQueue::class,
             [CustomSplSerialization::class, "sPriorityQueue"],
             [CustomSplSerialization::class, "uPriorityQueue"],
         );
-        self::setCustom(
+        self::register(
             \SplObjectStorage::class,
             [CustomSplSerialization::class, "sObjectStorage"],
             [CustomSplSerialization::class, "uObjectStorage"],
         );
-        self::setCustom(
+        self::register(
             \SplFixedArray::class,
             [CustomSplSerialization::class, "sFixedArray"],
             [CustomSplSerialization::class, "uFixedArray"],
         );
-        self::setCustom(
+        self::register(
             \SplMinHeap::class,
             [CustomSplSerialization::class, "sHeap"],
             [CustomSplSerialization::class, "uMinHeap"],
         );
-        self::setCustom(
+        self::register(
             \SplMaxHeap::class,
             [CustomSplSerialization::class, "sHeap"],
             [CustomSplSerialization::class, "uMaxHeap"],
         );
-        self::setCustom(
+        self::register(
             \WeakMap::class,
             [CustomSplSerialization::class, "sWeakMap"],
             [CustomSplSerialization::class, "uWeakMap"],
         );
-        self::setCustom(
+        self::register(
             \WeakReference::class,
             [CustomSplSerialization::class, "sWeakReference"],
             [CustomSplSerialization::class, "uWeakReference"],
@@ -260,13 +260,34 @@ final class Serializer
     }
 
     /**
-     * Use custom serialization/deserialization for a class
+     * Register custom serialization/deserialization for a class
      */
-    public static function setCustom(string $class, ?callable $serialize, ?callable $unserialize): void
+    public static function register(string $class, ?callable $serialize, ?callable $unserialize): void
     {
         $data = self::getClassInfo($class);
         $data->serialize = $serialize;
         $data->unserialize = $unserialize;
+    }
+
+    /**
+     * Helper method used to replace the deprecated create_function() from PHP
+     * @param string $args
+     * @param string $body
+     * @return Closure
+     */
+    public static function createClosure(string $args, string $body): Closure
+    {
+        // make sure we are registered
+        self::$init || self::init();
+
+        $header = "/* created with " . self::class . "::" . __METHOD__ . "() */";
+        $body = "static function (" . $args . ") {\n" . $body . "\n}";
+
+        if (!($info = ClosureInfo::resolve(ClosureInfo::createKey($header, $body)))) {
+            $info = new ClosureInfo($header, $body, null, ClosureInfo::FLAG_IS_STATIC);
+        }
+
+        return ($info->getFactory(null))();
     }
 
     /**

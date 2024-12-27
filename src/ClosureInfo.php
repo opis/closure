@@ -27,7 +27,7 @@ final class ClosureInfo
          * Function imports including namespace
          * @var string
          */
-        private string $imports,
+        private string $header,
 
         /**
          * Function body
@@ -57,7 +57,7 @@ final class ClosureInfo
     public function key(): string
     {
         if (!isset($this->key)) {
-            $this->key = md5($this->imports . "\n" . $this->body);
+            $this->key = self::createKey($this->header, $this->body);
             // save it to cache
             self::$cache[$this->key] = $this;
         }
@@ -120,8 +120,8 @@ final class ClosureInfo
         // we create a random param name to avoid collisions
         $varName = '$___opis_closure_' . rand(1_000_000, 9_999_999) . "___";
         $code = $phpTag ? '<?php' . "\n" : "";
-        if ($this->imports) {
-            $code .= $this->imports . "\n";
+        if ($this->header) {
+            $code .= $this->header . "\n";
         }
         $code .= "return function (?array &{$varName} = null): \\Closure {
 if ({$varName}) {
@@ -138,8 +138,8 @@ return {$this->body};
     public function getIncludePHP(bool $phpTag = true): string
     {
         $code = $phpTag ? '<?php' . "\n" : "";
-        if ($this->imports) {
-            $code .= $this->imports . "\n";
+        if ($this->header) {
+            $code .= $this->header . "\n";
         }
         return $code . "return {$this->body};";
     }
@@ -147,8 +147,8 @@ return {$this->body};
     public function __serialize(): array
     {
         $data = ['key' => $this->key()];
-        if ($this->imports) {
-            $data['imports'] = $this->imports;
+        if ($this->header) {
+            $data['imports'] = $this->header;
         }
         $data['body'] = $this->body;
         if ($this->use) {
@@ -163,10 +163,15 @@ return {$this->body};
     public function __unserialize(array $data): void
     {
         $this->key = $data['key'] ?? null;
-        $this->imports = $data['imports'] ?? '';
+        $this->header = $data['imports'] ?? '';
         $this->body = $data['body'];
         $this->use = $data['use'] ?? null;
         $this->flags = $data['flags'] ?? 0;
+    }
+
+    public static function createKey(string $body, ?string $header = null): string
+    {
+        return md5(($header ?? "") . "\n" . $body);
     }
 
     public static function flags(
