@@ -280,7 +280,7 @@ final class Serializer
         // make sure we are registered
         self::$init || self::init();
 
-        $header = "/* created with " . self::class . "::" . __METHOD__ . "() */";
+        $header = "/* created with " . __METHOD__ . "() */";
         $body = "static function (" . $args . ") {\n" . $body . "\n}";
 
         if (!($info = ClosureInfo::resolve(ClosureInfo::createKey($header, $body)))) {
