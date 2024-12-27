@@ -250,9 +250,8 @@ final class Serializer
      * Prevent serialization boxing for specified classes
      * @param string ...$class
      * @return void
-     * @throws \ReflectionException
      */
-    public static function noBox(string ...$class): void
+    public static function preventBoxing(string ...$class): void
     {
         foreach ($class as $cls) {
             self::getClassInfo($cls)->box = false;
@@ -260,7 +259,11 @@ final class Serializer
     }
 
     /**
-     * Register custom serialization/deserialization for a class
+     * Register custom serialization & deserialization for a class
+     * @param string $class
+     * @param null|callable(object): array $serialize
+     * @param null|callable(array, callable(object, mixed): void, \ReflectionClass): object $unserialize
+     * @return void
      */
     public static function register(string $class, ?callable $serialize, ?callable $unserialize): void
     {

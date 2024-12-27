@@ -3,7 +3,6 @@
 namespace Opis\Closure;
 
 use ReflectionClass;
-use Opis\Closure\Attribute\NoBox;
 
 /**
  * @internal
@@ -28,7 +27,7 @@ class ClassInfo
     public function __construct(string $className)
     {
         $reflection = $this->reflection = new ReflectionClass($className);
-        $this->box = empty($reflection->getAttributes(NoBox::class));
+        $this->box = empty($reflection->getAttributes(Attribute\PreventBoxing::class));
         $this->hasMagicSerialize = $reflection->hasMethod("__serialize");
         $this->hasMagicUnserialize = $reflection->hasMethod("__unserialize");
     }

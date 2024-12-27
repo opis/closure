@@ -2,12 +2,10 @@
 
 namespace Opis\Closure;
 
-use Opis\Closure\Attribute\NoBox;
-
 /**
  * @internal
  */
-#[NoBox]
+#[Attribute\PreventBoxing]
 final class Box
 {
     public const TYPE_CLOSURE = 1;

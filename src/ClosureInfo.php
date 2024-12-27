@@ -3,9 +3,8 @@
 namespace Opis\Closure;
 
 use Closure;
-use Opis\Closure\Attribute\NoBox;
 
-#[NoBox]
+#[Attribute\PreventBoxing]
 final class ClosureInfo
 {
     public const FLAG_IS_SHORT = 1;
