@@ -10,6 +10,12 @@ class DeserializationHandler
     private ?WeakMap $unboxed = null;
     private ?WeakMap $refs = null;
     private ?array $visitedArrays = null;
+    private array $options;
+
+    public function __construct(?array $options = null)
+    {
+        $this->options = $options ?? [];
+    }
 
     public function unserialize(string $serialized): mixed
     {
@@ -23,7 +29,7 @@ class DeserializationHandler
         }
 
         try {
-            $data = unserialize($serialized);
+            $data = unserialize($serialized, $this->options);
             unset($serialized);
 
             // handle unboxing

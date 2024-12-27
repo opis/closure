@@ -126,7 +126,7 @@ final class Serializer
         return self::encode((new SerializationHandler())->serialize($data), $security);
     }
 
-    public static function unserialize(string $data, ?SecurityProviderInterface $security = null): mixed
+    public static function unserialize(string $data, ?SecurityProviderInterface $security = null, ?array $options = null): mixed
     {
         self::$init || self::init();
 
@@ -141,7 +141,7 @@ final class Serializer
         }
 
         // Create a new deserialization handler
-        $handler = new DeserializationHandler();
+        $handler = new DeserializationHandler($options);
 
         if (!$skipDecode) {
             // current - v4
