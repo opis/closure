@@ -170,7 +170,7 @@ final class Serializer
      * This method was created in order to help with migration from v3 to v4
      * @throws SecurityException
      */
-    public static function unserialize_v3(string $data, ?SecurityProviderInterface $security = null): mixed
+    public static function unserialize_v3(string $data, ?SecurityProviderInterface $security = null, ?array $options = null): mixed
     {
         self::$init || self::init();
 
@@ -183,7 +183,7 @@ final class Serializer
         self::$securityProvider = $security;
 
         try {
-            return (new DeserializationHandler())->unserialize($data);
+            return (new DeserializationHandler($options))->unserialize($data);
         } finally {
             self::$v3Compatible = $enabled;
             self::$securityProvider = $prevSecurity;
