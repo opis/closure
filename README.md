@@ -5,11 +5,10 @@ Opis Closure
 [![Packagist Downloads](https://img.shields.io/packagist/dt/opis/closure?label=Downloads)](https://packagist.org/packages/opis/closure)
 [![Packagist License](https://img.shields.io/packagist/l/opis/closure?color=teal&label=License)](https://packagist.org/packages/opis/closure)
 
-Serialize anything
+Serialize closures, serialize anything
 ------------------
 
-**Opis Closure** is a PHP library that allows you to serialize arbitrary data, 
-including closures, without breaking a sweat.
+**Opis Closure** is a PHP library that allows you to serialize closures and arbitrary data.
 
 ```php
 use function Opis\Closure\{serialize, unserialize};
@@ -20,15 +19,14 @@ $greet = unserialize($serialized);
 echo $greet(); // hello
 ```
 
-A full rewrite was necessary to keep this project compatible with the PHP's new features, such as 
-attributes, enums, readonly properties, named parameters, anonymous classes and so on.
-This wasn't an easy task, the latest attempt involved using FFI extension in exotic ways, and still failed hard.
-The main problem was that very often the closures were bound to some object, thus in order to preserve functionality 
-we had to serialize the object too. Since we had to do arbitrary data serialization, we decided to make this project
-about arbitrary data serialization, providing support for serializing closures but also adding easier ways to
-serialize custom objects.
+_A full rewrite was necessary to keep this project compatible with the PHP's new features, such as attributes, enums, 
+read-only properties, named parameters, anonymous classes, and so on.
+This wasn't an easy task, as the latest attempt involved using the FFI extension in exotic ways, and it still failed hard. 
+The main problem was that very often the closures were bound to some object, thus in order to preserve functionality, we had 
+to serialize the object too. Since we had to do arbitrary data serialization, we decided to make this project about arbitrary 
+data serialization, providing support for serializing closures but also adding more effortless ways to serialize custom objects._
 
-Starting with v4, **Opis Closure** is about arbitrary data serialization not just closure serialization. 
+Starting with v4, **Opis Closure** is not just about closure serialization but also about arbitrary data serialization.
 
 ## Migrating from 3.x
 
