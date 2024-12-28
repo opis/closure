@@ -20,11 +20,11 @@ echo $greet(); // hello
 ```
 
 _A full rewrite was necessary to keep this project compatible with the PHP's new features, such as attributes, enums, 
-read-only properties, named parameters, anonymous classes, and so on.
-This wasn't an easy task, as the latest attempt involved using the FFI extension in exotic ways, and it still failed hard. 
-The main problem was that very often the closures were bound to some object, thus in order to preserve functionality, we had 
-to serialize the object too. Since we had to do arbitrary data serialization, we decided to make this project about arbitrary 
-data serialization, providing support for serializing closures but also adding more effortless ways to serialize custom objects._
+read-only properties, named parameters, anonymous classes, and so on. This wasn't an easy task, as the latest attempt 
+to launch a 4.x version involved using the FFI extension in exotic ways, and it failed hard. The main problem was that 
+very often the closures were bound to some object, thus in order to preserve functionality, we had to serialize the object 
+too. Since we had to do arbitrary data serialization, we decided to make this project about arbitrary data serialization, 
+providing support for serializing closures but also adding more effortless ways to serialize custom objects._
 
 Starting with v4, **Opis Closure** is not just about closure serialization but also about arbitrary data serialization.
 
