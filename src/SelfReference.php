@@ -1,30 +1,25 @@
 <?php
-/* ===========================================================================
- * Copyright (c) 2018-2021 Zindex Software
- *
- * Licensed under the MIT License
- * =========================================================================== */
 
 namespace Opis\Closure;
 
-
 /**
- * Helper class used to indicate a reference to an object
+ * Class used for 3.x unserialize compatibility
+ * @deprecated This will be removed in 5.x
  * @internal
  */
-class SelfReference
+final class SelfReference
 {
     /**
-     * @var string An unique hash representing the object
+     * @var string A unique hash representing the object
      */
-    public $hash;
+    public string $hash;
 
     /**
      * Constructor
      *
      * @param string $hash
      */
-    public function __construct($hash)
+    public function __construct(string $hash)
     {
         $this->hash = $hash;
     }

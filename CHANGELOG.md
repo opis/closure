@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v4.0.0, 2024.12.28
+
+- Complete rewrite of the library
+
 ### v3.6.2, 2021.04.09
 
 - Fixed string interpolation
@@ -35,7 +39,7 @@ CHANGELOG
 
 - Improved parser
 - The class scope optimisation is no longer used. We always bind now to the closure's original class scope.
-When the class scope was `null`, the optimisation failed to work as expected and kept the wrong `SerializableClosure` scope.
+  When the class scope was `null`, the optimisation failed to work as expected and kept the wrong `SerializableClosure` scope.
 
 ### v3.5.2, 2020.05.21
 
@@ -61,8 +65,8 @@ When the class scope was `null`, the optimisation failed to work as expected and
 ### v3.4.0, 2019.09.03
 
 - Added `createClosure` static method in `Opis\Closure\SerializableClosure`.
-This method creates a new closure from arbitrary code, emulating `create_function`,
-but without using eval
+  This method creates a new closure from arbitrary code, emulating `create_function`,
+  but without using eval
 
 ### v3.3.1, 2019.07.10
 
@@ -71,21 +75,21 @@ but without using eval
 ### v3.3.0, 2019.05.31
 
 - Fixed a bug that prevented signed closures to properly work when the serialized string
-contains invalid UTF-8 chars. Starting with this version `json_encode` is no longer used
-when signing a closure. Backward compatibility is maintained and all closures that were 
-previously signed using the old method will continue to work.
+  contains invalid UTF-8 chars. Starting with this version `json_encode` is no longer used
+  when signing a closure. Backward compatibility is maintained and all closures that were
+  previously signed using the old method will continue to work.
 
 ### v3.2.0, 2019.05.05
 
-- Since an unsigned closure can be unserialized when no security provider is set, 
-there is no reason to treat differently a signed closure in the same situation.
-Therefore, the `Opis\Closure\SecurityException` exception  is no longer thrown when 
-unserializing a signed closure, if no security provider is set.
+- Since an unsigned closure can be unserialized when no security provider is set,
+  there is no reason to treat differently a signed closure in the same situation.
+  Therefore, the `Opis\Closure\SecurityException` exception  is no longer thrown when
+  unserializing a signed closure, if no security provider is set.
 
 ### v3.1.6, 2019.02.22
 
 - Fixed a bug that occurred when trying to set properties of classes that were not defined in user-land.
-Those properties are now ignored.
+  Those properties are now ignored.
 
 ### v3.1.5, 2019.01.14
 
@@ -94,14 +98,14 @@ Those properties are now ignored.
 ### v3.1.4, 2019.01.14
 
 - Added support for static methods that are named using PHP keywords or magic constants.
-Ex: `A::new()`, `A::use()`, `A::if()`, `A::function()`, `A::__DIR__()`, etc.
+  Ex: `A::new()`, `A::use()`, `A::if()`, `A::function()`, `A::__DIR__()`, etc.
 - Used `@internal` to mark classes & methods that are for internal use only and
-backward compatibility is not guaranteed.
+  backward compatibility is not guaranteed.
 
 ### v3.1.3, 2019.01.07
 
 - Fixed a bug that prevented traits to be correctly resolved when used by an
-anonymous class
+  anonymous class
 - Fixed a bug that occurred when `$this` keyword was used inside an anonymous class
 
 ### v3.1.2, 2018.12.16
@@ -111,18 +115,18 @@ anonymous class
 ### v3.1.1, 2018.10.02
 
 * Fixed a bug where `parent` keyword was treated like a class-name and scope was not added to the
-serialized closure
+  serialized closure
 * Fixed a bug where return type was not properly handled for nested closures
 * Support for anonymous classes was improved
 
 ### v3.1.0, 2018.09.20
 
 * Added `transformUseVariables` and `resolveUseVariables` to
-`Opis\Closure\SerializableClosure` class.
-* Added `removeSecurityProvider` static method to 
-`Opis\Closure\SerializableClosure` class. 
+  `Opis\Closure\SerializableClosure` class.
+* Added `removeSecurityProvider` static method to
+  `Opis\Closure\SerializableClosure` class.
 * Fixed some security related issues where a user was able to unserialize an unsigned
-closure, even when a security provider was in use.
+  closure, even when a security provider was in use.
 
 ### v3.0.12, 2018.02.23
 
@@ -138,8 +142,8 @@ closure, even when a security provider was in use.
 
 ### v3.0.9, 2018.01.04
 
-* Fixed a bug where the return type was not properly resolved. 
-See [issue 17](https://github.com/opis/closure/issues/17)
+* Fixed a bug where the return type was not properly resolved.
+  See [issue 17](https://github.com/opis/closure/issues/17)
 * Added more tests
 
 ### v3.0.8, 2017.12.18
@@ -167,15 +171,15 @@ See [issue 17](https://github.com/opis/closure/issues/17)
 
 ### v3.0.3, 2017.09.06
 
-* Fixed a bug related to nested object references 
+* Fixed a bug related to nested object references
 * \[*internal*\] `Opis\Closure\ClosureScope` now extends `SplObjectStorage`
 * \[*internal*\] The `storage` property was removed from `Opis\Closure\ClosureScope`
 * \[*internal*\] The `instances` and `objects` properties were removed from `Opis\Closure\ClosureContext`
 
 ### v3.0.2, 2017.08.28
 
-* Fixed a bug where `$this` object was not handled properly inside the 
-`SerializableClosre::serialize` method. 
+* Fixed a bug where `$this` object was not handled properly inside the
+  `SerializableClosre::serialize` method.
 
 ### v3.0.1, 2017.04.13
 
@@ -198,7 +202,7 @@ See [issue 17](https://github.com/opis/closure/issues/17)
 * Refactored `Opis\Closure\SerializableClosure::__invoke` method
 * `Opis\Closure\{ISecurityProvider, SecurityProvider}` were added
 * `Opis\Closure\{SecurityProviderInterface, DefaultSecurityProvider, SecureClosure}` were deprecated
-and they will be removed in the next major version
+  and they will be removed in the next major version
 * `setSecretKey` and `addSecurityProvider` static methods were added to `Opis\Closure\SerializableClosure`
 
 ### v2.3.2, 2016.12.15
@@ -222,7 +226,7 @@ and they will be removed in the next major version
 
 * Fixed CS
 * `Opis\Closure\ClosureContext`, `Opis\Closure\ClosureScope`, `Opis\Closure\SelfReference`
- and `Opis\Closure\SecurityException` classes were moved into separate files
+  and `Opis\Closure\SecurityException` classes were moved into separate files
 * Added support for PHP7 syntax
 * Fixed some bugs in `Opis\Closure\ReflectionClosure` class
 * Improved closure parser
@@ -232,7 +236,7 @@ and they will be removed in the next major version
 
 * Added support for the missing `__METHOD__`, `__FUNCTION__` and `__TRAIT__` magic constants
 * Added some security related classes and interfaces: `Opis\Closure\SecurityProviderInterface`,
-`Opis\Closure\DefaultSecurityProvider`, `Opis\Closure\SecureClosure`, `Opis\Closure\SecurityException`.
+  `Opis\Closure\DefaultSecurityProvider`, `Opis\Closure\SecureClosure`, `Opis\Closure\SecurityException`.
 * Fiexed a bug in `Opis\Closure\ReflectionClosure::getClasses` method
 * Other minor bugfixes
 * Added support for static closures
