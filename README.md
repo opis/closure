@@ -1,13 +1,13 @@
 Opis Closure
 ====================
-![](https://github.com/opis/closure/workflows/Tests/badge.svg?branch=4.x)
+![](https://github.com/opis/closure/workflows/Tests/badge.svg?branch=ffi)
 [![Latest Stable Version](https://poser.pugx.org/opis/closure/v/stable.png)](https://packagist.org/packages/opis/closure)
 [![Latest Unstable Version](https://poser.pugx.org/opis/closure/v/unstable.png)](https://packagist.org/packages/opis/closure)
 [![License](https://poser.pugx.org/opis/closure/license.png)](https://packagist.org/packages/opis/closure)
 
 Serializable closures
 ---------------------
-> **Note:** Opis Closure 4.x is still in development and we do not recommend using it in production yet.
+> **Note:** This is an abandoned experiment of closure serialization using ffi extension.
 
 **Opis Closure** is a PHP library that allows you to serialize closures without breaking a sweat. 
 All you have to do is to add a single line of code, and you are good to go.
@@ -35,36 +35,10 @@ echo $g(); //> Hello
 This version of **Opis Closure** is a full rebuild of the library and is not compatible with the previous versions.
 The library use [FFI] to make closures serializable and you no longer need to wrap them as it was the case in the past.
 
-We would like to release a stable version as soon as possible, 
-so please test it rigorously and report any errors you have encountered. Feedback is welcome.
-
-## License
-
-**Opis Closure** is licensed under the [Apache License, Version 2.0][license].
-
 ## Requirements
 
 * PHP ^7.4 | ^8.0
 * FFI
-
-## Installation
-
-**Opis Closure** is available on [Packagist] and it can be installed from a 
-command line interface by using [Composer]. 
-
-```bash
-composer require opis/closure:4.x-dev
-```
-
-Or you could directly reference it into your `composer.json` file as a dependency
-
-```json
-{
-    "require": {
-        "opis/closure": "4.x-dev"
-    }
-}
-```
 
 
 [documentation]: https://www.opis.io/closure "Opis Closure"
