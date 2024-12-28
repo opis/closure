@@ -24,7 +24,7 @@
         "psr-4": {
             "Opis\\Closure\\": "src/"
         },
-        "files": ["functions.php"]
+        "files": ["src/functions.php"]
     },
     "autoload-dev": {
         "psr-4": {

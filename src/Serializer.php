@@ -9,6 +9,9 @@ use Opis\Closure\Security\{
     SecurityException
 };
 
+/**
+ * @internal
+ */
 final class Serializer
 {
     private static bool $init = false;
