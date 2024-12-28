@@ -1,6 +1,6 @@
 {
     "name": "opis/closure",
-    "description": "A library that can be used to serialize arbitrary data, including closures (anonymous functions).",
+    "description": "A library that can be used to serialize closures (anonymous functions) and arbitrary data.",
     "keywords": ["closure", "serialization", "function", "serializable", "serialize", "anonymous functions"],
     "homepage": "https://opis.io/closure",
     "license": "MIT",
