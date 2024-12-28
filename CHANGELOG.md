@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-### v4.0.0, 2024.12.25
+### v4.0.0, 2024.12.28
 
 - Complete rewrite of the library
 
