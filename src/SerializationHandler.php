@@ -124,10 +124,9 @@ class SerializationHandler
 
         $box = $this->objectMap[$data] = new Box(Box::TYPE_OBJECT, [$info->className(), null]);
 
-
         if ($serializer = $info->serialize ?? null) {
             // we have a custom serializer
-            $vars = $serializer($data, $this);
+            $vars = $serializer($data);
         } elseif ($info->hasMagicSerialize) {
             // we have the magic __serialize
             $vars = $data->__serialize();

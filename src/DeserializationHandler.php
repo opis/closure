@@ -5,6 +5,9 @@ namespace Opis\Closure;
 use stdClass, WeakMap, Closure;
 use function unserialize;
 
+/**
+ * @internal
+ */
 class DeserializationHandler
 {
     private ?WeakMap $unboxed = null;
@@ -185,7 +188,7 @@ class DeserializationHandler
                     // handle
                     $this->handle($value);
                 }
-            }, $info->reflection, $this);
+            }, $info->reflection);
         }
 
         // create a new object

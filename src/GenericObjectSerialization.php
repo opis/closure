@@ -4,6 +4,9 @@ namespace Opis\Closure;
 
 use ReflectionObject, ReflectionClass;
 
+/**
+ * @internal
+ */
 class GenericObjectSerialization
 {
     public static function serialize(object $object): array

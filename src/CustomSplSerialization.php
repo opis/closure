@@ -9,6 +9,9 @@ use SplObjectStorage;
 use SplFixedArray;
 use WeakMap, WeakReference;
 
+/**
+ * @internal
+ */
 class CustomSplSerialization
 {
     public static function sArrayObject(ArrayObject $object): array
