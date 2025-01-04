@@ -166,6 +166,10 @@ return {$this->body};
         $this->body = $data['body'];
         $this->use = $data['use'] ?? null;
         $this->flags = $data['flags'] ?? 0;
+        if ($this->key) {
+            // save it to cache
+            self::$cache[$this->key] = $this;
+        }
     }
 
     public static function createKey(string $body, ?string $header = null): string
