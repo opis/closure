@@ -236,8 +236,6 @@ final class Serializer
         return $data;
     }
 
-    private static array $info = [];
-
     /**
      * @param string $class
      * @return ClassInfo
@@ -245,7 +243,7 @@ final class Serializer
      */
     public static function getClassInfo(string $class): ClassInfo
     {
-        return self::$info[$class] ??= new ClassInfo($class);
+        return ClassInfo::get($class);
     }
 
     /**
@@ -256,7 +254,7 @@ final class Serializer
     public static function preventBoxing(string ...$class): void
     {
         foreach ($class as $cls) {
-            self::getClassInfo($cls)->box = false;
+            ClassInfo::get($cls)->box = false;
         }
     }
 
@@ -269,7 +267,7 @@ final class Serializer
      */
     public static function register(string $class, ?callable $serialize, ?callable $unserialize): void
     {
-        $data = self::getClassInfo($class);
+        $data = ClassInfo::get($class);
         $data->serialize = $serialize;
         $data->unserialize = $unserialize;
     }

@@ -140,5 +140,5 @@ function create_closure(string $args, string $body): \Closure
         $info = new ClosureInfo($header, $body, null, ClosureInfo::FLAG_IS_STATIC);
     }
 
-    return ($info->getFactory(null))();
+    return $info->getClosure();
 }

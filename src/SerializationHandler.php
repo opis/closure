@@ -115,7 +115,7 @@ class SerializationHandler
             return $this->handleClosure($data);
         }
 
-        $info = Serializer::getClassInfo(get_class($data));
+        $info = ClassInfo::get(get_class($data));
         if (!$this->shouldBox($info)) {
             // skip boxing
             return $this->objectMap[$data] = $data;

@@ -99,15 +99,33 @@ final class ClosureInfo
         return ($this->flags & self::FLAG_HAS_SCOPE) === self::FLAG_HAS_SCOPE;
     }
 
+    public function getClosure(?array &$vars = null, ?object $thisObj = null, ?string $scope = null): Closure
+    {
+        return $this->getFactory($thisObj, $scope)($vars);
+    }
+
     public function getFactory(?object $thisObj, ?string $scope = null): Closure
     {
         $factory = ($this->factory ??= ClosureStream::factory($this));
 
-        if ($thisObj) {
-            return $factory->bindTo($thisObj, $scope ?? 'static');
+        if ($thisObj && $this->isStatic()) {
+            // closure is static, we cannot bind
+            if (!$scope) {
+                // we can extract scope
+                $scope = get_class($thisObj);
+            }
+            // remove this
+            $thisObj = null;
         }
 
-        if ($scope) {
+        if ($thisObj) {
+            if (ClassInfo::isInternal($thisObj)) {
+                return $factory->bindTo($thisObj);
+            }
+            return $factory->bindTo($thisObj, $thisObj);
+        }
+
+        if ($scope && $scope !== "static" && $this->hasScope() && !ClassInfo::isInternal($scope)) {
             return $factory->bindTo(null, $scope);
         }
 

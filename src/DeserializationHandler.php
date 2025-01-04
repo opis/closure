@@ -162,7 +162,7 @@ class DeserializationHandler
 
     private function unboxObject(Box $box): object
     {
-        $info = Serializer::getClassInfo($box->data[0]);
+        $info = ClassInfo::get($box->data[0]);
 
         /**
          * @var $data array|null
@@ -242,7 +242,7 @@ class DeserializationHandler
             $this->handleArray($data["vars"]);
         }
 
-        return $info->getFactory($data["this"], $data["scope"])($data["vars"]);
+        return $info->getClosure($data["vars"], $data["this"], $data["scope"]);
     }
 
     ///////////////////////////////////////////////////////
@@ -357,6 +357,6 @@ class DeserializationHandler
             $this->handleArray($data["use"]);
         }
 
-        return $info->getFactory($data["this"], $data["scope"])($data["use"]);
+        return $info->getClosure($data["use"], $data["this"], $data["scope"]);
     }
 }

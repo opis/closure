@@ -3,8 +3,9 @@
 namespace Opis\Closure\Test\PHP80;
 
 use stdClass, DateTime, Closure;
+use Opis\Closure\ReflectionClosure;
 use Opis\Closure\Test\SerializeTestCase;
-use Opis\Closure\Test\PHP80\Objects\{Abc, ChildClass, Clone1, Entity, ObjSelf};
+use Opis\Closure\Test\PHP80\Objects\{Abc, ChildClass, Clone1, Entity, ObjSelf, ObjFactory};
 
 class SerializeTest extends SerializeTestCase
 {
@@ -457,6 +458,20 @@ class SerializeTest extends SerializeTestCase
 
         $u = $this->process($instance);
         $this->assertEquals('2018-02-23', $u->date->format('Y-m-d'));
+    }
+
+    public function testFactoryObj()
+    {
+        $data = [new ObjFactory(1), new ObjFactory(2)];
+        /** @var ObjFactory $u1 */
+        /** @var ObjFactory $u2 */
+        [$u1, $u2] = $this->process($data);
+
+        $this->assertEquals(1, $u1->getValue());
+        $this->assertEquals(2, $u2->getValue());
+
+        // must have the same info
+        $this->assertTrue((new ReflectionClosure($u1->factory))->info() === (new ReflectionClosure($u2->factory))->info());
     }
 
     /**
