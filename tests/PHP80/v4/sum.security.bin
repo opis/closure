@@ -1,0 +1,2 @@
+@3dYblAsRY6xP6slSCshCy0luKsYh05GmQKapFqTJ8jM=
+O:16:"Opis\Closure\Box":2:{i:0;i:1;i:1;a:1:{s:4:"info";O:24:"Opis\Closure\ClosureInfo":4:{s:3:"key";s:32:"093e81f0bc16d309b87c6468c295a871";s:7:"imports";s:14:"namespace Abc;";s:4:"body";s:34:"fn(int $a, int $b): int => $a + $b";s:5:"flags";i:1;}}}
