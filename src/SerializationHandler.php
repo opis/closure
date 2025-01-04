@@ -88,7 +88,7 @@ class SerializationHandler
     private function handleObject(object $data): object
     {
         if (
-            Serializer::isEnum($data) ||
+            ClassInfo::isEnum($data) ||
             ($data instanceof Box) ||
             ($data instanceof ClosureInfo)
         ) {
