@@ -13,6 +13,8 @@ final class ClosureParser
 
     private const MATCH_CLOSURE = [T_FN, T_FUNCTION];
 
+    private const ACCESS_PROP = [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON];
+
     /**
      * @var array Transformed file tokens cache
      */
@@ -663,6 +665,27 @@ final class ClosureParser
         } while (true);
     }
 
+    private function nextIs(int $index, array $token_types, bool $reverse = false): bool
+    {
+        $count = $this->count;
+        $tokens = $this->tokens;
+
+        $inc = $reverse ? -1 : 1;
+        for ($index += $inc; $index >= 0 && $index < $count; $index += $inc) {
+            if (is_array($tokens[$index])) {
+                if (in_array($tokens[$index][0], self::SKIP_WHITESPACE_AND_COMMENTS, true)) {
+                    continue;
+                }
+                $tok = $tokens[$index][0];
+            } else {
+                $tok = $tokens[$index];
+            }
+
+            return in_array($tok, $token_types, true);
+        }
+
+        return false;
+    }
     /**
      * @param string $hint
      * @return bool
@@ -705,9 +728,9 @@ final class ClosureParser
             $check = $checkThis = strcasecmp($token[1], '$this') === 0;
         } elseif ($token[0] === T_STRING) {
             if (strcasecmp($token[1], 'self') === 0) {
-                $check = true;
+                $check = !$this->nextIs($index, self::ACCESS_PROP, true);
             } elseif (strcasecmp($token[1], 'parent') === 0) {
-                $check = $isParent = true;
+                $check = $isParent = !$this->nextIs($index, self::ACCESS_PROP, true);
                 $checkThis = !$this->isStatic;
             }
         }
