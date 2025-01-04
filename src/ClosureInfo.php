@@ -165,7 +165,7 @@ return {$this->body};
     {
         $data = ['key' => $this->key()];
         if ($this->header) {
-            $data['imports'] = $this->header;
+            $data['header'] = $this->header;
         }
         $data['body'] = $this->body;
         if ($this->use) {
@@ -180,7 +180,7 @@ return {$this->body};
     public function __unserialize(array $data): void
     {
         $this->key = $data['key'] ?? null;
-        $this->header = $data['imports'] ?? '';
+        $this->header = $data['header'] ?? $data['imports'] ?? '';
         $this->body = $data['body'];
         $this->use = $data['use'] ?? null;
         $this->flags = $data['flags'] ?? 0;
