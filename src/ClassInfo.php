@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use UnitEnum, ReflectionClass;
+use UnitEnum, ReflectionClass, ReflectionReference;
 
 /**
  * @internal
@@ -64,5 +64,10 @@ final class ClassInfo
         // enums were added in php 8.1
         self::$enumExists ??= interface_exists(UnitEnum::class, false);
         return self::$enumExists && ($value instanceof UnitEnum);
+    }
+
+    public static function refId(mixed &$reference): ?string
+    {
+        return ReflectionReference::fromArrayElement([&$reference], 0)?->getId();
     }
 }
