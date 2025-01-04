@@ -104,6 +104,9 @@ final class ClosureInfo
         return $this->getFactory($thisObj, $scope)($vars);
     }
 
+    /**
+     * @internal
+     */
     public function getFactory(?object $thisObj, ?string $scope = null): Closure
     {
         $factory = ($this->factory ??= ClosureStream::factory($this));
