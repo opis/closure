@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v4.0.1, 2025.01.04
+
+- Fixes unserialization error [#149](https://github.com/opis/closure/issues/149)
+
 ### v4.0.0, 2024.12.28
 
 - Complete rewrite of the library
