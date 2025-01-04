@@ -1,6 +1,32 @@
 CHANGELOG
 ---------
 
+### v4.1.0, 2025.01.05
+
+#### Changes
+
+- Improved closure parser
+- Improved array & object serialization/deserialization
+- Added `ClosureInfo::getClosure()`
+- Fixed `ClosureInfo::getFactory()` bindings and marked the method as internal
+
+#### Internal changes
+
+Added
+
+- `ClassInfo::get()`
+- `ClassInfo::clear()`
+- `ClassInfo::isInternal()`
+- `ClassInfo::isEnum()`
+- `ClassInfo::refId()`
+- `ClassInfo` is final
+- `ClassInfo` constructor is private
+
+Removed
+
+- `Serializer::getClassInfo()` (replaced by `ClassInfo::get()`)
+- `Serializer::isEnum()` (replaced by `ClassInfo::isEnum()`)
+
 ### v4.0.1, 2025.01.04
 
 - Fixes unserialization error [#149](https://github.com/opis/closure/issues/149)

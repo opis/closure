@@ -2,7 +2,6 @@
 
 namespace Opis\Closure;
 
-use UnitEnum;
 use Opis\Closure\Security\{
     DefaultSecurityProvider,
     SecurityProviderInterface,
@@ -19,7 +18,6 @@ final class Serializer
     public static string $uniqKey;
 
     private static ?SecurityProviderInterface $securityProvider = null;
-    private static bool $enumExists;
 
     public static bool $v3Compatible = false;
 
@@ -61,9 +59,6 @@ final class Serializer
 
         // Set uniq key
         self::$uniqKey = '@(opis/closure):key:' . chr(0) . uniqid() . chr(8);
-
-        // Check for enums
-        self::$enumExists = interface_exists(UnitEnum::class, false);
 
         // add spl serializations
         self::register(
@@ -236,18 +231,6 @@ final class Serializer
         return $data;
     }
 
-    private static array $info = [];
-
-    /**
-     * @param string $class
-     * @return ClassInfo
-     * @internal
-     */
-    public static function getClassInfo(string $class): ClassInfo
-    {
-        return self::$info[$class] ??= new ClassInfo($class);
-    }
-
     /**
      * Prevent serialization boxing for specified classes
      * @param string ...$class
@@ -256,7 +239,7 @@ final class Serializer
     public static function preventBoxing(string ...$class): void
     {
         foreach ($class as $cls) {
-            self::getClassInfo($cls)->box = false;
+            ClassInfo::get($cls)->box = false;
         }
     }
 
@@ -269,7 +252,7 @@ final class Serializer
      */
     public static function register(string $class, ?callable $serialize, ?callable $unserialize): void
     {
-        $data = self::getClassInfo($class);
+        $data = ClassInfo::get($class);
         $data->serialize = $serialize;
         $data->unserialize = $unserialize;
     }
@@ -291,14 +274,5 @@ final class Serializer
     public static function getSecurityProvider(): ?SecurityProviderInterface
     {
         return self::$securityProvider;
-    }
-
-    /**
-     * Helper function to detect if a value is Enum
-     * @internal
-     */
-    public static function isEnum(mixed $value): bool
-    {
-        return self::$enumExists && ($value instanceof UnitEnum);
     }
 }

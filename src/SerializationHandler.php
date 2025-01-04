@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use stdClass, Closure, WeakMap;
+use stdClass, Closure, WeakMap, SplObjectStorage;
 use function serialize;
 
 class SerializationHandler
@@ -11,14 +11,9 @@ class SerializationHandler
 
     private ?WeakMap $objectMap;
 
-    /**
-     * @var object[]|null
-     */
-    private ?array $priority;
+    private ?SplObjectStorage $priority;
 
     private ?WeakMap $shouldBox;
-
-    private int $uniqueArrayKeyValue;
 
     private bool $hasAnonymousObjects;
 
@@ -26,24 +21,16 @@ class SerializationHandler
     {
         $this->arrayMap = [];
         $this->objectMap = new WeakMap();
-        $this->priority = [];
+        $this->priority = new SplObjectStorage();
         $this->shouldBox = new WeakMap();
-        $this->uniqueArrayKeyValue = 0;
         $this->hasAnonymousObjects = false;
 
         try {
             // get boxed structure
             $data = $this->handle($data);
-            // remove unique key
-            foreach ($this->arrayMap as &$pair) {
-                unset($pair[0][Serializer::$uniqKey], $pair);
-            }
-            if ($this->hasAnonymousObjects) {
+            if ($this->hasAnonymousObjects && $this->priority->count()) {
                 // we only need priority when we have closures
-                $priority = array_unique($this->priority, \SORT_REGULAR);
-                if ($priority) {
-                    $data = new PriorityWrapper($priority, $data);
-                }
+                $data = new PriorityWrapper(iterator_to_array($this->priority), $data);
             }
             return serialize($data);
         } finally {
@@ -91,7 +78,7 @@ class SerializationHandler
     private function handleObject(object $data): object
     {
         if (
-            Serializer::isEnum($data) ||
+            ClassInfo::isEnum($data) ||
             ($data instanceof Box) ||
             ($data instanceof ClosureInfo)
         ) {
@@ -106,7 +93,9 @@ class SerializationHandler
 
         if ($data instanceof stdClass) {
             // handle stdClass
-            return $this->priority[] = $this->handleStdClass($data);
+            $obj = $this->handleStdClass($data);
+            $this->priority->attach($obj);
+            return $obj;
         }
 
         if ($data instanceof Closure) {
@@ -116,7 +105,7 @@ class SerializationHandler
             return $this->handleClosure($data);
         }
 
-        $info = Serializer::getClassInfo(get_class($data));
+        $info = ClassInfo::get(get_class($data));
         if (!$this->shouldBox($info)) {
             // skip boxing
             return $this->objectMap[$data] = $data;
@@ -139,25 +128,28 @@ class SerializationHandler
             $box->data[1] = &$this->handleArray($vars);
         }
 
-        return $this->priority[] = $box;
+        $this->priority->attach($box);
+
+        return $box;
     }
 
     private function &handleArray(array &$data): array
     {
-        if (isset($data[Serializer::$uniqKey])) {
-            // we must grab the reference to boxed
-            return $this->arrayMap[$data[Serializer::$uniqKey]][1];
+        $id = ClassInfo::refId($data);
+
+        if (array_key_exists($id, $this->arrayMap)) {
+            return $this->arrayMap[$id];
         }
 
         $box = [];
-        $this->arrayMap[($data[Serializer::$uniqKey] ??= $this->uniqueArrayKeyValue++)] = [&$data, &$box];
+        $this->arrayMap[$id] = &$box;
 
         foreach ($data as $key => &$value) {
             if (is_object($value)) {
                 $box[$key] = $this->handleObject($value);
             } elseif (is_array($value)) {
                 $box[$key] = &$this->handleArray($value);
-            } elseif ($key !== Serializer::$uniqKey) {
+            } else {
                 $box[$key] = &$value;
             }
             unset($value);

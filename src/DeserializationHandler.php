@@ -74,28 +74,11 @@ class DeserializationHandler
 
     private function handleArray(array &$array): void
     {
-        $visited = &$this->visitedArrays;
-
-        if ($visited) {
-            $found = false;
-            $array[Serializer::$uniqKey] = true;
-
-            for ($i = count($visited) - 1; $i >= 0; $i--) {
-                if (isset($visited[$i][Serializer::$uniqKey])) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            unset($array[Serializer::$uniqKey]);
-
-            if ($found) {
-                return;
-            }
+        $id = ClassInfo::refId($array);
+        if (!isset($this->visitedArrays[$id])) {
+            $this->visitedArrays[$id] = true;
+            $this->handleIterable($array);
         }
-
-        $visited[] = &$array;
-        $this->handleIterable($array);
     }
 
     private function handleObject(object &$object): void
@@ -162,7 +145,7 @@ class DeserializationHandler
 
     private function unboxObject(Box $box): object
     {
-        $info = Serializer::getClassInfo($box->data[0]);
+        $info = ClassInfo::get($box->data[0]);
 
         /**
          * @var $data array|null
@@ -242,7 +225,7 @@ class DeserializationHandler
             $this->handleArray($data["vars"]);
         }
 
-        return $info->getFactory($data["this"], $data["scope"])($data["vars"]);
+        return $info->getClosure($data["vars"], $data["this"], $data["scope"]);
     }
 
     ///////////////////////////////////////////////////////
@@ -357,6 +340,6 @@ class DeserializationHandler
             $this->handleArray($data["use"]);
         }
 
-        return $info->getFactory($data["this"], $data["scope"])($data["use"]);
+        return $info->getClosure($data["use"], $data["this"], $data["scope"]);
     }
 }
