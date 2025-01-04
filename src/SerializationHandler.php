@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use stdClass, Closure, WeakMap;
+use stdClass, Closure, WeakMap, SplObjectStorage;
 use function serialize;
 
 class SerializationHandler
@@ -12,9 +12,9 @@ class SerializationHandler
     private ?WeakMap $objectMap;
 
     /**
-     * @var object[]|null
+     * @var SplObjectStorage|null
      */
-    private ?array $priority;
+    private ?SplObjectStorage $priority;
 
     private ?WeakMap $shouldBox;
 
@@ -26,7 +26,7 @@ class SerializationHandler
     {
         $this->arrayMap = [];
         $this->objectMap = new WeakMap();
-        $this->priority = [];
+        $this->priority = new SplObjectStorage();
         $this->shouldBox = new WeakMap();
         $this->uniqueArrayKeyValue = 0;
         $this->hasAnonymousObjects = false;
@@ -38,12 +38,9 @@ class SerializationHandler
             foreach ($this->arrayMap as &$pair) {
                 unset($pair[0][Serializer::$uniqKey], $pair);
             }
-            if ($this->hasAnonymousObjects) {
+            if ($this->hasAnonymousObjects && $this->priority->count()) {
                 // we only need priority when we have closures
-                $priority = array_unique($this->priority, \SORT_REGULAR);
-                if ($priority) {
-                    $data = new PriorityWrapper($priority, $data);
-                }
+                $data = new PriorityWrapper(iterator_to_array($this->priority), $data);
             }
             return serialize($data);
         } finally {
@@ -106,7 +103,9 @@ class SerializationHandler
 
         if ($data instanceof stdClass) {
             // handle stdClass
-            return $this->priority[] = $this->handleStdClass($data);
+            $obj = $this->handleStdClass($data);
+            $this->priority->attach($obj);
+            return $obj;
         }
 
         if ($data instanceof Closure) {
@@ -139,7 +138,9 @@ class SerializationHandler
             $box->data[1] = &$this->handleArray($vars);
         }
 
-        return $this->priority[] = $box;
+        $this->priority->attach($box);
+
+        return $box;
     }
 
     private function &handleArray(array &$data): array
