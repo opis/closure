@@ -59,10 +59,4 @@ class SecurityTest extends SerializeTest
 
         Serializer::unserialize($str);
     }
-
-    protected function tearDown(): void
-    {
-        // do not keep security provider
-        Serializer::setSecurityProvider(null);
-    }
 }

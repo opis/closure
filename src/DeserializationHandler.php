@@ -74,28 +74,11 @@ class DeserializationHandler
 
     private function handleArray(array &$array): void
     {
-        $visited = &$this->visitedArrays;
-
-        if ($visited) {
-            $found = false;
-            $array[Serializer::$uniqKey] = true;
-
-            for ($i = count($visited) - 1; $i >= 0; $i--) {
-                if (isset($visited[$i][Serializer::$uniqKey])) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            unset($array[Serializer::$uniqKey]);
-
-            if ($found) {
-                return;
-            }
+        $id = ClassInfo::refId($array);
+        if (!isset($this->visitedArrays[$id])) {
+            $this->visitedArrays[$id] = true;
+            $this->handleIterable($array);
         }
-
-        $visited[] = &$array;
-        $this->handleIterable($array);
     }
 
     private function handleObject(object &$object): void

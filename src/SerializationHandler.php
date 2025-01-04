@@ -11,14 +11,9 @@ class SerializationHandler
 
     private ?WeakMap $objectMap;
 
-    /**
-     * @var SplObjectStorage|null
-     */
     private ?SplObjectStorage $priority;
 
     private ?WeakMap $shouldBox;
-
-    private int $uniqueArrayKeyValue;
 
     private bool $hasAnonymousObjects;
 
@@ -28,16 +23,11 @@ class SerializationHandler
         $this->objectMap = new WeakMap();
         $this->priority = new SplObjectStorage();
         $this->shouldBox = new WeakMap();
-        $this->uniqueArrayKeyValue = 0;
         $this->hasAnonymousObjects = false;
 
         try {
             // get boxed structure
             $data = $this->handle($data);
-            // remove unique key
-            foreach ($this->arrayMap as &$pair) {
-                unset($pair[0][Serializer::$uniqKey], $pair);
-            }
             if ($this->hasAnonymousObjects && $this->priority->count()) {
                 // we only need priority when we have closures
                 $data = new PriorityWrapper(iterator_to_array($this->priority), $data);
@@ -145,20 +135,21 @@ class SerializationHandler
 
     private function &handleArray(array &$data): array
     {
-        if (isset($data[Serializer::$uniqKey])) {
-            // we must grab the reference to boxed
-            return $this->arrayMap[$data[Serializer::$uniqKey]][1];
+        $id = ClassInfo::refId($data);
+
+        if (array_key_exists($id, $this->arrayMap)) {
+            return $this->arrayMap[$id];
         }
 
         $box = [];
-        $this->arrayMap[($data[Serializer::$uniqKey] ??= $this->uniqueArrayKeyValue++)] = [&$data, &$box];
+        $this->arrayMap[$id] = &$box;
 
         foreach ($data as $key => &$value) {
             if (is_object($value)) {
                 $box[$key] = $this->handleObject($value);
             } elseif (is_array($value)) {
                 $box[$key] = &$this->handleArray($value);
-            } elseif ($key !== Serializer::$uniqKey) {
+            } else {
                 $box[$key] = &$value;
             }
             unset($value);
