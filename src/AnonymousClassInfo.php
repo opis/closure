@@ -56,7 +56,7 @@ final class AnonymousClassInfo extends AbstractInfo
 
     private function fullClassName(): string
     {
-        $class = ReflectionClassInfo::ANONYMOUS_CLASS_PREFIX . $this->key();
+        $class = ReflectionClass::ANONYMOUS_CLASS_PREFIX . $this->key();
         return $this->ns ? "\\{$this->ns}\\{$class}" : $class;
     }
 
@@ -78,7 +78,7 @@ final class AnonymousClassInfo extends AbstractInfo
         }
 
         // name without namespace
-        $class = ReflectionClassInfo::ANONYMOUS_CLASS_PREFIX . $this->key();
+        $class = ReflectionClass::ANONYMOUS_CLASS_PREFIX . $this->key();
 
         if ($check) {
             $code .= "if (!\class_exists({$class}::class, false)):\n";

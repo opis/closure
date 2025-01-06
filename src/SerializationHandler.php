@@ -52,7 +52,7 @@ class SerializationHandler
         return $data;
     }
 
-    private function shouldBox(ReflectionClassInfo $info): bool
+    private function shouldBox(ReflectionClass $info): bool
     {
         if (isset($this->shouldBox[$info])) {
             // already marked
@@ -78,7 +78,7 @@ class SerializationHandler
         return $this->shouldBox[$info] = true;
     }
 
-    private function getObjectVars(object $object, ReflectionClassInfo $info): ?array
+    private function getObjectVars(object $object, ReflectionClass $info): ?array
     {
         if ($serializer = $info->customSerializer ?? null) {
             // we have a custom serializer
@@ -101,7 +101,7 @@ class SerializationHandler
     private function handleObject(object $data): object
     {
         if (
-            ReflectionClassInfo::objectIsEnum($data) ||
+            ReflectionClass::objectIsEnum($data) ||
             ($data instanceof Box) ||
             ($data instanceof AbstractInfo)
         ) {
@@ -128,7 +128,7 @@ class SerializationHandler
             return $this->handleClosure($data);
         }
 
-        $info = ReflectionClassInfo::get(get_class($data));
+        $info = ReflectionClass::get(get_class($data));
         if (!$this->shouldBox($info)) {
             // skip boxing
             return $this->objectMap[$data] = $data;
@@ -160,7 +160,7 @@ class SerializationHandler
         if ($skipRefId) {
             $box = [];
         } else {
-            $id = ReflectionClassInfo::getRefId($data);
+            $id = ReflectionClass::getRefId($data);
             if (array_key_exists($id, $this->arrayMap)) {
                 return $this->arrayMap[$id];
             }

@@ -74,7 +74,7 @@ class DeserializationHandler
 
     private function handleArray(array &$array): void
     {
-        $id = ReflectionClassInfo::getRefId($array);
+        $id = ReflectionClass::getRefId($array);
         if (!isset($this->visitedArrays[$id])) {
             $this->visitedArrays[$id] = true;
             $this->handleIterable($array);
@@ -154,7 +154,7 @@ class DeserializationHandler
         }
 
         // get reflection info
-        $info = ReflectionClassInfo::get($class);
+        $info = ReflectionClass::get($class);
 
         // get a reference to data
         $data = &$box->data[1];

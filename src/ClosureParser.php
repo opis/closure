@@ -2,8 +2,6 @@
 
 namespace Opis\Closure;
 
-use ReflectionFunction, ReflectionClass;
-
 /**
  * @internal
  */
@@ -22,7 +20,7 @@ final class ClosureParser extends AbstractParser
     private array $use = [];
 
     private function __construct(
-        private ReflectionFunction $reflector,
+        private \ReflectionFunction $reflector,
         string                     $ns,
         ?array                     $aliases,
         array                      $tokens,
@@ -663,7 +661,7 @@ final class ClosureParser extends AbstractParser
     }
 
     /**
-     * @param ReflectionFunction $reflector
+     * @param \ReflectionFunction $reflector
      * @param string $ns
      * @param array $fileInfo
      * @param array|null $aliases

@@ -165,6 +165,9 @@ abstract class AbstractParser
 
     ////////////////////////////////////////////////////
 
+    /**
+     * @var AbstractInfo[]
+     */
     private static array $cache = [];
 
     private static array $fileCache = [];

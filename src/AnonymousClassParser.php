@@ -12,11 +12,11 @@ final class AnonymousClassParser extends AbstractParser
     private int $last = -1;
 
     protected function __construct(
-        private ReflectionClassInfo $reflector,
-        string                      $ns,
-        ?array                      $aliases,
-        array                       $tokens,
-        array                       $anonymous
+        private ReflectionClass $reflector,
+        string                  $ns,
+        ?array                  $aliases,
+        array                   $tokens,
+        array                   $anonymous
     )
     {
         parent::__construct($ns, $aliases, $tokens, $anonymous);
@@ -144,13 +144,13 @@ final class AnonymousClassParser extends AbstractParser
     }
 
     /**
-     * @param ReflectionClassInfo $reflector
+     * @param ReflectionClass $reflector
      * @return AnonymousClassInfo|null
      */
     public static function parse($reflector): ?AnonymousClassInfo
     {
         if (is_string($reflector)) {
-            $reflector = ReflectionClassInfo::get($reflector);
+            $reflector = ReflectionClass::get($reflector);
         }
 
         if ($reflector->isInternal() || !$reflector->isAnonymousLike()) {
@@ -161,7 +161,7 @@ final class AnonymousClassParser extends AbstractParser
     }
 
     /**
-     * @param ReflectionClassInfo $reflector
+     * @param ReflectionClass $reflector
      * @param string $ns
      * @param array $fileInfo
      * @param array|null $aliases

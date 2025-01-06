@@ -231,7 +231,7 @@ final class Serializer
     public static function preventBoxing(string ...$class): void
     {
         foreach ($class as $cls) {
-            ReflectionClassInfo::get($cls)->useBoxing = false;
+            ReflectionClass::get($cls)->useBoxing = false;
         }
     }
 
@@ -244,7 +244,7 @@ final class Serializer
      */
     public static function register(string $class, ?callable $serialize, ?callable $unserialize): void
     {
-        $data = ReflectionClassInfo::get($class);
+        $data = ReflectionClass::get($class);
         $data->customSerializer = $serialize;
         $data->customDeserializer = $unserialize;
     }

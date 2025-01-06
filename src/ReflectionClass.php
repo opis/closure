@@ -2,10 +2,7 @@
 
 namespace Opis\Closure;
 
-/**
- * @internal
- */
-final class ReflectionClassInfo extends \ReflectionClass
+final class ReflectionClass extends \ReflectionClass
 {
     // yes, we use U+FF20 instead of @
     public const ANONYMOUS_CLASS_PREFIX = 'anonymous＠';
@@ -42,6 +39,11 @@ final class ReflectionClassInfo extends \ReflectionClass
      */
     public $customDeserializer = null;
 
+    /**
+     * You should not use this ctor directly, use ::get()
+     * @param string|object $classOrObject
+     * @throws \ReflectionException
+     */
     public function __construct(string|object $classOrObject)
     {
         parent::__construct($classOrObject);
@@ -78,9 +80,10 @@ final class ReflectionClassInfo extends \ReflectionClass
         return $this->_isAnonLike;
     }
 
-    public function getAnonymousClassInfo(): ?AnonymousClassInfo
+    public function info(): ?AnonymousClassInfo
     {
         if (!$this->_isAnonLike) {
+            // we don't provide info for non-anonymous classes
             return null;
         }
         return $this->_info ??= AnonymousClassParser::parse($this);

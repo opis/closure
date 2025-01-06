@@ -2,11 +2,6 @@
 
 namespace Opis\Closure;
 
-use ReflectionClass;
-
-/**
- * @internal
- */
 abstract class AbstractInfo
 {
     protected ?string $key = null;
@@ -74,7 +69,7 @@ abstract class AbstractInfo
      */
     private static array $cache = [];
 
-    private static ?ReflectionClass $reflector = null;
+    private static ?\ReflectionClass $reflector = null;
 
     /**
      * @return string Unique short name
@@ -95,7 +90,7 @@ abstract class AbstractInfo
         }
 
         /** @var static $obj */
-        $obj = (static::$reflector ??= new ReflectionClass(static::class))->newInstanceWithoutConstructor();
+        $obj = (static::$reflector ??= new \ReflectionClass(static::class))->newInstanceWithoutConstructor();
 
         $obj->__unserialize($data);
 

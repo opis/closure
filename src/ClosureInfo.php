@@ -90,7 +90,7 @@ final class ClosureInfo extends AbstractInfo
         }
 
         if ($thisObj) {
-            if (ReflectionClassInfo::get($thisObj)->isInternal()) {
+            if (ReflectionClass::get($thisObj)->isInternal()) {
                 return $factory->bindTo($thisObj);
             }
             return $factory->bindTo($thisObj, $thisObj);
@@ -100,7 +100,7 @@ final class ClosureInfo extends AbstractInfo
             $scope &&
             $scope !== "static" &&
             $this->hasScope() &&
-            !ReflectionClassInfo::get($scope)->isInternal()
+            !ReflectionClass::get($scope)->isInternal()
         ) {
             return $factory->bindTo(null, $scope);
         }
