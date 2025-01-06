@@ -18,4 +18,27 @@ class AnonymousClassTest extends SerializeTestCase
 
         $this->assertEquals(123, $u->value);
     }
+
+    public function testComplex()
+    {
+        $factory = fn(?Objects\Entity $parent) => new class($parent) extends Objects\Entity {
+            public function __construct(?Objects\Entity $parent)
+            {
+                $this->parent = $parent;
+            }
+        };
+
+        $a = $factory(null);
+        $b = $factory($a);
+
+        // process twice
+        $u = $this->process([$a, $b]);
+        $u = $this->process($u);
+
+        $this->assertInstanceOf(Objects\Entity::class, $u[0]);
+        $this->assertInstanceOf(Objects\Entity::class, $u[1]);
+
+        $this->assertNull($u[0]->parent);
+        $this->assertEquals($u[0], $u[1]->parent);
+    }
 }
