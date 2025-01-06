@@ -11,25 +11,26 @@ final class ReflectionClassInfo extends \ReflectionClass
     public const ANONYMOUS_CLASS_PREFIX = 'anonymous＠';
 
     /**
-     * @var bool True if this class must be boxed
-     */
-    public bool $useBoxing;
-
-    /**
      * @var bool True if this class has __serialize()
      */
-    public bool $hasMagicSerialize;
+    private bool $_magicSerialize;
 
     /**
      * @var bool True if this class has __unserialize()
      */
-    public bool $hasMagicUnserialize;
+    private bool $_magicUnserialize;
 
     /**
      * @var bool True if this class is anonymous or built from fake anonymous
      */
-    private bool $isAnon;
-    private ?AnonymousClassInfo $info = null;
+    private bool $_isAnonLike;
+
+    private ?AnonymousClassInfo $_info = null;
+
+    /**
+     * @var bool True if this class must be boxed
+     */
+    public bool $useBoxing;
 
     /**
      * @var callable|null Custom serialization callback
@@ -41,21 +42,32 @@ final class ReflectionClassInfo extends \ReflectionClass
      */
     public $customDeserializer = null;
 
-    private function __construct(string $class)
+    public function __construct(string|object $classOrObject)
     {
-        parent::__construct($class);
-        $this->hasMagicSerialize = $this->hasMethod("__serialize");
-        $this->hasMagicUnserialize = $this->hasMethod("__unserialize");
-        $this->isAnon = parent::isAnonymous();
-        if (!$this->isAnon) {
+        parent::__construct($classOrObject);
+        $this->_magicSerialize = $this->hasMethod("__serialize");
+        $this->_magicUnserialize = $this->hasMethod("__unserialize");
+        $this->_isAnonLike = parent::isAnonymous();
+        if (!$this->_isAnonLike) {
+            $class = $this->name;
             $pos = strrpos($class, '\\');
             if ($pos !== false) {
                 $class = substr($class, $pos + 1);
             }
-            $this->isAnon = str_starts_with($class, self::ANONYMOUS_CLASS_PREFIX);
+            $this->_isAnonLike = str_starts_with($class, self::ANONYMOUS_CLASS_PREFIX);
         }
         // we always box anonymous
-        $this->useBoxing = $this->isAnon || empty($this->getAttributes(Attribute\PreventBoxing::class));
+        $this->useBoxing = $this->_isAnonLike || empty($this->getAttributes(Attribute\PreventBoxing::class));
+    }
+
+    public function hasMagicSerialize(): bool
+    {
+        return $this->_magicSerialize;
+    }
+
+    public function hasMagicUnserialize(): bool
+    {
+        return $this->_magicUnserialize;
     }
 
     /**
@@ -63,15 +75,15 @@ final class ReflectionClassInfo extends \ReflectionClass
      */
     public function isAnonymousLike(): bool
     {
-        return $this->isAnon;
+        return $this->_isAnonLike;
     }
 
     public function getAnonymousClassInfo(): ?AnonymousClassInfo
     {
-        if (!$this->isAnon) {
+        if (!$this->_isAnonLike) {
             return null;
         }
-        return $this->info ??= AnonymousClassParser::parse($this);
+        return $this->_info ??= AnonymousClassParser::parse($this);
     }
 
     private static array $cache = [];

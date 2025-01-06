@@ -162,7 +162,7 @@ class DeserializationHandler
         $data ??= [];
 
         $unserialize = $info->customDeserializer;
-        if (!$unserialize && !$info->hasMagicUnserialize) {
+        if (!$unserialize && !$info->hasMagicUnserialize()) {
             // if we don't have a custom deserializer, and we don't have __unserialize
             // then use the generic object unserialize
             $unserialize = GenericObjectSerialization::UNSERIALIZE_CALLBACK;

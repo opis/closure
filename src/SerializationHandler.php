@@ -83,7 +83,7 @@ class SerializationHandler
         if ($serializer = $info->customSerializer ?? null) {
             // we have a custom serializer
             $vars = $serializer($object);
-        } elseif ($info->hasMagicSerialize) {
+        } elseif ($info->hasMagicSerialize()) {
             // we have the magic __serialize
             $vars = $object->__serialize();
         } else {
