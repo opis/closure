@@ -91,4 +91,31 @@ class AnonymousClassTest extends SerializeTestCase
 
         $this->assertEquals("ok", $closure());
     }
+
+    public function testTrait()
+    {
+        $v = new class {
+            use Objects\StaticTrait1;
+        };
+
+        $closure = $this->process($v::create());
+        $this->assertEquals("ok-trait", $closure());
+    }
+
+    public function testTraitAlias()
+    {
+        $v = new class {
+            use Objects\StaticTrait1 {
+                test as test_trait;
+            }
+
+            public static function test()
+            {
+                return "ok-class";
+            }
+        };
+
+        $closure = $this->process($v::create());
+        $this->assertEquals("ok-class", $closure());
+    }
 }
