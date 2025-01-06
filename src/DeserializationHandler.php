@@ -74,7 +74,7 @@ class DeserializationHandler
 
     private function handleArray(array &$array): void
     {
-        $id = ClassInfo::refId($array);
+        $id = ReflectionClassInfo::getRefId($array);
         if (!isset($this->visitedArrays[$id])) {
             $this->visitedArrays[$id] = true;
             $this->handleIterable($array);
@@ -118,9 +118,10 @@ class DeserializationHandler
 
         // start unboxing
         $unboxed = match ($object->type) {
-            Box::TYPE_OBJECT => $this->unboxObject($object),
+            Box::TYPE_OBJECT => $this->unboxObject($object, false),
             Box::TYPE_CLOSURE => $this->unboxClosure($object),
             Box::TYPE_CALLABLE => $this->unboxCallable($object),
+            Box::TYPE_ANONYMOUS_CLASS => $this->unboxObject($object, true),
         };
 
         // process references
@@ -143,22 +144,28 @@ class DeserializationHandler
         $object = $unboxed;
     }
 
-    private function unboxObject(Box $box): object
+    private function unboxObject(Box $box, bool $isAnonymous): object
     {
-        $info = ClassInfo::get($box->data[0]);
+        // resolve class name
+        if ($isAnonymous) {
+            $class = AnonymousClassInfo::load($box->data[0])->loadClass();
+        } else {
+            $class = $box->data[0];
+        }
 
-        /**
-         * @var $data array|null
-         */
+        // get reflection info
+        $info = ReflectionClassInfo::get($class);
+
+        // get a reference to data
         $data = &$box->data[1];
         // we must always have an array
         $data ??= [];
 
-        $unserialize = $info->unserialize;
+        $unserialize = $info->customDeserializer;
         if (!$unserialize && !$info->hasMagicUnserialize) {
-            // if we don't have a custom unserializer, and we don't have __unserialize
+            // if we don't have a custom deserializer, and we don't have __unserialize
             // then use the generic object unserialize
-            $unserialize = [GenericObjectSerialization::class, "unserialize"];
+            $unserialize = GenericObjectSerialization::UNSERIALIZE_CALLBACK;
         }
         if ($unserialize) {
             return $unserialize($data, function (?object $object, mixed &$value = null) use ($box, &$data): void {
@@ -171,11 +178,11 @@ class DeserializationHandler
                     // handle
                     $this->handle($value);
                 }
-            }, $info->reflection);
+            }, $info);
         }
 
         // create a new object
-        $object = $info->reflection->newInstanceWithoutConstructor();
+        $object = $info->newInstanceWithoutConstructor();
 
         // we eagerly save cache
         $this->unboxed[$box] = $object;
@@ -214,9 +221,6 @@ class DeserializationHandler
             "scope" => null,
         ];
 
-        /** @var $info ClosureInfo */
-        $info = $data["info"];
-
         if ($data["this"]) {
             $this->handleObject($data["this"]);
         }
@@ -225,6 +229,10 @@ class DeserializationHandler
             $this->handleArray($data["vars"]);
         }
 
+        // in 4.1 data[info] was the object, we changed it to be an array
+        $info = ($data["info"] instanceof ClosureInfo) ? $data["info"] : ClosureInfo::load($data["info"]);
+
+        // get the closure
         return $info->getClosure($data["vars"], $data["this"], $data["scope"]);
     }
 

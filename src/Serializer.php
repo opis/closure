@@ -15,8 +15,6 @@ final class Serializer
 {
     private static bool $init = false;
 
-    public static string $uniqKey;
-
     private static ?SecurityProviderInterface $securityProvider = null;
 
     public static bool $v3Compatible = false;
@@ -46,19 +44,13 @@ final class Serializer
             }
         }
 
-        // Init closure parser
-        ClosureParser::init();
-
-        // Init closure stream protocol
-        ClosureStream::init();
+        // Init code stream protocol
+        CodeStream::init([ClosureInfo::class, AnonymousClassInfo::class]);
 
         // Set security provider
         if ($security) {
             self::setSecurityProvider($security);
         }
-
-        // Set uniq key
-        self::$uniqKey = '@(opis/closure):key:' . chr(0) . uniqid() . chr(8);
 
         // add spl serializations
         self::register(
@@ -239,7 +231,7 @@ final class Serializer
     public static function preventBoxing(string ...$class): void
     {
         foreach ($class as $cls) {
-            ClassInfo::get($cls)->box = false;
+            ReflectionClassInfo::get($cls)->useBoxing = false;
         }
     }
 
@@ -252,9 +244,9 @@ final class Serializer
      */
     public static function register(string $class, ?callable $serialize, ?callable $unserialize): void
     {
-        $data = ClassInfo::get($class);
-        $data->serialize = $serialize;
-        $data->unserialize = $unserialize;
+        $data = ReflectionClassInfo::get($class);
+        $data->customSerializer = $serialize;
+        $data->customDeserializer = $unserialize;
     }
 
     /**

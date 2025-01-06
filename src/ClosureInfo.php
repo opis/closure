@@ -5,62 +5,29 @@ namespace Opis\Closure;
 use Closure;
 
 #[Attribute\PreventBoxing]
-final class ClosureInfo
+final class ClosureInfo extends AbstractInfo
 {
     public const FLAG_IS_SHORT = 1;
     public const FLAG_IS_STATIC = 2;
     public const FLAG_HAS_THIS = 4;
     public const FLAG_HAS_SCOPE = 8;
 
-    private ?string $key = null;
+    public ?array $use;
+
+    public int $flags;
 
     private ?Closure $factory = null;
 
-    /**
-     * @var ClosureInfo[] Cache by key
-     */
-    private static array $cache = [];
-
     public function __construct(
-        /**
-         * Function imports including namespace
-         * @var string
-         */
-        private string $header,
-
-        /**
-         * Function body
-         * @var string
-         */
-        private string $body,
-
-        /**
-         * Variable names from use()
-         * @var string[]|null
-         */
-        public ?array  $use = null,
-
-        /**
-         * Closure properties
-         * @var int
-         */
-        public int     $flags = 0,
+        string $header,
+        string $body,
+        ?array $use = null,
+        int $flags = 0,
     )
     {
-    }
-
-    /**
-     * Unique key for this function info
-     * @return string
-     */
-    public function key(): string
-    {
-        if (!isset($this->key)) {
-            $this->key = self::createKey($this->header, $this->body);
-            // save it to cache
-            self::$cache[$this->key] = $this;
-        }
-        return $this->key;
+        parent::__construct($header, $body);
+        $this->use = $use;
+        $this->flags = $flags;
     }
 
     /**
@@ -109,7 +76,8 @@ final class ClosureInfo
      */
     public function getFactory(?object $thisObj, ?string $scope = null): Closure
     {
-        $factory = ($this->factory ??= ClosureStream::factory($this));
+        /** @var Closure $factory */
+        $factory = ($this->factory ??= CodeStream::include($this));
 
         if ($thisObj && $this->isStatic()) {
             // closure is static, we cannot bind
@@ -122,13 +90,18 @@ final class ClosureInfo
         }
 
         if ($thisObj) {
-            if (ClassInfo::isInternal($thisObj)) {
+            if (ReflectionClassInfo::get($thisObj)->isInternal()) {
                 return $factory->bindTo($thisObj);
             }
             return $factory->bindTo($thisObj, $thisObj);
         }
 
-        if ($scope && $scope !== "static" && $this->hasScope() && !ClassInfo::isInternal($scope)) {
+        if (
+            $scope &&
+            $scope !== "static" &&
+            $this->hasScope() &&
+            !ReflectionClassInfo::get($scope)->isInternal()
+        ) {
             return $factory->bindTo(null, $scope);
         }
 
@@ -166,11 +139,7 @@ return {$this->body};
 
     public function __serialize(): array
     {
-        $data = ['key' => $this->key()];
-        if ($this->header) {
-            $data['header'] = $this->header;
-        }
-        $data['body'] = $this->body;
+        $data = parent::__serialize();
         if ($this->use) {
             $data['use'] = $this->use;
         }
@@ -182,20 +151,14 @@ return {$this->body};
 
     public function __unserialize(array $data): void
     {
-        $this->key = $data['key'] ?? null;
-        $this->header = $data['header'] ?? $data['imports'] ?? '';
-        $this->body = $data['body'];
         $this->use = $data['use'] ?? null;
         $this->flags = $data['flags'] ?? 0;
-        if ($this->key && !isset(self::$cache[$this->key])) {
-            // save it to cache
-            self::$cache[$this->key] = $this;
-        }
+        parent::__unserialize($data);
     }
 
-    public static function createKey(string $body, ?string $header = null): string
+    public static function name(): string
     {
-        return md5(($header ?? "") . "\n" . $body);
+        return "fn";
     }
 
     public static function flags(
@@ -224,19 +187,5 @@ return {$this->body};
         }
 
         return $flags;
-    }
-
-    public static function resolve(string $key): ?ClosureInfo
-    {
-        return self::$cache[$key] ?? null;
-    }
-
-    /**
-     * Clears cache
-     * @return void
-     */
-    public static function clear(): void
-    {
-        self::$cache = [];
     }
 }

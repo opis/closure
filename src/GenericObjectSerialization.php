@@ -9,6 +9,9 @@ use ReflectionObject, ReflectionClass;
  */
 class GenericObjectSerialization
 {
+    public const SERIALIZE_CALLBACK = [self::class, "serialize"];
+    public const UNSERIALIZE_CALLBACK = [self::class, "unserialize"];
+
     public static function serialize(object $object): array
     {
         $data = [];
