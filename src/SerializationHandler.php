@@ -78,7 +78,7 @@ class SerializationHandler
         return $this->shouldBox[$info] = true;
     }
 
-    private function &getObjectVars(object $object, ReflectionClassInfo $info): ?array
+    private function getObjectVars(object $object, ReflectionClassInfo $info): ?array
     {
         if ($serializer = $info->customSerializer ?? null) {
             // we have a custom serializer
@@ -91,15 +91,11 @@ class SerializationHandler
             $vars = GenericObjectSerialization::serialize($object);
         }
 
-        if (!is_array($vars) || empty($vars)) {
-            $vars = null;
+        if (!is_array($vars) || !$vars) {
+            return null;
         }
 
-        if (!$vars) {
-            return $vars;
-        }
-
-        return $this->handleArray($vars);
+        return $this->handleArray($vars, true);
     }
 
     private function handleObject(object $data): object
@@ -151,7 +147,7 @@ class SerializationHandler
         $this->objectMap[$data] = $box;
 
         // Set vars
-        $box->data[1] = &$this->getObjectVars($data, $info);
+        $box->data[1] = $this->getObjectVars($data, $info);
 
         // Add to priority
         $this->priority->attach($box);
@@ -159,15 +155,18 @@ class SerializationHandler
         return $box;
     }
 
-    private function &handleArray(array &$data): array
+    private function &handleArray(array &$data, bool $skipRefId = false): array
     {
-        $id = ReflectionClassInfo::getRefId($data);
-        if (array_key_exists($id, $this->arrayMap)) {
-            return $this->arrayMap[$id];
+        if ($skipRefId) {
+            $box = [];
+        } else {
+            $id = ReflectionClassInfo::getRefId($data);
+            if (array_key_exists($id, $this->arrayMap)) {
+                return $this->arrayMap[$id];
+            }
+            $box = [];
+            $this->arrayMap[$id] = &$box;
         }
-
-        $box = [];
-        $this->arrayMap[$id] = &$box;
 
         foreach ($data as $key => &$value) {
             if (is_object($value)) {
@@ -234,7 +233,7 @@ class SerializationHandler
         }
 
         if ($use = $reflector->getUseVariables()) {
-            $box->data["vars"] = &$this->handleArray($use);
+            $box->data["vars"] = &$this->handleArray($use, true);
         }
 
         return $box;

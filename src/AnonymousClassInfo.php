@@ -12,7 +12,7 @@ final class AnonymousClassInfo extends AbstractInfo
      */
     private string $ns;
 
-    private ?string $loadedClass = null;
+    private bool $loaded = false;
 
     public function __construct(string $header, string $body, string $ns = '')
     {
@@ -41,17 +41,17 @@ final class AnonymousClassInfo extends AbstractInfo
      */
     public function loadClass(): string
     {
-        if ($this->loadedClass) {
-            return $this->loadedClass;
-        }
-
         $class = $this->fullClassName();
-        if (!class_exists($class, false)) {
-            // include the class
-            CodeStream::include($this);
+
+        if (!$this->loaded) {
+            if (!class_exists($class, false)) {
+                // include the class
+                CodeStream::include($this);
+            }
+            $this->loaded = true;
         }
 
-        return $this->loadedClass = $class;
+        return $class;
     }
 
     private function fullClassName(): string

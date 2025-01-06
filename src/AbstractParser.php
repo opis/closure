@@ -169,6 +169,14 @@ abstract class AbstractParser
 
     private static array $fileCache = [];
 
+    final public static function clear(bool $include_file_cache = false): void
+    {
+        self::$cache = [];
+        if ($include_file_cache) {
+            self::$fileCache = [];
+        }
+    }
+
     abstract public static function parse($reflector): ?AbstractInfo;
 
     abstract protected static function create(

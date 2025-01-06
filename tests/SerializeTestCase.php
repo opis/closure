@@ -2,6 +2,7 @@
 
 namespace Opis\Closure\Test;
 
+use Opis\Closure\AbstractParser;
 use Opis\Closure\ClosureInfo;
 use Opis\Closure\Serializer;
 use PHPUnit\Framework\TestCase;
@@ -17,6 +18,7 @@ abstract class SerializeTestCase extends TestCase
     {
         // clear cache if any
         ClosureInfo::clear();
+        AbstractParser::clear();
         // do not keep security provider
         Serializer::setSecurityProvider(null);
     }

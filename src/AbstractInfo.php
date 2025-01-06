@@ -4,6 +4,9 @@ namespace Opis\Closure;
 
 use ReflectionClass;
 
+/**
+ * @internal
+ */
 abstract class AbstractInfo
 {
     protected ?string $key = null;
