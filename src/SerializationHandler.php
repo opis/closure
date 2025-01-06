@@ -103,7 +103,7 @@ class SerializationHandler
         if (
             ReflectionClassInfo::objectIsEnum($data) ||
             ($data instanceof Box) ||
-            ($data instanceof ClosureInfo)
+            ($data instanceof AbstractInfo)
         ) {
             // we do need original serialization
             return $data;
