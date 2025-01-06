@@ -69,7 +69,10 @@ abstract class AbstractInfo
      */
     private static array $cache = [];
 
-    private static ?\ReflectionClass $reflector = null;
+    /**
+     * @var \ReflectionClass[]
+     */
+    private static array $reflector = [];
 
     /**
      * @return string Unique short name
@@ -90,7 +93,7 @@ abstract class AbstractInfo
         }
 
         /** @var static $obj */
-        $obj = (static::$reflector ??= new \ReflectionClass(static::class))->newInstanceWithoutConstructor();
+        $obj = (self::$reflector[static::name()] ??= new \ReflectionClass(static::class))->newInstanceWithoutConstructor();
 
         $obj->__unserialize($data);
 

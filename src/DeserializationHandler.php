@@ -229,6 +229,11 @@ class DeserializationHandler
             $this->handleArray($data["vars"]);
         }
 
+        if (isset($data["anon"])) {
+            // load anonymous class definition if any
+            AnonymousClassInfo::load($data["anon"])->loadClass();
+        }
+
         // in 4.1 data[info] was the object, we changed it to be an array
         $info = ($data["info"] instanceof ClosureInfo) ? $data["info"] : ClosureInfo::load($data["info"]);
 

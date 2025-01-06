@@ -54,7 +54,7 @@ final class AnonymousClassInfo extends AbstractInfo
         return $class;
     }
 
-    private function fullClassName(): string
+    public function fullClassName(): string
     {
         $class = ReflectionClass::ANONYMOUS_CLASS_PREFIX . $this->key();
         return $this->ns ? "\\{$this->ns}\\{$class}" : $class;
