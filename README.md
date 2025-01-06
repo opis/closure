@@ -13,10 +13,28 @@ Serialize closures, serialize anything
 ```php
 use function Opis\Closure\{serialize, unserialize};
 
-$serialized = serialize(fn() => "hello!");
+$serialized = serialize(fn() => "hello from closure!");
 $greet = unserialize($serialized);
 
-echo $greet(); // hello
+echo $greet(); // hello from closure!
+```
+
+> [!IMPORTANT]
+> Starting with version 4.2, **Opis Closure** supports serialization of anonymous classes.
+
+```php
+use function Opis\Closure\{serialize, unserialize};
+
+$serialized = serialize(new class("hello from anonymous class!") {
+    public function __construct(private string $message) {}
+    
+    public function greet(): string {
+        return $this->message;
+    }
+});
+
+$object = unserialize($serialized);
+echo $object->greet(); // hello from anonymous class!
 ```
 
 _A full rewrite was necessary to keep this project compatible with the PHP's new features, such as attributes, enums, 
@@ -59,7 +77,7 @@ Or you could directly reference it into your `composer.json` file as a dependenc
 ```json
 {
     "require": {
-        "opis/closure": "^4.1"
+        "opis/closure": "^4.2"
     }
 }
 ```
