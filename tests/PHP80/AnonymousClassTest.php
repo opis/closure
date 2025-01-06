@@ -51,4 +51,44 @@ class AnonymousClassTest extends SerializeTestCase
 
         $this->assertEquals(1, $closure());
     }
+
+    public function testScopeOnly()
+    {
+        /**
+         * this is an interesting case
+         * we don't have $this bound, but we need the static methods
+         * from anonymous class
+         */
+        $v = new class {
+            public static function create()
+            {
+                return static function () {
+                    return self::test();
+                };
+            }
+
+            public static function test() {
+                return "ok";
+            }
+        };
+
+        $s = $this->s($v::create());
+        $this->clearCache(); // clear cache so we don't have info in memory
+        $closure = $this->u($s);
+
+        $this->assertEquals("ok", $closure());
+    }
+
+    public function testCallable()
+    {
+        $v = new class {
+            public static function test() {
+                return "ok";
+            }
+        };
+
+        $closure = $this->process(\Closure::fromCallable([get_class($v), "test"]));
+
+        $this->assertEquals("ok", $closure());
+    }
 }

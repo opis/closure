@@ -68,7 +68,7 @@ final class ReflectionClosure extends ReflectionFunction
 
         if ($scope = $this->getClosureScopeClass()) {
             // Static method
-            return $scope->getName() . '::' . $name;
+            return [$scope->getName(), $name];
         }
 
         // Global function

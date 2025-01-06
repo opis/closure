@@ -204,8 +204,15 @@ class DeserializationHandler
     {
         $callable = &$box->data;
 
-        if (is_array($callable) && is_object($callable[0])) {
-            $this->handleObject($callable[0]);
+        if (is_array($callable)) {
+            if (isset($callable[2])) {
+                // load anonymous class definition if any
+                AnonymousClassInfo::load($callable[2])->loadClass();
+                unset($callable[2]);
+            }
+            if (is_object($callable[0])) {
+                $this->handleObject($callable[0]);
+            }
         }
 
         return Closure::fromCallable($callable);

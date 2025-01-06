@@ -210,7 +210,20 @@ class SerializationHandler
 
         if (($callable = $reflector->getCallableForm()) !== null) {
             $box->type = Box::TYPE_CALLABLE;
-            $box->data = $this->handle($callable);
+            if (is_object($callable)) {
+                $callable = $this->handleObject($callable);
+            } else if (is_array($callable)) {
+                if (is_object($callable[0])) {
+                    $callable[0] = $this->handleObject($callable[0]);
+                } else if ($info = ReflectionClass::get($callable[0])->info()) {
+                    // we have an anonymous
+                    $callable[0] = $info->fullClassName();
+                    $callable[2] = &$this->getCachedInfo($info);
+                }
+            }
+
+            $box->data = $callable;
+
             return $box;
         }
 
