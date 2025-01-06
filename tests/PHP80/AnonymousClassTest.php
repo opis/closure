@@ -2,6 +2,7 @@
 
 namespace Opis\Closure\Test\PHP80;
 
+use Opis\Closure\Test\PHP80\Objects\Clone1;
 use Opis\Closure\Test\SerializeTestCase;
 
 class AnonymousClassTest extends SerializeTestCase
@@ -40,5 +41,14 @@ class AnonymousClassTest extends SerializeTestCase
 
         $this->assertNull($u[0]->parent);
         $this->assertEquals($u[0], $u[1]->parent);
+    }
+
+    public function testBoundClosure()
+    {
+        $v = new class extends Clone1 {};
+
+        $closure = $this->process($v->create());
+
+        $this->assertEquals(1, $closure());
     }
 }

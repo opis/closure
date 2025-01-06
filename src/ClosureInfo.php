@@ -90,9 +90,21 @@ final class ClosureInfo extends AbstractInfo
         }
 
         if ($thisObj) {
-            if (ReflectionClass::get($thisObj)->isInternal()) {
+            $reflector = ReflectionClass::get($thisObj);
+
+            if ($reflector->isInternal()) {
+                // we cannot bind to internal objects
                 return $factory->bindTo($thisObj);
             }
+
+            if ($scope && $scope !== $reflector->name) {
+                // we have a different scope than the object
+                // this usually happens if the closure is bound
+                // in a super class and has access to private members of the super
+                return $factory->bindTo($thisObj, $scope);
+            }
+
+            // use the same object as scope
             return $factory->bindTo($thisObj, $thisObj);
         }
 

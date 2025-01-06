@@ -220,16 +220,35 @@ class SerializationHandler
         $box->data = [];
         $box->data["info"] = &$this->getCachedInfo($closureInfo);
 
-        $object = $closureInfo->hasThis() ? $reflector->getClosureThis() : null;
+        $object = $closureInfo->hasThis() && !$closureInfo->isStatic() ? $reflector->getClosureThis() : null;
         $scope = $closureInfo->hasScope() ? $reflector->getClosureScopeClass() : null;
 
-        if ($object && !$closureInfo->isStatic()) {
+        if ($object) {
             $box->data["this"] = $this->handleObject($object);
+            $scope ??= $reflector->getClosureScopeClass();
         }
 
-        // Do not add internal or anonymous scope
-        if ($scope && !$scope->isInternal() && !$scope->isAnonymous()) {
-            $box->data["scope"] = $scope->getName();
+        if ($scope && !$scope->isInternal()) {
+            $name = $scope->getName();
+            if ($scope->isAnonymous()) {
+                if ($useScope = !$object && $closureInfo->hasScope()) {
+                    // this is a tricky case
+                    // we don't have $this, but we must make sure the anonymous class is available for static::/self::
+                    // this works on a local machine because the class name is something like:
+                    // class@anonymous/path/to/file.php:31$0
+                    // but on another machine we have to make it available
+                    // TODO: transfer anonymous class definition
+                }
+            } else if (ReflectionClass::isAnonymousClassName($name)) {
+                // we can use the scope only if static, self, keywords
+                $useScope = $closureInfo->hasScope();
+            } else {
+                $useScope = true;
+            }
+            if ($useScope) {
+                $box->data["scope"] = $name;
+            }
+            unset($name, $useScope);
         }
 
         if ($use = $reflector->getUseVariables()) {

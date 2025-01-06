@@ -49,15 +49,7 @@ final class ReflectionClass extends \ReflectionClass
         parent::__construct($classOrObject);
         $this->_magicSerialize = $this->hasMethod("__serialize");
         $this->_magicUnserialize = $this->hasMethod("__unserialize");
-        $this->_isAnonLike = parent::isAnonymous();
-        if (!$this->_isAnonLike) {
-            $class = $this->name;
-            $pos = strrpos($class, '\\');
-            if ($pos !== false) {
-                $class = substr($class, $pos + 1);
-            }
-            $this->_isAnonLike = str_starts_with($class, self::ANONYMOUS_CLASS_PREFIX);
-        }
+        $this->_isAnonLike = parent::isAnonymous() || self::isAnonymousClassName($this->name);
         // we always box anonymous
         $this->useBoxing = $this->_isAnonLike || empty($this->getAttributes(Attribute\PreventBoxing::class));
     }
@@ -115,5 +107,14 @@ final class ReflectionClass extends \ReflectionClass
     public static function getRefId(mixed &$reference): ?string
     {
         return \ReflectionReference::fromArrayElement([&$reference], 0)?->getId();
+    }
+
+    public static function isAnonymousClassName(string $class): bool
+    {
+        $pos = strrpos($class, '\\');
+        if ($pos !== false) {
+            $class = substr($class, $pos + 1);
+        }
+        return str_starts_with($class, self::ANONYMOUS_CLASS_PREFIX);
     }
 }
