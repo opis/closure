@@ -36,6 +36,16 @@ class UnserializeTest extends TestCase
         $f = $this->u("sum.security", "other-secret");
     }
 
+    public function testAnonymousClassComplex()
+    {
+        $u = $this->u("anon.complex");
+        $this->assertInstanceOf(Objects\Entity::class, $u[0]);
+        $this->assertInstanceOf(Objects\Entity::class, $u[1]);
+
+        $this->assertNull($u[0]->parent);
+        $this->assertEquals($u[0], $u[1]->parent);
+    }
+
     private function u(string $name, SecurityProviderInterface|string|null $security = null): mixed
     {
         $data = file_get_contents(__DIR__ . "/v4/{$name}.bin");
