@@ -168,7 +168,7 @@ class DeserializationHandler
             $unserialize = GenericObjectSerialization::UNSERIALIZE_CALLBACK;
         }
         if ($unserialize) {
-            return $unserialize($data, function (?object $object, mixed &$value = null) use ($box, &$data): void {
+            return $unserialize($data, function (?object $object, mixed &$value = null) use ($box): void {
                 if ($object) {
                     // eagerly cache
                     $this->unboxed[$box] = $object;

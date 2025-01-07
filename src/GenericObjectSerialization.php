@@ -56,7 +56,7 @@ class GenericObjectSerialization
             if (!$data || !$reflection->isUserDefined()) {
                 break;
             }
-            foreach ($data as $name => $value) {
+            foreach ($data as $name => &$value) {
                 if (!$reflection->hasProperty($name)) {
                     continue;
                 }
@@ -66,8 +66,10 @@ class GenericObjectSerialization
                     continue;
                 }
 
-                $property->setAccessible(true);
-                $property->setValue($object, $value);
+                if (!$property->hasDefaultValue() || $value !== $property->getDefaultValue()) {
+                    $property->setAccessible(true);
+                    $property->setValue($object, $value);
+                }
                 unset($data[$name]);
             }
         } while ($reflection = $reflection->getParentClass());
