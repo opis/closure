@@ -44,6 +44,9 @@ final class Serializer
             }
         }
 
+        // Init parser
+        AbstractParser::init();
+
         // Init code stream protocol
         CodeStream::init([ClosureInfo::class, AnonymousClassInfo::class]);
 

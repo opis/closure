@@ -41,8 +41,6 @@ abstract class AbstractParser
         protected array $anonymous,
     )
     {
-        // init built in types
-        self::$BUILTIN_TYPES ??= self::getBuiltInTypes();
         // Set number of tokens
         $this->count = count($tokens);
     }
@@ -356,5 +354,10 @@ abstract class AbstractParser
         }
 
         return $types;
+    }
+
+    final public static function init(): void
+    {
+        self::$BUILTIN_TYPES ??= self::getBuiltInTypes();
     }
 }

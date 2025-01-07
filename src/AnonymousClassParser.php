@@ -7,8 +7,6 @@ namespace Opis\Closure;
  */
 final class AnonymousClassParser extends AbstractParser
 {
-    private const MATCH_PARAMS_OR_BODY = ['(', '{'];
-
     private int $last = -1;
 
     protected function __construct(

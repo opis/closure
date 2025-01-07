@@ -5,13 +5,16 @@ namespace Opis\Closure;
 #[Attribute\PreventBoxing]
 final class AnonymousClassInfo extends AbstractInfo
 {
-    public const PLACEHOLDER = "\x07{opis\x06class\x05name}\x07";
+    public const PLACEHOLDER = "\x07opis\x06anonymous＠class\x05name\x07";
 
     /**
      * @var string Original class namespace
      */
     private string $ns;
 
+    /**
+     * @var bool True if class was loaded
+     */
     private bool $loaded = false;
 
     public function __construct(string $header, string $body, string $ns = '')
