@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v4.2.1, 2025.01.07
+
+- Improved generic object serialization
+
 ### v4.2.0, 2025.01.07
 
 #### Changes

@@ -8,7 +8,7 @@ Opis Closure
 Serialize closures, serialize anything
 ------------------
 
-**Opis Closure** is a PHP library that allows you to serialize closures and arbitrary data.
+**Opis Closure** is a PHP library that allows you to serialize closures, anonymous classes, and arbitrary data.
 
 ```php
 use function Opis\Closure\{serialize, unserialize};
@@ -43,8 +43,6 @@ to launch a 4.x version involved using the FFI extension in exotic ways, and it 
 very often the closures were bound to some object, thus in order to preserve functionality, we had to serialize the object 
 too. Since we had to do arbitrary data serialization, we decided to make this project about arbitrary data serialization, 
 providing support for serializing closures but also adding more effortless ways to serialize custom objects._
-
-Starting with v4, **Opis Closure** is not just about closure serialization but also about arbitrary data serialization.
 
 ## Migrating from 3.x
 
