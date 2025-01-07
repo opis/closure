@@ -1,0 +1,6 @@
+a:2:{i:0;O:16:"Opis\Closure\Box":2:{i:0;i:4;i:1;a:2:{i:0;a:4:{s:3:"key";s:32:"3f8961a5672a610d4e034a9932cf59d8";s:6:"header";s:34:"namespace Opis\Closure\Test\PHP80;";s:4:"body";s:205:"class opisanonymous＠classname  extends Objects\Entity {
+            public function __construct(?Objects\Entity $parent)
+            {
+                $this->parent = $parent;
+            }
+        }";s:2:"ns";s:23:"Opis\Closure\Test\PHP80";}i:1;a:2:{i:0;N;i:1;a:0:{}}}}i:1;O:16:"Opis\Closure\Box":2:{i:0;i:4;i:1;a:2:{i:0;R:5;i:1;a:2:{i:0;r:2;i:1;a:0:{}}}}}

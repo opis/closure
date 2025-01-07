@@ -1,6 +1,30 @@
 CHANGELOG
 ---------
 
+### v4.2.0, 2025.01.07
+
+#### Changes
+
+- Added support for anonymous classes (also supports closures bound to anonymous classes)
+- Fixed closure scope for some edge cases
+- Improved parsers
+
+#### Internal changes
+
+Added classes
+
+- `AbastractInfo`
+- `AbstractParser`
+- `AnonymousClassInfo`
+- `AnonymousClassParser`
+- `ReflectionClass`
+- `CodeStream`
+
+Removed
+
+- `ClosureStream` (replaced by `CodeStream`)
+- `ClassInfo` (replace by `ReflectionClass`)
+
 ### v4.1.0, 2025.01.05
 
 #### Changes

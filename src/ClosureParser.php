@@ -2,62 +2,40 @@
 
 namespace Opis\Closure;
 
-use ReflectionFunction;
-
 /**
  * @internal
  */
-final class ClosureParser
+final class ClosureParser extends AbstractParser
 {
-    private const SKIP_WHITESPACE_AND_COMMENTS = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
-
     private const MATCH_CLOSURE = [T_FN, T_FUNCTION];
 
     private const ACCESS_PROP = [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON];
 
-    /**
-     * @var array Transformed file tokens cache
-     */
-    private static array $globalFileCache = [];
-
-    /**
-     * @var array Closure info cache by file/stat-line/end-line
-     */
-    private static array $globalInfoCache = [];
-
-    /**
-     * @var string[] PHP types
-     */
-    private static ?array $BUILTIN_TYPES = null;
-
-    private int $count;
-    private int $index = -1;
+    private const SKIP_WHITESPACE_AND_COMMENTS = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
 
     private bool $isShort = false;
     private bool $isStatic = false;
     private bool $scopeRef = false;
     private bool $thisRef = false;
-
     private array $use = [];
-    private array $hints = [];
 
     private function __construct(
-        private ReflectionFunction $reflector,
-        private array $tokens,
-        private string $ns,
-        private ?array $aliases,
-        private array $anonymous
+        private \ReflectionFunction $reflector,
+        string                     $ns,
+        ?array                     $aliases,
+        array                      $tokens,
+        array                      $anonymous
     )
     {
-        $this->count = count($tokens);
+        parent::__construct($ns, $aliases, $tokens, $anonymous);
     }
 
     /**
      * @return ClosureInfo|null
      */
-    private function info(): ?ClosureInfo
+    public function getInfo(): ?ClosureInfo
     {
-        $this->index = $this->functionIndex();
+        $this->index = $this->findFunctionIndex();
 
         if ($this->index < 0) {
             return null;
@@ -66,13 +44,13 @@ final class ClosureParser
         $this->filterAnonymous($this->index);
 
         // we must get the code first
-        $code = $this->sourceCode();
+        $body = $this->getBody();
         // only then we can process the imports
-        $imports = $this->imports();
+        $header = $this->getHeader();
 
         return new ClosureInfo(
-            $imports,
-            $code,
+            $header,
+            $body,
             $this->use ?: null,
             ClosureInfo::flags(
                 $this->isShort,
@@ -101,7 +79,7 @@ final class ClosureParser
     /**
      * @return int
      */
-    private function functionIndex(): int
+    private function findFunctionIndex(): int
     {
         $startLine = $this->reflector->getStartLine();
         $tokens = $this->tokens;
@@ -179,7 +157,7 @@ final class ClosureParser
     /**
      * @return string
      */
-    private function sourceCode(): string
+    protected function getBody(): string
     {
         $tokens = $this->tokens;
         $count = $this->count;
@@ -205,10 +183,8 @@ final class ClosureParser
                     case T_DOC_COMMENT:
                         continue 2;
                     case ']':
-                        if (T_ATTRIBUTE > 0) {
-                            $balance--;
-                            continue 2;
-                        }
+                        $balance--;
+                        continue 2;
                 }
             } else {
                 switch ($tokens[$start_index][0]) {
@@ -326,29 +302,87 @@ final class ClosureParser
         return $code;
     }
 
-    /**
-     * @returns string
-     */
-    private function imports(): string
+    private function handleBalanceToken(int $index): void
     {
-        $code = "";
-        $ns = $this->ns;
-
-        if ($this->aliases || $this->hints) {
-            $code = self::formatImports($this->aliases, $this->hints, $ns);
+        if ($this->thisRef && $this->scopeRef) {
+            // we already have these
+            return;
         }
 
-        if ($ns) {
-            return "namespace {$ns};" . ($code ? "\n" : "") . $code;
+        $check = false;
+        $checkThis = false;
+        $isStatic = false;
+        $isParent = false;
+
+        $token = $this->tokens[$index];
+
+        if ($token[0] === T_STATIC) {
+            $check = $isStatic = true;
+        } elseif ($token[0] === T_VARIABLE) {
+            $check = $checkThis = strcasecmp($token[1], '$this') === 0;
+        } elseif ($token[0] === T_STRING) {
+            if (strcasecmp($token[1], 'self') === 0) {
+                $check = !$this->nextIs($index, self::ACCESS_PROP, true);
+            } elseif (strcasecmp($token[1], 'parent') === 0) {
+                $check = $isParent = !$this->nextIs($index, self::ACCESS_PROP, true);
+                $checkThis = !$this->isStatic;
+            }
         }
 
-        return $code;
+        if (!$check) {
+            // nothing to check
+            return;
+        }
+
+        if ($checkThis) {
+            if ($this->thisRef) {
+                if ($isParent) {
+                    $this->scopeRef = true;
+                }
+                // already has $this
+                return;
+            }
+        } elseif ($this->scopeRef) {
+            // already has scope
+            return;
+        }
+
+        foreach ($this->anonymous as $anonymous) {
+            if ($index >= $anonymous[0] && $index <= $anonymous[1]) {
+                // this token is inside anonymous class body, ignore it
+                return;
+            }
+        }
+
+        if ($checkThis) {
+            $this->thisRef = true;
+            if ($isParent) {
+                $this->scopeRef = true;
+            }
+            return;
+        }
+
+        if ($isStatic) {
+            while ($index < $this->count) {
+                switch ($this->tokens[++$index][0]) {
+                    case T_WHITESPACE:
+                    case T_COMMENT:
+                    case T_DOC_COMMENT:
+                        continue 2;
+                    case T_VARIABLE:
+                        // static variable
+                        return;
+                }
+                break;
+            }
+        }
+
+        $this->scopeRef = true;
+        if ($isParent) {
+            $this->thisRef = true;
+        }
     }
 
-    /**
-     * @param int $end_line
-     * @return string
-     */
     private function balanceExpression(int $end_line): string
     {
         $tokens = $this->tokens;
@@ -459,7 +493,7 @@ final class ClosureParser
             }
 
             if ($is_array) {
-                $this->checkSpecialToken($index - 1);
+                $this->handleBalanceToken($index - 1);
                 $code .= $token[1];
             } else {
                 $code .= $token;
@@ -479,12 +513,6 @@ final class ClosureParser
         return $code;
     }
 
-    /**
-     * @param $start
-     * @param $end
-     * @param int $open
-     * @return string
-     */
     private function balance($start, $end, int $open = 0): string
     {
         $tokens = $this->tokens;
@@ -513,7 +541,7 @@ final class ClosureParser
                     break;
                 }
             } elseif ($is_array) {
-                $this->checkSpecialToken($index - 1);
+                $this->handleBalanceToken($index - 1);
             }
 
             if ($use_hints) {
@@ -592,79 +620,6 @@ final class ClosureParser
         return $code;
     }
 
-    /**
-     * @param int $index
-     * @param int $end
-     * @return string
-     */
-    private function between(int $index, int $end): string
-    {
-        $hint = '';
-        $code = '';
-        $tokens = $this->tokens;
-        $use_hints = $this->aliases !== null;
-
-        while ($index <= $end) {
-            $token = $tokens[$index++];
-            $code .= is_array($token) ? $token[1] : $token;
-
-            if ($use_hints) {
-                switch ($token[0]) {
-                    case T_STRING:
-                    case T_NS_SEPARATOR:
-                    case T_NAME_QUALIFIED:
-                    case T_NAME_FULLY_QUALIFIED:
-                        $hint .= $token[1];
-                        break;
-                    case T_WHITESPACE:
-                    case T_COMMENT:
-                    case T_DOC_COMMENT:
-                        // ignore whitespace and comments
-                        break;
-                    default:
-                        if ($hint !== '') {
-                            $this->addHint($hint);
-                            $hint = '';
-                        }
-                        break;
-                }
-            }
-        }
-
-        if ($use_hints && $hint !== '') {
-            $this->addHint($hint);
-        }
-
-        return $code;
-    }
-
-    /**
-     * @param int $index
-     * @param array $token_types
-     * @param bool $match Pass false to skip, pass true to match first
-     * @param int $maxLine
-     * @return int
-     */
-    private function walk(int $index, array $token_types, bool $match = false, int $maxLine = PHP_INT_MAX): int
-    {
-        $count = $this->count;
-        $tokens = $this->tokens;
-
-        do {
-            $is_arr = is_array($tokens[$index]);
-            if (
-                $index >= $count || // too big
-                ($is_arr && $tokens[$index][2] > $maxLine) // past max line
-            ) {
-                return -1;
-            }
-            if ($match === in_array($is_arr ? $tokens[$index][0] : $tokens[$index], $token_types, true)) {
-                return $index;
-            }
-            $index++;
-        } while (true);
-    }
-
     private function nextIs(int $index, array $token_types, bool $reverse = false): bool
     {
         $count = $this->count;
@@ -686,311 +641,34 @@ final class ClosureParser
 
         return false;
     }
-    /**
-     * @param string $hint
-     * @return bool
-     */
-    private function addHint(string $hint): bool
-    {
-        if (!$hint || $hint[0] == '\\') {
-            // Ignore empty or absolute
-            return false;
-        }
-
-        $key = strtolower($hint);
-
-        if (isset($this->hints[$key]) || in_array($key, self::$BUILTIN_TYPES)) {
-            return false;
-        }
-
-        $this->hints[$key] = $hint;
-
-        return true;
-    }
-
-    private function checkSpecialToken(int $index): void
-    {
-        if ($this->thisRef && $this->scopeRef) {
-            // we already have these
-            return;
-        }
-
-        $check = false;
-        $checkThis = false;
-        $isStatic = false;
-        $isParent = false;
-
-        $token = $this->tokens[$index];
-
-        if ($token[0] === T_STATIC) {
-            $check = $isStatic = true;
-        } elseif ($token[0] === T_VARIABLE) {
-            $check = $checkThis = strcasecmp($token[1], '$this') === 0;
-        } elseif ($token[0] === T_STRING) {
-            if (strcasecmp($token[1], 'self') === 0) {
-                $check = !$this->nextIs($index, self::ACCESS_PROP, true);
-            } elseif (strcasecmp($token[1], 'parent') === 0) {
-                $check = $isParent = !$this->nextIs($index, self::ACCESS_PROP, true);
-                $checkThis = !$this->isStatic;
-            }
-        }
-
-        if (!$check) {
-            // nothing to check
-            return;
-        }
-
-        if ($checkThis) {
-            if ($this->thisRef) {
-                if ($isParent) {
-                    $this->scopeRef = true;
-                }
-                // already has $this
-                return;
-            }
-        } elseif ($this->scopeRef) {
-            // already has scope
-            return;
-        }
-
-        foreach ($this->anonymous as $anonymous) {
-            if ($index >= $anonymous[0] && $index <= $anonymous[1]) {
-                // this token is inside anonymous class body, ignore it
-                return;
-            }
-        }
-
-        if ($checkThis) {
-            $this->thisRef = true;
-            if ($isParent) {
-                $this->scopeRef = true;
-            }
-            return;
-        }
-
-        if ($isStatic) {
-            while ($index < $this->count) {
-                switch ($this->tokens[++$index][0]) {
-                    case T_WHITESPACE:
-                    case T_COMMENT:
-                    case T_DOC_COMMENT:
-                        continue 2;
-                    case T_VARIABLE:
-                        // static variable
-                        return;
-                }
-                break;
-            }
-        }
-
-        $this->scopeRef = true;
-        if ($isParent) {
-            $this->thisRef = true;
-        }
-    }
 
     /**
-     * @param array $namespaces
-     * @param int $startLine
-     * @return array|null
-     */
-    private static function findNamespaceAliases(array $namespaces, int $startLine): ?array
-    {
-        foreach ($namespaces as $info) {
-            if ($startLine >= $info['start'] && $startLine <= $info['end']) {
-                return $info;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string $prefix
-     * @param array|null $items
-     * @return string
-     */
-    private static function formatUse(string $prefix, ?array $items): string
-    {
-        if (!$items) {
-            return '';
-        }
-
-        foreach ($items as $alias => $full) {
-            if (strcasecmp('\\' . $alias, substr($full, 0 - strlen($alias) - 1)) === 0) {
-                // Same name as alias, do not use as
-                $items[$alias] = trim($full, '\\');
-            } else {
-                $items[$alias] = trim($full, '\\') . ' as ' . $alias;
-            }
-        }
-
-        sort($items);
-
-        return $prefix . implode(",\n" . str_repeat(' ', strlen($prefix)), $items) . ";";
-    }
-
-    private const FORMAT_IMPORTS_MAP = [
-        'class' => 'use ',
-        'func' => 'use function ',
-        'const' => 'use const ',
-    ];
-
-    /**
-     * @param array $alias
-     * @param array $hints
-     * @param string $ns
-     * @return string
-     */
-    private static function formatImports(array $alias, array $hints, string $ns = ""): string
-    {
-        if ($ns && $ns[0] !== '\\') {
-            $ns = '\\' . $ns;
-        }
-
-        $use = [];
-
-        foreach ($hints as $hint => $hintValue) {
-            if (($pos = strpos($hint, '\\')) !== false) {
-                // Relative
-                $hint = substr($hint, 0, $pos);
-                $hintValue = substr($hintValue, 0, $pos);
-            }
-
-            foreach ($alias as $type => $values) {
-                if (!isset($values[$hint])) {
-                    continue;
-                }
-
-                if (strcasecmp($ns . '\\' . $hint, $values[$hint]) === 0) {
-                    // Skip redundant import
-                    continue;
-                }
-
-                $use[$type][$hintValue] = $values[$hint];
-            }
-        }
-
-        if (!$use) {
-            return '';
-        }
-
-        $code = '';
-
-        foreach (self::FORMAT_IMPORTS_MAP as $key => $prefix) {
-            if (!isset($use[$key])) {
-                continue;
-            }
-            if ($add = self::formatUse($prefix, $use[$key])) {
-                if ($code) {
-                    $code .= "\n";
-                }
-                $code .= $add;
-            }
-        }
-
-        return $code;
-    }
-
-    /**
-     * @param ReflectionFunction $reflector
+     * @param \ReflectionFunction $reflector
      * @return ClosureInfo|null Returns null if not a real closure (a function, from callable)
      */
-    public static function parse(ReflectionFunction $reflector): ?ClosureInfo
+    public static function parse($reflector): ?ClosureInfo
     {
         // Check if a valid closure
-        if (!$reflector->isClosure() || $reflector->isInternal() || !str_starts_with($reflector->getShortName(), '{closure')) {
+        if (
+            !$reflector->isClosure() ||
+            $reflector->isInternal() ||
+            !str_starts_with($reflector->getShortName(), '{closure')
+        ) {
             return null;
         }
 
-        // Get file name
-        $file = $reflector->getFileName();
-
-        // Check if file name is present
-        if (!$file) {
-            return null;
-        }
-
-        // Try already deserialized
-        // closure://...
-        if ($fromStream = ClosureStream::info($file)) {
-            return $fromStream;
-        }
-
-        // Get file key
-        $fileKey = md5($file);
-
-        // Get line bounds
-        $startLine = $reflector->getStartLine();
-        $endLine = $reflector->getEndLine();
-
-        // compute top-level cache key
-        $cacheKey = "{$fileKey}/{$startLine}/{$endLine}";
-
-        // check cache
-        if (array_key_exists($cacheKey, self::$globalInfoCache)) {
-            return self::$globalInfoCache[$cacheKey];
-        }
-
-        // check file cache
-        if (!array_key_exists($fileKey, self::$globalFileCache)) {
-            self::$globalFileCache[$fileKey] = TokenizedFileInfo::getInfo($file);
-        }
-
-        $fileInfo = self::$globalFileCache[$fileKey];
-
-        if ($fileInfo === null) {
-            return null;
-        }
-
-        $ns = '';
-        $aliases = null;
-        if ($fileInfo['namespaces']) {
-            if ($info = self::findNamespaceAliases($fileInfo['namespaces'], $startLine)) {
-                $ns = trim($info['ns'] ?? '', '\\');
-                $aliases = $info['use'] ?? null;
-            }
-        }
-
-        // create parser
-        $parser = new self($reflector, $fileInfo['tokens'], $ns, $aliases, $fileInfo['anonymous']);
-
-        // cache result
-        return self::$globalInfoCache[$cacheKey] = $parser->info();
-    }
-
-    public static function init(): void
-    {
-        if (self::$BUILTIN_TYPES) {
-            // already initialized
-            return;
-        }
-
-        self::$BUILTIN_TYPES = self::getBuiltInTypes();
+        return self::resolve($reflector, ClosureInfo::name());
     }
 
     /**
-     * @return string[]
+     * @param \ReflectionFunction $reflector
+     * @param string $ns
+     * @param array $fileInfo
+     * @param array|null $aliases
+     * @return static
      */
-    private static function getBuiltInTypes(): array
+    protected static function create($reflector, string $ns, array $fileInfo, ?array $aliases): static
     {
-        // PHP 8
-
-        $types = [
-            'bool', 'int', 'float', 'string', 'array',
-            'object', 'iterable', 'callable', 'void', 'mixed',
-            'self', 'parent', 'static',
-            'false', 'null',
-        ];
-
-        if (PHP_MINOR_VERSION >= 1) {
-            $types[] = 'never';
-        }
-
-        if (PHP_MINOR_VERSION >= 2) {
-            $types[] = 'true';
-        }
-
-        return $types;
+        return new self($reflector, $ns, $aliases, $fileInfo['tokens'], $fileInfo['anonymous']);
     }
 }

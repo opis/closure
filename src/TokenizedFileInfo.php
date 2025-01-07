@@ -406,7 +406,11 @@ final class TokenizedFileInfo
         }
 
         // Now we can check body
-        $start = $this->index + 1;
+        $start = $this->index;
+
+        if ($this->tokens[$start] !== "{") {
+            $start++;
+        }
 
         $this->insideAnonymousClass++;
         foreach ($this->balanceCurly() as $token) {

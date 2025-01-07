@@ -2,16 +2,22 @@
 
 namespace Opis\Closure;
 
-use Closure;
-
 /**
  * @internal
  */
-final class ClosureStream
+final class CodeStream
 {
-    const STREAM_PROTO = 'closure://';
+    public const STREAM_PROTO = 'closure';
+
+    // this must be kept in sync with HANDLERS keys
+    private const REGEX = '/^' . self::STREAM_PROTO . ':\/\/([a-z]+)\/(.+)$/';
 
     private static bool $isRegistered = false;
+
+    /**
+     * @var array Handler classes keyed by name
+     */
+    private static array $handlers = [];
 
     private ?string $content;
 
@@ -26,7 +32,7 @@ final class ClosureStream
 
     public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool
     {
-        $info = ClosureInfo::resolve(substr($path, strlen(self::STREAM_PROTO)));
+        $info = self::info($path);
         if (!$info) {
             return false;
         }
@@ -104,25 +110,51 @@ final class ClosureStream
         return $this->pointer;
     }
 
-    public static function init(): void
+    /**
+     * @param array $handlers Class names that extend AbstractInfo
+     * @return void
+     */
+    public static function init(array $handlers = []): void
     {
         if (!self::$isRegistered) {
-            // we remove ://
-            self::$isRegistered = stream_wrapper_register(substr(self::STREAM_PROTO, 0, -3), self::class);
+            self::$isRegistered = stream_wrapper_register(self::STREAM_PROTO, self::class);
+        }
+
+        // register handlers
+        foreach ($handlers as $class) {
+            self::$handlers[$class::name()] = $class;
         }
     }
 
-    public static function factory(ClosureInfo $info): Closure
+    public static function include(AbstractInfo $info): mixed
     {
-        return include_factory(self::STREAM_PROTO . $info->key());
+        return include_factory($info->url());
     }
 
-    public static function info(string $url): ?ClosureInfo
+    public static function info(string $url): ?AbstractInfo
     {
-        if (!str_starts_with($url, self::STREAM_PROTO)) {
+        if (!str_starts_with($url, self::STREAM_PROTO . '://')) {
             return null;
         }
-        return ClosureInfo::resolve(substr($url, strlen(self::STREAM_PROTO)));
+
+        $m = self::classAndKey($url);
+        if (!$m) {
+            return null;
+        }
+
+        return $m[0]::resolve($m[1]);
+    }
+
+    private static function classAndKey(string $url): ?array
+    {
+        $m = null;
+        if (!preg_match(self::REGEX, $url, $m)) {
+            return null;
+        }
+        if (!isset(self::$handlers[$m[1]])) {
+            return null;
+        }
+        return [self::$handlers[$m[1]], $m[2]];
     }
 }
 
@@ -130,6 +162,6 @@ final class ClosureStream
  * Use this function to get an unbound closure
  * @internal
  */
-function include_factory(string $url): Closure {
+function include_factory(string $url): mixed {
     return include($url);
 }
