@@ -2,8 +2,6 @@
 
 namespace Opis\Closure;
 
-use ReflectionObject, ReflectionClass;
-
 /**
  * @internal
  */
@@ -12,11 +10,10 @@ class GenericObjectSerialization
     public const SERIALIZE_CALLBACK = [self::class, "serialize"];
     public const UNSERIALIZE_CALLBACK = [self::class, "unserialize"];
 
-    public static function serialize(object $object): array
+    public static function serialize(object $object, ReflectionClass $reflection): array
     {
         $data = [];
         $skip = [];
-        $reflection = new ReflectionObject($object);
 
         do {
             if (!$reflection->isUserDefined()) {

@@ -82,13 +82,13 @@ class SerializationHandler
     {
         if ($serializer = $info->customSerializer ?? null) {
             // we have a custom serializer
-            $vars = $serializer($object);
+            $vars = $serializer($object, $info);
         } elseif ($info->hasMagicSerialize()) {
             // we have the magic __serialize
             $vars = $object->__serialize();
         } else {
             // we use a generic object serializer
-            $vars = GenericObjectSerialization::serialize($object);
+            $vars = GenericObjectSerialization::serialize($object, $info);
         }
 
         if (!is_array($vars) || !$vars) {
