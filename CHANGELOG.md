@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+### v4.3.0, 2025.01.08
+
+- Proper serialization of private properties
+- Improved serialization/deserialization of properties having hooks (PHP 8.4)
+- Skip virtual properties (PHP 8.4)
+- Added `Opis\Closure\clear_cache()`
+- Added `Opis\Closure\get_raw_properties()`
+
 ### v4.2.1, 2025.01.07
 
 - Improved generic object serialization

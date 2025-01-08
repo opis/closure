@@ -81,6 +81,9 @@ final class ReflectionClass extends \ReflectionClass
         return $this->_info ??= AnonymousClassParser::parse($this);
     }
 
+    /**
+     * @var self[]
+     */
     private static array $cache = [];
 
     public static function get(string|object $class): self
@@ -116,5 +119,25 @@ final class ReflectionClass extends \ReflectionClass
             $class = substr($class, $pos + 1);
         }
         return str_starts_with($class, self::ANONYMOUS_CLASS_PREFIX);
+    }
+
+    public static function getRawProperties(object $object, array $properties, ?string $class = null): array
+    {
+        $vars = get_mangled_object_vars($object);
+        $class ??= get_class($object);
+        $prefixes = ["\0$class\0", "\0*\0", ""];
+
+        $data = [];
+        foreach ($properties as $name) {
+            foreach ($prefixes as $prefix) {
+                $prop_name = $prefix . $name;
+                if (array_key_exists($prop_name, $vars)) {
+                    $data[$name] = $vars[$prop_name];
+                    break;
+                }
+            }
+        }
+
+        return $data;
     }
 }

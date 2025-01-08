@@ -142,3 +142,27 @@ function create_closure(string $args, string $body): \Closure
 
     return $info->getClosure();
 }
+
+/**
+ * Get the raw values of properties - it won't invoke property hooks
+ * @param object $object The object from where to extract raw properties
+ * @param string[] $properties Array of property names
+ * @param string|null $class If you need a private property from a parent use the class
+ * @return array Raw property values keyed by property name
+ */
+function get_raw_properties(object $object, array $properties, ?string $class = null): array
+{
+    return ReflectionClass::getRawProperties($object, $properties, $class);
+}
+
+/**
+ * If you have a long-running process that deserializes closures or anonymous classes, you may want to clear cache
+ * to prevent high memory usage.
+ * @return void
+ */
+function clear_cache(): void
+{
+    AbstractInfo::clear();
+    AbstractParser::clear();
+    ReflectionClass::clear();
+}

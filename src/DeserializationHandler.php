@@ -51,7 +51,7 @@ class DeserializationHandler
         }
     }
 
-    public function handle(mixed &$data): void
+    private function handle(mixed &$data): void
     {
         if (is_object($data)) {
             $this->handleObject($data);
@@ -174,9 +174,13 @@ class DeserializationHandler
                     $this->unboxed[$box] = $object;
                     $this->unboxed[$object] = $object;
                 }
+                // handle value
                 if ($value) {
-                    // handle
-                    $this->handle($value);
+                    if (is_array($value)) {
+                        $this->handleIterable($value);
+                    } elseif (is_object($value)) {
+                        $this->handleObject($value);
+                    }
                 }
             }, $info);
         }
