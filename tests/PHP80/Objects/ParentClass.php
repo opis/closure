@@ -10,4 +10,9 @@ class ParentClass
     {
         return $this->foobar;
     }
+
+    public function setFoobar(array $value)
+    {
+        $this->foobar = $value;
+    }
 }

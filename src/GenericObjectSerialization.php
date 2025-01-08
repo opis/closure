@@ -2,6 +2,8 @@
 
 namespace Opis\Closure;
 
+use ReflectionProperty;
+
 /**
  * @internal
  */
@@ -22,6 +24,7 @@ class GenericObjectSerialization
         $private = [];
 
         // according to docs get_mangled_object_vars() uses raw values, bypassing hooks
+        // we don't use reflection because hooks were added in 8.4, this should work just fine for all versions
         foreach (get_mangled_object_vars($object) as $name => $value) {
             if ($name[0] !== "\0") {
                 // public property
@@ -59,8 +62,8 @@ class GenericObjectSerialization
         }
 
         // we save the private values to a special key empty key
-        if ($private) {
-            $data[self::PRIVATE_KEY] = $private;
+        if ($data || $private) {
+            $data[self::PRIVATE_KEY] = $private ?: null;
         }
 
         return $data;
@@ -74,6 +77,10 @@ class GenericObjectSerialization
         if (array_key_exists(self::PRIVATE_KEY, $data)) {
             $private = &$data[self::PRIVATE_KEY];
             unset($data[self::PRIVATE_KEY]);
+            $visibility = ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED;
+        } else {
+            // old format
+            $visibility = ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PRIVATE;
         }
 
         if ($data) {
@@ -89,17 +96,20 @@ class GenericObjectSerialization
 
             // handle private properties
             if (isset($private[$class])) {
-                // we solve only when needed
-                $solve($object, $private[$class]);
                 foreach ($private[$class] as $name => $value) {
-                    self::setProperty($reflection, $object, $name, $value, true);
+                    if ($value && !is_scalar($value)) {
+                        // we solve only when needed
+                        $solve($object, $value);
+                    }
+                    self::setProperty($reflection, $object, $name, $value, ReflectionProperty::IS_PRIVATE);
                 }
                 // done with this class
                 unset($private[$class]);
             }
 
             foreach ($data as $name => $value) {
-                if (self::setProperty($reflection, $object, $name, $value)) {
+                if (self::setProperty($reflection, $object, $name, $value, $visibility)) {
+                    // done with this property
                     unset($data[$name]);
                 }
             }
@@ -120,21 +130,32 @@ class GenericObjectSerialization
         object $object,
         string $name,
         mixed $value,
-        bool $privateOnly = false
+        int $visibility
     ): bool {
         if (!$reflection->hasProperty($name)) {
             return false;
         }
 
         $property = $reflection->getProperty($name);
-        if ($property->isStatic() || ($privateOnly && !$property->isPrivate())) {
+        if ($property->isStatic()) {
             return false;
         }
 
-        if (!$property->hasDefaultValue() || $value !== $property->getDefaultValue()) {
+        if (!($property->getModifiers() & $visibility)) {
+            return false;
+        }
+
+        if (\PHP_MINOR_VERSION < 4) {
             $property->setAccessible(true);
             $property->setValue($object, $value);
+            return true;
         }
+
+        if ($property->isVirtual() || $property->isDynamic()) {
+            return false;
+        }
+
+        $property->setRawValue($object, $value);
 
         return true;
     }
