@@ -81,6 +81,9 @@ final class ReflectionClass extends \ReflectionClass
         return $this->_info ??= AnonymousClassParser::parse($this);
     }
 
+    /**
+     * @var self[]
+     */
     private static array $cache = [];
 
     public static function get(string|object $class): self
@@ -118,7 +121,7 @@ final class ReflectionClass extends \ReflectionClass
         return str_starts_with($class, self::ANONYMOUS_CLASS_PREFIX);
     }
 
-    public static function getRawProperties(object $object, array $properties, ?string $class = null): mixed
+    public static function getRawProperties(object $object, array $properties, ?string $class = null): array
     {
         $vars = get_mangled_object_vars($object);
         $class ??= get_class($object);
