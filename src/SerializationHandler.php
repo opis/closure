@@ -19,6 +19,8 @@ class SerializationHandler
 
     private bool $hasClosures;
 
+    private ?SplObjectStorage $refKeepAlive;
+
     public function serialize(mixed $data): string
     {
         $this->arrayMap = [];
@@ -27,6 +29,7 @@ class SerializationHandler
         $this->shouldBox = new WeakMap();
         $this->info = [];
         $this->hasClosures = false;
+        $this->refKeepAlive = new SplObjectStorage();
 
         try {
             // get boxed structure
@@ -37,7 +40,12 @@ class SerializationHandler
             }
             return serialize($data);
         } finally {
-            $this->arrayMap = $this->objectMap = $this->priority = $this->shouldBox = $this->info = null;
+            $this->arrayMap =
+            $this->objectMap =
+            $this->priority =
+            $this->refKeepAlive =
+            $this->shouldBox =
+            $this->info = null;
         }
     }
 
@@ -155,12 +163,14 @@ class SerializationHandler
         return $box;
     }
 
+    private SplObjectStorage $keep;
+
     private function &handleArray(array &$data, bool $skipRefId = false): array
     {
         if ($skipRefId) {
             $box = [];
         } else {
-            $id = ReflectionClass::getRefId($data);
+            $id = ReflectionClass::getRefId($data, $this->refKeepAlive);
             if (array_key_exists($id, $this->arrayMap)) {
                 return $this->arrayMap[$id];
             }
