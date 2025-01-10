@@ -163,8 +163,6 @@ class SerializationHandler
         return $box;
     }
 
-    private SplObjectStorage $keep;
-
     private function &handleArray(array &$data, bool $skipRefId = false): array
     {
         if ($skipRefId) {
