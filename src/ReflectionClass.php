@@ -107,9 +107,17 @@ final class ReflectionClass extends \ReflectionClass
         return self::$enumExists && ($value instanceof \UnitEnum);
     }
 
-    public static function getRefId(mixed &$reference): ?string
+    public static function getRefId(mixed &$reference, ?\SplObjectStorage $keepAlive = null): ?string
     {
-        return \ReflectionReference::fromArrayElement([&$reference], 0)?->getId();
+        $ref = \ReflectionReference::fromArrayElement([&$reference], 0);
+        if (!$ref) {
+            return null;
+        }
+
+        // we save this so the ref ids cannot be reused while serializing/deserializing
+        $keepAlive?->attach($ref);
+
+        return $ref->getId();
     }
 
     public static function isAnonymousClassName(string $class): bool

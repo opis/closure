@@ -2,7 +2,7 @@
 
 namespace Opis\Closure;
 
-use stdClass, WeakMap, Closure;
+use stdClass, WeakMap, Closure, SplObjectStorage;
 use function unserialize;
 
 /**
@@ -15,6 +15,8 @@ class DeserializationHandler
     private ?array $visitedArrays = null;
     private array $options;
 
+    private ?SplObjectStorage $refKeepAlive;
+
     public function __construct(?array $options = null)
     {
         $this->options = $options ?? [];
@@ -25,6 +27,7 @@ class DeserializationHandler
         $this->unboxed = new WeakMap();
         $this->refs = new WeakMap();
         $this->visitedArrays = [];
+        $this->refKeepAlive = new SplObjectStorage();
 
         if (Serializer::$v3Compatible) {
             $this->v3_unboxed = [];
@@ -46,7 +49,7 @@ class DeserializationHandler
 
             return $data;
         } finally {
-            $this->unboxed = $this->refs = $this->visitedArrays = null;
+            $this->unboxed = $this->refs = $this->visitedArrays = $this->refKeepAlive = null;
             $this->v3_unboxed = $this->v3_refs = null;
         }
     }
@@ -74,7 +77,7 @@ class DeserializationHandler
 
     private function handleArray(array &$array): void
     {
-        $id = ReflectionClass::getRefId($array);
+        $id = ReflectionClass::getRefId($array, $this->refKeepAlive);
         if (!isset($this->visitedArrays[$id])) {
             $this->visitedArrays[$id] = true;
             $this->handleIterable($array);

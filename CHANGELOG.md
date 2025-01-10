@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+### v4.3.1, 2025.01.10
+
+- Fixed reference bug [#154](https://github.com/opis/closure/issues/154)
+
 ### v4.3.0, 2025.01.08
 
 - Proper serialization of private properties
