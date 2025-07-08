@@ -29,13 +29,26 @@ function serialize($data)
  * @param array|null $options
  * @return mixed
  */
-function unserialize($data, ?array $options = null)
-{
-    SerializableClosure::enterContext();
-    $data = ($options === null || \PHP_MAJOR_VERSION < 7)
-        ? \unserialize($data)
-        : \unserialize($data, $options);
-    SerializableClosure::unwrapClosures($data);
-    SerializableClosure::exitContext();
-    return $data;
+if (PHP_VERSION_ID >= 80400) {
+    function unserialize($data, ?array $options = null)
+    {
+        SerializableClosure::enterContext();
+        $data = ($options === null || \PHP_MAJOR_VERSION < 7)
+            ? \unserialize($data)
+            : \unserialize($data, $options);
+        SerializableClosure::unwrapClosures($data);
+        SerializableClosure::exitContext();
+        return $data;
+    }
+} else {
+    function unserialize($data, array $options = null)
+    {
+        SerializableClosure::enterContext();
+        $data = ($options === null || \PHP_MAJOR_VERSION < 7)
+            ? \unserialize($data)
+            : \unserialize($data, $options);
+        SerializableClosure::unwrapClosures($data);
+        SerializableClosure::exitContext();
+        return $data;
+    }
 }
