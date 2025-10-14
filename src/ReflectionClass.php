@@ -115,7 +115,7 @@ final class ReflectionClass extends \ReflectionClass
         }
 
         // we save this so the ref ids cannot be reused while serializing/deserializing
-        $keepAlive?->attach($ref);
+        $keepAlive?->offsetSet($ref);
 
         return $ref->getId();
     }

@@ -158,7 +158,7 @@ class SerializationHandler
         $box->data[1] = $this->getObjectVars($data, $info);
 
         // Add to priority
-        $this->priority->attach($box);
+        $this->priority->offsetSet($box);
 
         return $box;
     }
