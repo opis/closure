@@ -125,7 +125,7 @@ class SerializationHandler
         if ($data instanceof stdClass) {
             // handle stdClass
             $obj = $this->handleStdClass($data);
-            $this->priority->attach($obj);
+            $this->priority->offsetSet($obj);
             return $obj;
         }
 
