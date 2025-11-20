@@ -5,10 +5,29 @@ Opis Closure
 [![Packagist Downloads](https://img.shields.io/packagist/dt/opis/closure?label=Downloads)](https://packagist.org/packages/opis/closure)
 [![Packagist License](https://img.shields.io/packagist/l/opis/closure?color=teal&label=License)](https://packagist.org/packages/opis/closure)
 
-Serialize closures, serialize anything
+Serialize closures and anonymous classes
 ------------------
 
-**Opis Closure** is a PHP library that allows you to serialize closures, anonymous classes, and arbitrary data.
+**Opis Closure** is a PHP library that allows you to serialize closures, 
+anonymous classes, and arbitrary data.
+
+Key features:
+
+- serialize [closures (anonymous functions)](https://www.php.net/manual/en/functions.anonymous.php)
+- serialize [anonymous classes](https://www.php.net/manual/en/language.oop5.anonymous.php)
+- does not rely on PHP extensions (no FFI or similar dependencies)
+- supports PHP 8.0-8.5 syntax
+- handles circular references
+- works with [attributes](https://www.php.net/manual/en/language.attributes.overview.php)
+- works with [readonly properties](https://www.php.net/manual/en/language.oop5.properties.php#language.oop5.properties.readonly-properties)
+- works with [property hooks](https://www.php.net/manual/en/language.oop5.property-hooks.php)
+- extensible via [custom serializers and deserializers](https://opis.io/closure/4.x/objects.html)
+- supports [cryptographically signed data](https://opis.io/closure/4.x/security.html)
+- supports PHP's built-in [SPL and Date classes](https://opis.io/closure/4.x/objects.html#default-object-serializers), and the popular [`nesbot/carbon`](https://github.com/CarbonPHP/carbon) package
+- reconstructed code is close to the original and [debugger friendly](https://opis.io/closure/4.x/debug.html)
+- and [many more][documentation]
+
+### Example of closure serialization
 
 ```php
 use function Opis\Closure\{serialize, unserialize};
@@ -19,8 +38,7 @@ $greet = unserialize($serialized);
 echo $greet(); // hello from closure!
 ```
 
-> [!IMPORTANT]
-> Starting with version 4.2, **Opis Closure** supports serialization of anonymous classes.
+### Example of anonymous class serialization
 
 ```php
 use function Opis\Closure\{serialize, unserialize};
@@ -36,13 +54,6 @@ $serialized = serialize(new class("hello from anonymous class!") {
 $object = unserialize($serialized);
 echo $object->greet(); // hello from anonymous class!
 ```
-
-_A full rewrite was necessary to keep this project compatible with the PHP's new features, such as attributes, enums, 
-read-only properties, named parameters, anonymous classes, and so on. This wasn't an easy task, as the latest attempt 
-to launch a 4.x version involved using the FFI extension in exotic ways, and it failed hard. The main problem was that 
-very often the closures were bound to some object, thus in order to preserve functionality, we had to serialize the object 
-too. Since we had to do arbitrary data serialization, we decided to make this project about arbitrary data serialization, 
-providing support for serializing closures but also adding more effortless ways to serialize custom objects._
 
 ## Migrating from 3.x
 
@@ -75,7 +86,7 @@ Or you could directly reference it into your `composer.json` file as a dependenc
 ```json
 {
     "require": {
-        "opis/closure": "^4.3"
+        "opis/closure": "^4.4"
     }
 }
 ```

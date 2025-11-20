@@ -24,4 +24,10 @@ class SerializeTest extends SerializeTestCase
         $closure = $this->process(MyEnum::CASE1->getClosure());
         $this->assertEquals(MyEnum::CASE1, $closure());
     }
+
+    public function testFirstClassCallable()
+    {
+        $closure = $this->process((new MyInt(5))->read(...));
+        $this->assertEquals(5, $closure());
+    }
 }

@@ -6,6 +6,7 @@
             <directory suffix="Test.php" phpVersion="8.2" phpVersionOperator=">=">./tests/PHP82</directory>
             <directory suffix="Test.php" phpVersion="8.3" phpVersionOperator=">=">./tests/PHP83</directory>
             <directory suffix="Test.php" phpVersion="8.4" phpVersionOperator=">=">./tests/PHP84</directory>
+            <directory suffix="Test.php" phpVersion="8.5" phpVersionOperator=">=">./tests/PHP85</directory>
         </testsuite>
     </testsuites>
 </phpunit>

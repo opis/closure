@@ -9,6 +9,14 @@ class SyntaxTest extends SyntaxTestCase
     public function closureProvider(): iterable
     {
         yield [
+            'New without parenthesis',
+static fn() => new class {},
+            <<<'PHP'
+namespace Opis\Closure\Test\PHP84;
+return static fn() => new class {};
+PHP,
+        ];
+        yield [
             'Asymmetric Property Visibility',
 static fn() => new class("Opis") {
     public protected(set) string $name;
