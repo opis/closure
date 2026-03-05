@@ -200,12 +200,6 @@ abstract class AbstractParser
             return null;
         }
 
-        // Try already deserialized
-        // closure://...
-        if ($fromStream = CodeStream::info($file)) {
-            return $fromStream;
-        }
-
         // Get file key
         $fileKey = md5($file);
 

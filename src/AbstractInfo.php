@@ -2,6 +2,8 @@
 
 namespace Opis\Closure;
 
+use WeakMap;
+
 abstract class AbstractInfo
 {
     protected ?string $key = null;
@@ -115,5 +117,20 @@ abstract class AbstractInfo
         // yes, there was a mistake in params order, keep the body first
         $code = "$body\n$header";
         return $code === "\n" ? "" : md5($code);
+    }
+
+    private static ?WeakMap $weakAssoc = null;
+
+    final public function assoc(object $obj): void
+    {
+        (self::$weakAssoc ??= new WeakMap())->offsetSet($obj, $this);
+    }
+
+    public static function search(object $object): ?static
+    {
+        if (!self::$weakAssoc || !self::$weakAssoc->offsetExists($object)) {
+            return null;
+        }
+        return self::$weakAssoc->offsetGet($object);
     }
 }

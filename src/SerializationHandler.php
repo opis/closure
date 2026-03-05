@@ -34,9 +34,12 @@ class SerializationHandler
         try {
             // get boxed structure
             $data = $this->handle($data);
-            if ($this->hasClosures && $this->priority->count()) {
+            if ($this->hasClosures && ($count = $this->priority->count())) {
                 // we only need priority when we have closures
-                $data = new PriorityWrapper(iterator_to_array($this->priority), $data);
+                // do not try to wrap a single object
+                if ($count !== 1 || !is_object($data) || !$this->priority->offsetExists($data)) {
+                    $data = new PriorityWrapper(iterator_to_array($this->priority), $data);
+                }
             }
             return serialize($data);
         } finally {
@@ -136,26 +139,26 @@ class SerializationHandler
             return $this->handleClosure($data);
         }
 
-        $info = ReflectionClass::get(get_class($data));
-        if (!$this->shouldBox($info)) {
+        $reflector = ReflectionClass::get($data);
+        if (!$this->shouldBox($reflector)) {
             // skip boxing
             return $this->objectMap[$data] = $data;
         }
 
-        if ($info->isAnonymousLike()) {
-            $anonInfo = AnonymousClassParser::parse($info);
+        if ($reflector->isAnonymousLike()) {
+            $anonInfo = $reflector->info();
             $box = new Box(Box::TYPE_ANONYMOUS_CLASS, [null, null]);
             $box->data[0] = &$this->getCachedInfo($anonInfo);
             unset($anonInfo);
         } else {
-            $box = new Box(Box::TYPE_OBJECT, [$info->name, null]);
+            $box = new Box(Box::TYPE_OBJECT, [$reflector->name, null]);
         }
 
         // Set mapping (before vars!)
         $this->objectMap[$data] = $box;
 
         // Set vars
-        $box->data[1] = $this->getObjectVars($data, $info);
+        $box->data[1] = $this->getObjectVars($data, $reflector);
 
         // Add to priority
         $this->priority->offsetSet($box);

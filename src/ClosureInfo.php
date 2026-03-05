@@ -68,7 +68,9 @@ final class ClosureInfo extends AbstractInfo
 
     public function getClosure(?array &$vars = null, ?object $thisObj = null, ?string $scope = null): Closure
     {
-        return $this->getFactory($thisObj, $scope)($vars);
+        $closure = $this->getFactory($thisObj, $scope)($vars);
+        $this->assoc($closure);
+        return $closure;
     }
 
     /**

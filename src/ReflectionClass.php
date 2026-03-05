@@ -78,7 +78,17 @@ final class ReflectionClass extends \ReflectionClass
             // we don't provide info for non-anonymous classes
             return null;
         }
-        return $this->_info ??= AnonymousClassParser::parse($this);
+
+        if ($this->_info) {
+            return $this->_info;
+        }
+
+        if (parent::isAnonymous()) {
+            return $this->_info = AnonymousClassParser::parse($this);
+        }
+
+        $key = substr($this->getShortName(), strlen(ReflectionClass::ANONYMOUS_CLASS_PREFIX));
+        return $this->_info = AnonymousClassInfo::resolve($key);
     }
 
     /**

@@ -474,6 +474,17 @@ class SerializeTest extends SerializeTestCase
         $this->assertTrue((new ReflectionClosure($u1->factory))->info() === (new ReflectionClosure($u2->factory))->info());
     }
 
+    public function testNestedReserialization()
+    {
+        $f1 = fn() => [
+            fn(int $a, int $b) => $a + $b,
+        ];
+        $f1 = $this->process($f1);
+
+        $f2 = $this->process($f1()[0]);
+        $this->assertEquals(3, $f2(1, 2));
+    }
+
     /**
      * @dataProvider fnDataProvider
      */

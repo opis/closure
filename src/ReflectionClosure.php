@@ -19,6 +19,8 @@ final class ReflectionClosure extends ReflectionFunction
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         parent::__construct($closure);
+        // grab the info if deserialized
+        $this->info = ClosureInfo::search($closure);
     }
 
     public function info(): ClosureInfo
